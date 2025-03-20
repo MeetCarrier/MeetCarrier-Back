@@ -47,7 +47,7 @@ jobs:
       # gradle build
       - name: Build with Gradle
         run: |
-           chmod +x ./gradlew
+          chmod +x ./gradlew
           ./gradlew build -x test
 
       # make zip file
