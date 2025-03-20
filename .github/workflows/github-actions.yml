@@ -40,8 +40,7 @@ jobs:
           contains(github.ref, 'main')
         run: |
           cd ./src/main/resources # resources 폴더로 이동
-          touch ./application.yml # application.yml 생성
-          echo "${{ secrets.Properties }}" > ./application.properties # github actions에서 설정한 값을 application.yml 파일에 쓰기
+          echo "${{ secrets.PROPERTIES }}" > ./application.properties # github actions에서 설정한 값을 application.properties 파일에 쓰기
         shell: bash
 
       # gradle build
