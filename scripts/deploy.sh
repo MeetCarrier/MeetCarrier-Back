@@ -1,6 +1,9 @@
 REPOSITORY=/home/ubuntu/app
 cd $REPOSITORY
 
+# 🔧 디렉터리 소유권 변경
+sudo chown -R ubuntu:ubuntu $REPOSITORY
+
 APP_NAME=demo
 JAR_NAME=$(ls $REPOSITORY/build/libs/ | grep '.jar' | tail -n 1)
 JAR_PATH=$REPOSITORY/build/libs/$JAR_NAME
@@ -19,4 +22,4 @@ fi
 echo "> $JAR_PATH 배포" #3
 nohup java -jar \
         -Dspring.profiles.active=dev \
-        build/libs/$JAR_NAME > $REPOSITORY/nohup.out 2>&1 &
+        build/libs/$JAR_NAME > /home/ubuntu/nohup.out 2>&1 &
