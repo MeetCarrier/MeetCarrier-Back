@@ -1,14 +1,11 @@
 REPOSITORY=/home/ubuntu/app
 cd $REPOSITORY
 
-# 🔧 디렉터리 소유권 변경
-sudo chown -R ubuntu:ubuntu $REPOSITORY
-
 APP_NAME=demo
 JAR_NAME=$(ls $REPOSITORY/build/libs/ | grep '.jar' | tail -n 1)
 JAR_PATH=$REPOSITORY/build/libs/$JAR_NAME
 
-CURRENT_PID=$(pgrep -f $APP_NAME)
+CURRENT_PID=$(pgrep -f $JAR_NAME)
 
 if [ -z $CURRENT_PID ] #2
 then
