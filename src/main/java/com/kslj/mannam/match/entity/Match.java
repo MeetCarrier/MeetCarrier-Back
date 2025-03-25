@@ -22,6 +22,7 @@ public class Match {
     @Column(name = "matched_at", nullable = false)
     private LocalDateTime matchedAt = LocalDateTime.now();
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MatchStatus status;
 

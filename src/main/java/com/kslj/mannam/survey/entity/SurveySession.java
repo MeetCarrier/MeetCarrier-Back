@@ -17,6 +17,7 @@ public class SurveySession {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private SessionStatus status;
 

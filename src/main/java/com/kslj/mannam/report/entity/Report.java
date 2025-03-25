@@ -22,9 +22,11 @@ public class Report {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ReportType type;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ReportStatus status;
 

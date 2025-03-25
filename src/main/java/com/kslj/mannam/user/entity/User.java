@@ -24,12 +24,14 @@ public class User {
     @Column(nullable = false, name = "social_id")
     private String socialId;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, name = "social_type")
     private SocialType socialType;
 
     @Column(nullable = false)
     private String nickname;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Gender gender;
 
