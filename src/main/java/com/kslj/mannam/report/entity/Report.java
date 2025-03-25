@@ -1,5 +1,6 @@
 package com.kslj.mannam.report.entity;
 
+import com.kslj.mannam.report.enums.ReportStatus;
 import com.kslj.mannam.report.enums.ReportType;
 import com.kslj.mannam.user.entity.User;
 import jakarta.persistence.*;
@@ -24,17 +25,14 @@ public class Report {
     @Column(nullable = false)
     private ReportType type;
 
+    @Column(nullable = false)
+    private ReportStatus status;
+
     @Column(name = "report_content", nullable = false)
     private String reportContent;
 
     @Column(name = "reported_at", nullable = false)
     private LocalDateTime reportedAt = LocalDateTime.now();
-
-    @Column(name = "reply_content")
-    private String replyContent;
-
-    @Column(name = "replied_at")
-    private LocalDateTime repliedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reporter_id", nullable = false)
