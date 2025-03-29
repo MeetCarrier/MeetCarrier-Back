@@ -41,6 +41,7 @@ jobs:
         run: |
           cd ./src/main/resources # resources 폴더로 이동
           echo "${{ secrets.PROPERTIES }}" > ./application.properties # github actions에서 설정한 값을 application.properties 파일에 쓰기
+          echo "${{ secrets.OAUTH_PROPERTIES }}" > ./application-oauth.properties # github actions에서 설정한 값을 application-oauth.properties 파일에 쓰기
         shell: bash
 
       # gradle build
