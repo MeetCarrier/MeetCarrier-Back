@@ -44,4 +44,28 @@ public class UserServiceTest {
         // then
         Assertions.assertThat(foundUser.getNickname()).isEqualTo(signUpRequestDto.getNickname());
     }
+
+    // 닉네임 중복 테스트
+    @Test
+    public void testDuplicateUser() {
+        // given
+        UserSignUpRequestDto signUpRequestDto = UserSignUpRequestDto.builder()
+                .socialId("1234")
+                .socialType(SocialType.Google)
+                .nickname("Mannam")
+                .gender(Gender.Male)
+                .region("서울")
+                .personalities("스포츠")
+                .preferences("게임")
+                .interests("롤")
+                .build();
+
+        userService.createUser(signUpRequestDto);
+
+        // when
+        boolean result = userService.checkNickDuplication("Mannam");
+
+        // then
+        Assertions.assertThat(result).isTrue();
+    }
 }

@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -21,5 +23,11 @@ public class UserService {
 
     public User getUserBySocialId(String socialId) {
         return userRepository.findBySocialId(socialId).orElseThrow();
+    }
+
+    public Boolean checkNickDuplication(String nickname) {
+        Optional<User> optionalUser = userRepository.findByNickname(nickname);
+
+        return optionalUser.isPresent();
     }
 }
