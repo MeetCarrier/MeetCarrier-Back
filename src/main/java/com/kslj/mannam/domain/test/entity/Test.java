@@ -1,15 +1,15 @@
-package com.kslj.mannam.domain.assessment.entity;
+package com.kslj.mannam.domain.test.entity;
 
 import com.kslj.mannam.domain.user.entity.User;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "tests")
 public class Test {
@@ -24,6 +24,7 @@ public class Test {
     @Column(name = "relationship_score", nullable = false)
     private int relationshipScore;
 
+    @Builder.Default
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 

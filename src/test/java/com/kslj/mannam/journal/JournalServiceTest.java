@@ -1,15 +1,13 @@
 package com.kslj.mannam.journal;
 
+import com.kslj.mannam.TestUtils;
 import com.kslj.mannam.domain.journal.dto.JournalRequestDto;
 import com.kslj.mannam.domain.journal.dto.JournalResponseDto;
 import com.kslj.mannam.domain.journal.dto.JournalResponseWithImageDto;
 import com.kslj.mannam.domain.journal.entity.Journal;
 import com.kslj.mannam.domain.journal.repository.JournalRepository;
 import com.kslj.mannam.domain.journal.service.JournalService;
-import com.kslj.mannam.domain.user.dto.UserSignUpRequestDto;
 import com.kslj.mannam.domain.user.entity.User;
-import com.kslj.mannam.domain.user.enums.Gender;
-import com.kslj.mannam.domain.user.enums.SocialType;
 import com.kslj.mannam.domain.user.service.UserService;
 import jakarta.transaction.Transactional;
 import org.assertj.core.api.Assertions;
@@ -35,22 +33,8 @@ public class JournalServiceTest {
     @Autowired
     private UserService userService;
 
-    // 유저 생성 메서드
-    private User createAndGetTestUser() {
-        UserSignUpRequestDto signUpRequestDto = UserSignUpRequestDto.builder()
-                .socialId("1234")
-                .socialType(SocialType.Google)
-                .nickname("Mannam")
-                .gender(Gender.Male)
-                .region("서울")
-                .personalities("스포츠")
-                .preferences("게임")
-                .interests("롤")
-                .build();
-
-        userService.createUser(signUpRequestDto);
-        return userService.getUserBySocialId(signUpRequestDto.getSocialId());
-    }
+    @Autowired
+    private TestUtils testUtils;
 
     // JournalRequestDto 생성 메서드
     private JournalRequestDto createJournalRequest(String content, String stamp, List<String> imageUrls) {
@@ -65,7 +49,7 @@ public class JournalServiceTest {
     @Test
     public void testCreateJournal() {
         // given
-        User foundUser = createAndGetTestUser();
+        User foundUser = testUtils.createAndGetTestUser();
         JournalRequestDto journalRequestDto = createJournalRequest("오늘은 좋은 날이었다.", "좋아요", new ArrayList<>());
 
         // when
@@ -82,7 +66,7 @@ public class JournalServiceTest {
     @Test
     public void testCreateJournalWithImage() {
         // given
-        User foundUser = createAndGetTestUser();
+        User foundUser = testUtils.createAndGetTestUser();
         JournalRequestDto journalRequestDto = createJournalRequest("오늘은 좋은 날이었다.", "좋아요", new ArrayList<String>(Arrays.asList("1.jpg", "2.jpg", "3.jpg")));
 
         // when
@@ -99,7 +83,7 @@ public class JournalServiceTest {
     @Test
     public void testGetJournalByYearAndMonth() {
         // given
-        User foundUser = createAndGetTestUser();
+        User foundUser = testUtils.createAndGetTestUser();
 
         Journal journal1 = Journal.builder()
                 .content("테스트1")
@@ -139,7 +123,7 @@ public class JournalServiceTest {
     @Test
     public void testUpdateJournal() {
         // given
-        User foundUser = createAndGetTestUser();
+        User foundUser = testUtils.createAndGetTestUser();
         JournalRequestDto journalRequestDto = createJournalRequest("오늘은 좋은 날이었다.", "좋아요", new ArrayList<String>(Arrays.asList("1.jpg", "2.jpg", "3.jpg")));
 
         long journalId = journalService.saveJournal(journalRequestDto, foundUser);
@@ -160,7 +144,7 @@ public class JournalServiceTest {
     @Test
     public void testDeleteJournal() {
         // given
-        User foundUser = createAndGetTestUser();
+        User foundUser = testUtils.createAndGetTestUser();
         JournalRequestDto journalRequestDto1 = createJournalRequest("오늘은 좋은 날이었다.", "좋아요", new ArrayList<>());
         JournalRequestDto journalRequestDto2 = createJournalRequest("오늘은 좋은 날이었다.", "좋아요", new ArrayList<>());
         JournalRequestDto journalRequestDto3 = createJournalRequest("오늘은 좋은 날이었다.", "좋아요", new ArrayList<>());
