@@ -21,6 +21,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/file/**")
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()   // static 파일 접근 허용
                         .requestMatchers("/journal/**").authenticated()     // 인증이 필요한 엔드포인트
