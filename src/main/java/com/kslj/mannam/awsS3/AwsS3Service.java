@@ -65,8 +65,10 @@ public class AwsS3Service {
         }
     }
 
-    public void deleteFile(String fileName){
-        amazonS3.deleteObject(new DeleteObjectRequest(bucket, fileName));
+    public void deleteFile(String dirName, String fileName){
+        String path = dirName + "/" + fileName;
+
+        amazonS3.deleteObject(new DeleteObjectRequest(bucket, path));
         System.out.println(bucket);
     }
 }

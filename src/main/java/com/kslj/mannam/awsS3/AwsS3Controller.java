@@ -5,8 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/file/{dirName}")
@@ -21,8 +19,9 @@ public class AwsS3Controller {
     }
 
     @DeleteMapping
-    public ResponseEntity<String> deleteFile(@RequestParam(value = "fileName") String fileName) {
-        awsS3Service.deleteFile(fileName);
+    public ResponseEntity<String> deleteFile(@RequestParam(value = "fileName") String fileName,
+                                             @PathVariable(value = "dirName") String dirName) {
+        awsS3Service.deleteFile(dirName, fileName);
         return ResponseEntity.ok(fileName);
     }
 
