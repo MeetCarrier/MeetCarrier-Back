@@ -1,7 +1,6 @@
 package com.kslj.mannam.domain.test.service;
 
 import com.kslj.mannam.domain.test.dto.TestRequestDto;
-import com.kslj.mannam.domain.test.dto.TestResponseDto;
 import com.kslj.mannam.domain.test.entity.Test;
 import com.kslj.mannam.domain.test.repository.TestRepository;
 import com.kslj.mannam.domain.user.entity.User;
@@ -9,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,21 +32,9 @@ public class TestService {
 
     // 테스트 결과 목록
     @Transactional
-    public List<TestResponseDto> getTestByUserId(User user) {
-        List<Test> results = testRepository.findTop10ByUserOrderByCreatedAtDesc(user);
-        List<TestResponseDto> dtos = new ArrayList<>();
+    public List<Test> getTestByUserId(User user) {
 
-        for(Test test : results) {
-            TestResponseDto dto = TestResponseDto.builder()
-                    .depressionScore(test.getDepressionScore())
-                    .relationshipScore(test.getRelationshipScore())
-                    .createdAt(test.getCreatedAt())
-                    .build();
-
-            dtos.add(dto);
-        }
-
-        return dtos;
+        return testRepository.findTop10ByUserOrderByCreatedAtDesc(user);
     }
 
     // 테스트 결과 삭제

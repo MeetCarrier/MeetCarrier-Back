@@ -1,7 +1,7 @@
 package com.kslj.mannam.domain.test.controller;
 
 import com.kslj.mannam.domain.test.dto.TestRequestDto;
-import com.kslj.mannam.domain.test.dto.TestResponseDto;
+import com.kslj.mannam.domain.test.entity.Test;
 import com.kslj.mannam.domain.test.service.TestService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -23,9 +23,9 @@ class TestController {
     // 현재 유저의 테스트 결과 목록 반환
     @GetMapping("/tests/")
     public ResponseEntity<?> getTestList(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        List<TestResponseDto> testResponseDtoList = testService.getTestByUserId(userDetails.getUser());
+        List<Test> tests = testService.getTestByUserId(userDetails.getUser());
 
-        return ResponseEntity.ok(testResponseDtoList);
+        return ResponseEntity.ok(tests);
     }
 
     // 새로운 테스트 결과 추가
@@ -39,7 +39,7 @@ class TestController {
 
     // 테스트 결과 삭제
     @DeleteMapping("/tests/{testId}")
-    public ResponseEntity<?> deleteTest(@PathVariable Long testId) {
+    public ResponseEntity<?> deleteTest(@PathVariable(value = "testId") Long testId) {
         long deletedTestId = testService.deleteTestByTestId(testId);
 
         return ResponseEntity.ok("테스트 결과가 삭제되었습니다. TestId = " + deletedTestId);

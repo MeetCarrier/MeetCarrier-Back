@@ -2,7 +2,6 @@ package com.kslj.mannam.test;
 
 import com.kslj.mannam.TestUtils;
 import com.kslj.mannam.domain.test.dto.TestRequestDto;
-import com.kslj.mannam.domain.test.dto.TestResponseDto;
 import com.kslj.mannam.domain.test.service.TestService;
 import com.kslj.mannam.domain.user.entity.User;
 import org.assertj.core.api.Assertions;
@@ -40,7 +39,7 @@ public class TestServiceTest {
 
         // when
         long testId = testService.createTest(testRequest, testUser);
-        List<TestResponseDto> testByUserId = testService.getTestByUserId(testUser);
+        List<com.kslj.mannam.domain.test.entity.Test> testByUserId = testService.getTestByUserId(testUser);
 
         // then
         System.out.println("testRequest.getDepressionScore() = " + testRequest.getDepressionScore());
@@ -60,10 +59,10 @@ public class TestServiceTest {
         }
 
         // when
-        List<TestResponseDto> testByUserId = testService.getTestByUserId(testUser);
+        List<com.kslj.mannam.domain.test.entity.Test> testByUserId = testService.getTestByUserId(testUser);
 
         // then
-        for (TestResponseDto test : testByUserId) {
+        for (com.kslj.mannam.domain.test.entity.Test test : testByUserId) {
             System.out.println("score = " + test.getDepressionScore() + ", " + test.getRelationshipScore());
         }
         Assertions.assertThat(testByUserId.size()).isEqualTo(10);
@@ -84,7 +83,7 @@ public class TestServiceTest {
 
         // when
         testService.deleteTestByTestId(testId3);
-        List<TestResponseDto> testByUserId = testService.getTestByUserId(testUser);
+        List<com.kslj.mannam.domain.test.entity.Test> testByUserId = testService.getTestByUserId(testUser);
 
         // then
         Assertions.assertThat(testByUserId.size()).isEqualTo(2);
