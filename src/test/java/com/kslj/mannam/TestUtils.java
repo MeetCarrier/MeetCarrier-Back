@@ -27,7 +27,7 @@ public class TestUtils {
                 .interests("롤")
                 .build();
 
-        userService.createUser(signUpRequestDto);
-        return userService.getUserBySocialId(signUpRequestDto.getSocialId());
+        long userId = userService.createUser(signUpRequestDto);
+        return userService.getUserById(userId);
     }
 }

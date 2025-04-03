@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class JournalResponseDto {
+    long id;
     String content;
     String stamp;
     LocalDateTime createdAt;

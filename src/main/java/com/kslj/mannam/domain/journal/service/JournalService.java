@@ -36,6 +36,7 @@ public class JournalService {
 
         for(Journal journal : journals) {
             JournalResponseDto responseDto = JournalResponseDto.builder()
+                    .id(journal.getId())
                     .content(journal.getContent())
                     .createdAt(journal.getCreatedAt())
                     .stamp(journal.getStamp())

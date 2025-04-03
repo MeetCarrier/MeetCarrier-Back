@@ -16,9 +16,15 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public void createUser(UserSignUpRequestDto userSignUpRequestDto) {
-        userRepository.save(userSignUpRequestDto.toUserEntity());
+    public long createUser(UserSignUpRequestDto userSignUpRequestDto) {
+        User savedUser = userRepository.save(userSignUpRequestDto.toUserEntity());
         log.info("nickname: {} 등록", userSignUpRequestDto.getNickname());
+
+        return savedUser.getId();
+    }
+
+    public User getUserById(long id) {
+        return userRepository.findById(id).orElseThrow();
     }
 
     public User getUserBySocialId(String socialId) {

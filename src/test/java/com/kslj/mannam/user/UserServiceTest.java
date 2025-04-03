@@ -6,11 +6,11 @@ import com.kslj.mannam.domain.user.enums.Gender;
 import com.kslj.mannam.domain.user.enums.SocialType;
 import com.kslj.mannam.domain.user.repository.UserRepository;
 import com.kslj.mannam.domain.user.service.UserService;
-import jakarta.transaction.Transactional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional  // 테스트 후 자동 롤백
