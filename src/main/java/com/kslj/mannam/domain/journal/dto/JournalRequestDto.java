@@ -14,5 +14,5 @@ import java.util.List;
 public class JournalRequestDto {
     private String content;
     private String stamp;
-    private List<String> imageUrls;
+    private List<String> images;
 }

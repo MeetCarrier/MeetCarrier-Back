@@ -6,14 +6,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class JournalResponseDto {
-    long id;
-    String content;
-    String stamp;
-    LocalDateTime createdAt;
+    private long id;
+    private String content;
+    private String stamp;
+    private LocalDateTime createdAt;
+    private List<String> images;
 }

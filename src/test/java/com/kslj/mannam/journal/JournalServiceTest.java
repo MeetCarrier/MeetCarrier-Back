@@ -3,7 +3,6 @@ package com.kslj.mannam.journal;
 import com.kslj.mannam.TestUtils;
 import com.kslj.mannam.domain.journal.dto.JournalRequestDto;
 import com.kslj.mannam.domain.journal.dto.JournalResponseDto;
-import com.kslj.mannam.domain.journal.dto.JournalResponseWithImageDto;
 import com.kslj.mannam.domain.journal.entity.Journal;
 import com.kslj.mannam.domain.journal.repository.JournalRepository;
 import com.kslj.mannam.domain.journal.service.JournalService;
@@ -37,11 +36,11 @@ public class JournalServiceTest {
     private TestUtils testUtils;
 
     // JournalRequestDto 생성 메서드
-    private JournalRequestDto createJournalRequest(String content, String stamp, List<String> imageUrls) {
+    private JournalRequestDto createJournalRequest(String content, String stamp, List<String> images) {
         return JournalRequestDto.builder()
                 .content(content)
                 .stamp(stamp)
-                .imageUrls(imageUrls)
+                .images(images)
                 .build();
     }
 
@@ -54,15 +53,15 @@ public class JournalServiceTest {
 
         // when
         long savedJournalId = journalService.saveJournal(journalRequestDto, foundUser);
-        JournalResponseWithImageDto foundJournal = journalService.getJournalById(savedJournalId);
+        List<JournalResponseDto> foundJournal = journalService.getJournalsByYearAndMonth(foundUser, 2025, 4);
 
         // then
         System.out.println("journalRequestDto.getContent() = " + journalRequestDto.getContent());
-        System.out.println("foundJournal.getContent() = " + foundJournal.getContent());
-        Assertions.assertThat(foundJournal.getContent()).isEqualTo(journalRequestDto.getContent());
+        System.out.println("foundJournal.getContent() = " + foundJournal.get(0).getContent());
+        Assertions.assertThat(foundJournal.get(0).getContent()).isEqualTo(journalRequestDto.getContent());
     }
 
-    // 새로운 일기 추가 및 조회 테스트 (이미지 없이)
+    // 새로운 일기 추가 및 조회 테스트 (이미지 존재)
     @Test
     public void testCreateJournalWithImage() {
         // given
@@ -71,12 +70,12 @@ public class JournalServiceTest {
 
         // when
         long savedJournalId = journalService.saveJournal(journalRequestDto, foundUser);
-        JournalResponseWithImageDto foundJournal = journalService.getJournalById(savedJournalId);
+        List<JournalResponseDto> foundJournal = journalService.getJournalsByYearAndMonth(foundUser, 2025, 4);
 
         // then
-        System.out.println("journalRequestDto.getImageUrls() = " + journalRequestDto.getImageUrls());
-        System.out.println("foundJournal.getImageUrls() = " + foundJournal.getImageUrls());
-        Assertions.assertThat(foundJournal.getImageUrls()).isEqualTo(journalRequestDto.getImageUrls());
+        System.out.println("journalRequestDto.getImageUrls() = " + journalRequestDto.getImages());
+        System.out.println("foundJournal.getImageUrls() = " + foundJournal.get(0).getImages());
+        Assertions.assertThat(foundJournal.get(0).getImages()).isEqualTo(journalRequestDto.getImages());
     }
 
     // 일기 년/월 기준으로 조회 테스트
@@ -90,6 +89,7 @@ public class JournalServiceTest {
                 .stamp("기쁨")
                 .user(foundUser)
                 .createdAt(LocalDateTime.of(2025, 3, 31, 10, 20, 30))
+                .images("[]")
                 .build();
 
         Journal journal2 = Journal.builder()
@@ -97,6 +97,7 @@ public class JournalServiceTest {
                 .stamp("기쁨")
                 .user(foundUser)
                 .createdAt(LocalDateTime.of(2025, 4, 1, 10, 20, 30))
+                .images("[]")
                 .build();
 
         Journal journal3 = Journal.builder()
@@ -104,6 +105,7 @@ public class JournalServiceTest {
                 .stamp("기쁨")
                 .user(foundUser)
                 .createdAt(LocalDateTime.of(2025, 4, 2, 10, 20, 30))
+                .images("[]")
                 .build();
 
         journalRepository.saveAll(Arrays.asList(journal1, journal2, journal3));
@@ -131,12 +133,12 @@ public class JournalServiceTest {
         // when
         JournalRequestDto updatedRequestDto = createJournalRequest("테스트", "슬퍼요", new ArrayList<>(Arrays.asList("3.jpg", "4.jpg", "5.jpg")));
         journalService.updateJournal(journalId, updatedRequestDto);
-        JournalResponseWithImageDto updatedJournal = journalService.getJournalById(journalId);
+        List<JournalResponseDto> journalsByYearAndMonth = journalService.getJournalsByYearAndMonth(foundUser, 2025, 4);
 
         // then
-        System.out.println("updatedJournal.getContent() = " + updatedJournal.getContent());
-        System.out.println("updatedJournal.getImageUrls() = " + updatedJournal.getImageUrls());
-        Assertions.assertThat(updatedJournal.getImageUrls()).isEqualTo(updatedRequestDto.getImageUrls());
+        System.out.println("journalsByYearAndMonth.get(0).getContent() = " + journalsByYearAndMonth.get(0).getContent());
+        System.out.println("journalsByYearAndMonth.get(0).getImages() = " + journalsByYearAndMonth.get(0).getImages());
+        Assertions.assertThat(journalsByYearAndMonth.get(0).getImages()).isEqualTo(updatedRequestDto.getImages());
 
     }
 
