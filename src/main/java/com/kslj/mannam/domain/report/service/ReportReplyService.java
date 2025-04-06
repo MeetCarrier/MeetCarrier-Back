@@ -1,0 +1,85 @@
+package com.kslj.mannam.domain.report.service;
+
+import com.kslj.mannam.domain.report.dto.ReplyRequestDto;
+import com.kslj.mannam.domain.report.dto.ReplyResponseDto;
+import com.kslj.mannam.domain.report.entity.Report;
+import com.kslj.mannam.domain.report.entity.ReportReply;
+import com.kslj.mannam.domain.report.enums.ReportStatus;
+import com.kslj.mannam.domain.report.repository.ReportReplyRepository;
+import com.kslj.mannam.domain.report.repository.ReportRepository;
+import com.kslj.mannam.domain.user.entity.User;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@RequiredArgsConstructor
+@Service
+public class ReportReplyService {
+
+    private final ReportRepository reportRepository;
+    private final ReportReplyRepository replyRepository;
+
+    // 답변 저장
+    public long createReportReply(long reportId, ReplyRequestDto replyRequestDto, User user) {
+
+        // 넘겨온 reportId를 바탕으로 Report 조회
+        Optional<Report> report = reportRepository.findById(reportId);
+        if(report.isEmpty()) {
+            throw new RuntimeException("신고 내역을 찾을 수 없습니다. reportId = " + reportId);
+        }
+
+        // ReportReply 객체 생성
+        ReportReply reply = ReportReply.builder()
+                .content(replyRequestDto.getContent())
+                .user(user)
+                .report(report.get())
+                .build();
+
+        // 상태 업데이트(등록됨 -> 처리됨)
+        report.get().updateStatus(ReportStatus.Processed);
+
+        ReportReply savedReply = replyRepository.save(reply);
+
+        return savedReply.getId();
+    }
+
+    // 답변 조회
+    public ReportReply getReportReply(long reportId) {
+        Optional<ReportReply> reportReply = replyRepository.findById(reportId);
+
+        if (reportReply.isEmpty()) {
+            throw new RuntimeException("답변 내역을 찾을 수 없습니다. reportId=" + reportId);
+        }
+
+        return reportReply.get();
+    }
+
+    // 답변 수정
+    public long updateReportReply(long reportReplyId, ReplyRequestDto replyRequestDto) {
+        Optional<ReportReply> reportReplyOpt = replyRepository.findById(reportReplyId);
+
+        if (reportReplyOpt.isEmpty()) {
+            throw new RuntimeException("답변 내역을 찾을 수 없습니다. reportReplyId=" + reportReplyId);
+        }
+
+        ReportReply reportReply = reportReplyOpt.get();
+        reportReply.updateContent(replyRequestDto.getContent());
+
+        return reportReply.getId();
+    }
+
+    // 답변 삭제
+    public long deleteReportReply(long replyId) {
+        Optional<ReportReply> reportReply = replyRepository.findById(replyId);
+
+        if (reportReply.isEmpty()) {
+            throw new RuntimeException("답변 내역을 찾을 수 없습니다. reportId=" + replyId);
+        }
+
+        reportReply.get().getReport().updateStatus(ReportStatus.Registered);
+        replyRepository.deleteById(replyId);
+
+        return replyId;
+    }
+}
