@@ -1,17 +1,18 @@
 package com.kslj.mannam.domain.assistant.entity;
 
+import com.kslj.mannam.domain.user.entity.User;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "ai_answers")
-public class AiAnswer {
+@Table(name = "ai_inquiries")
+public class AssistantQuestion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,10 +21,11 @@ public class AiAnswer {
     @Column(nullable = false)
     private String content;
 
+    @Builder.Default
     @Column(name = "sent_at", nullable = false)
     private LocalDateTime sentAt = LocalDateTime.now();
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "inquiry_id", nullable = false)
-    private AiInquiry inquiry;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 }
