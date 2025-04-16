@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface MatchRepository extends JpaRepository<Match, Long> {
     List<Match> findAllByUser1OrUser2(User user1, User user2);
+
+    Match getMatchById(Long id);
 }

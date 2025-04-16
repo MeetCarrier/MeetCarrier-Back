@@ -42,4 +42,7 @@ public class Match {
     public void updateStatus(MatchStatus status) {
         this.status = status;
     }
+    public boolean hasUser(User sender) {
+        return user1.equals(sender) || user2.equals(sender);
+    }
 }

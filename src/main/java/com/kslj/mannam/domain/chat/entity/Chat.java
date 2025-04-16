@@ -4,14 +4,14 @@ import com.kslj.mannam.domain.chat.enums.MessageType;
 import com.kslj.mannam.domain.room.entity.Room;
 import com.kslj.mannam.domain.user.entity.User;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "chats")
 public class Chat {
@@ -29,6 +29,7 @@ public class Chat {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Builder.Default
     @Column(name = "sent_at")
     private LocalDateTime sentAt = LocalDateTime.now();
 
