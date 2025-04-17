@@ -57,7 +57,7 @@ public class AssistantTest {
         when(assistantQuestionRepository.save(any(AssistantQuestion.class))).thenReturn(savedQuestion);
 
         // when
-        long questionId = assistantService.createQuestionAndSendToAI(foundUser, question);
+        long questionId = assistantService.createQuestionAndSendToAI(foundUser, question).getId();
 
 
         // then
@@ -94,7 +94,7 @@ public class AssistantTest {
 
         when(assistantAnswerRepository.save(any(AssistantAnswer.class))).thenAnswer(invocation -> {
             AssistantAnswer answer = invocation.getArgument(0);
-            return answer.builder()
+            return AssistantAnswer.builder()
                     .id(200L)
                     .content(answer.getContent())
                     .question(answer.getQuestion())

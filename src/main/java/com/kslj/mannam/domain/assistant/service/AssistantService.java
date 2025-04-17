@@ -1,5 +1,7 @@
 package com.kslj.mannam.domain.assistant.service;
 
+import com.kslj.mannam.domain.assistant.dto.AssistantAnswerDto;
+import com.kslj.mannam.domain.assistant.dto.AssistantResponseDto;
 import com.kslj.mannam.domain.assistant.entity.AssistantAnswer;
 import com.kslj.mannam.domain.assistant.entity.AssistantQuestion;
 import com.kslj.mannam.domain.assistant.repository.AssistantAnswerRepository;
@@ -9,9 +11,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -22,9 +28,10 @@ public class AssistantService {
     private final AssistantAnswerRepository assistantAnswerRepository;
     private final AssistantQuestionRepository assistantQuestionRepository;
     private final RabbitTemplate rabbitTemplate;
+    private final SimpMessageSendingOperations messagingTemplate;
 
     // 질문 등록 및 AI 비서로 전달
-    public long createQuestionAndSendToAI(User user, String questionContent) {
+    public AssistantQuestion createQuestionAndSendToAI(User user, String questionContent) {
         // 질문 저장
         AssistantQuestion newQuestion = AssistantQuestion.builder()
                 .content(questionContent)
@@ -40,13 +47,14 @@ public class AssistantService {
 
         rabbitTemplate.convertAndSend("ai_request_queue", message);
 
-        return savedQuestion.getId();
+        return savedQuestion;
     }
 
     // AI 비서 답변 수신 및 등록
     @RabbitListener(queues = "ai_response_queue")
     public void createAnswer(Map<String, Object> response) {
         try {
+            long userId = ((Number) response.get("userId")).longValue();
             long questionId = ((Number) response.get("questionId")).longValue();
             String answer = (String) response.get("answer");
 
@@ -58,12 +66,16 @@ public class AssistantService {
                     .question(question)
                     .build();
 
-            assistantAnswerRepository.save(newAnswer);
+            AssistantAnswer savedAnswer = assistantAnswerRepository.save(newAnswer);
 
-            // 여기까지 오면 정상 처리
+            AssistantAnswerDto answerDto = AssistantAnswerDto.builder()
+                    .content(answer)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+
+            messagingTemplate.convertAndSend("/topic/assistant/" + userId, answerDto);
+
         } catch (Exception e) {
-            // 로깅만 하고, 예외를 밖으로 터뜨리지 않음
-            // 에러가 있어도 메시지 큐에는 "ACK" 보내는 흐름
             log.error("Failed to process AI response", e);
         }
     }
@@ -76,5 +88,16 @@ public class AssistantService {
     }
 
     // 질문, 답변 불러오기
+    public AssistantResponseDto getQuestionsAndAnswers(User user) {
+        List<AssistantQuestion> questions = assistantQuestionRepository.findAllWithAnswerByUserId(user.getId());
+        List<AssistantAnswer> answers = new ArrayList<>();
+        for(AssistantQuestion question : questions) {
+            answers.add(question.getAnswer());
+        }
 
+        return AssistantResponseDto.builder()
+                .assistantQuestions(questions)
+                .assistantAnswers(answers)
+                .build();
+    }
 }

@@ -28,4 +28,8 @@ public class AssistantQuestion {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @OneToOne(mappedBy = "question",
+            cascade = CascadeType.ALL)
+    private AssistantAnswer answer;
 }
