@@ -2,14 +2,14 @@ package com.kslj.mannam.domain.review.entity;
 
 import com.kslj.mannam.domain.user.entity.User;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Builder
 @Getter
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "reviews")
 public class Review {
@@ -24,6 +24,7 @@ public class Review {
     @Column(nullable = false)
     private String content;
 
+    @Builder.Default
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -36,4 +37,9 @@ public class Review {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reviewer_id", nullable = false)
     private User reviewer;
+
+    public void updateRatingAndContent(int rating, String content) {
+        this.rating = rating;
+        this.content = content;
+    }
 }
