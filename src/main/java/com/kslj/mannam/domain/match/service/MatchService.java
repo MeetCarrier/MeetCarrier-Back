@@ -38,6 +38,13 @@ public class MatchService {
         return matchRepository.findAllByUser1OrUser2(user, user);
     }
 
+    // 특정 매칭 정보 조회
+    @Transactional
+    public Match getMatch(Long matchId) {
+        return matchRepository.findById(matchId).orElseThrow(
+                () -> new RuntimeException("매칭 정보가 없습니다. matchId=" + matchId));
+    }
+
     // 매칭 정보 업데이트
     @Transactional
     public long updateMathStatus(long matchId, MatchStatus status) {
