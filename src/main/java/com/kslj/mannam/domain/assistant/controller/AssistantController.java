@@ -1,6 +1,6 @@
 package com.kslj.mannam.domain.assistant.controller;
 
-import com.kslj.mannam.domain.assistant.dto.AssistantQuestionDto;
+import com.kslj.mannam.domain.assistant.dto.AssistantDto;
 import com.kslj.mannam.domain.assistant.dto.AssistantResponseDto;
 import com.kslj.mannam.domain.assistant.service.AssistantService;
 import com.kslj.mannam.domain.user.dto.UserSignUpRequestDto;
@@ -14,9 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
@@ -24,13 +26,14 @@ import java.time.LocalDateTime;
 @Slf4j
 @RequiredArgsConstructor
 @Controller
+@RequestMapping("/assistant")
 public class AssistantController {
 
     private final AssistantService assistantService;
     private final UserService userService;
     private final SimpMessagingTemplate messagingTemplate;
 
-    @PostMapping("/assistant/test")
+    @PostMapping("/test")
     public ResponseEntity<?> createQuestion(@RequestParam(name="content") String content) {
         long userId = userService.createUser(UserSignUpRequestDto.builder()
                 .region("서울")
@@ -46,7 +49,7 @@ public class AssistantController {
         return ResponseEntity.ok(id);
     }
 
-    @MessageMapping("/assistant/send")
+    @MessageMapping("/send")
     public void sendQuestion(@RequestParam(name="content") String content) {
 
         // 임시로 user 설정. UserDetailsImpl을 이용하도록 변경 예정
@@ -57,7 +60,7 @@ public class AssistantController {
         // 질문 저장
         assistantService.createQuestionAndSendToAI(sender, content);
 
-        AssistantQuestionDto questionDto = AssistantQuestionDto.builder()
+        AssistantDto questionDto = AssistantDto.builder()
                 .content(content)
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -66,9 +69,9 @@ public class AssistantController {
         messagingTemplate.convertAndSend("/topic/assistant/" + sender.getId(), questionDto);
     }
 
-    @GetMapping("/assistant")
-    public ResponseEntity<?> getAssistantQuestionsAndAnswers(UserDetailsImpl userDetails) {
-        AssistantResponseDto questionsAndAnswers = assistantService.getQuestionsAndAnswers(userDetails.getUser());
+    @GetMapping
+    public ResponseEntity<?> getAssistantQuestionsAndAnswers(@AuthenticationPrincipal UserDetailsImpl user) {
+        AssistantResponseDto questionsAndAnswers = assistantService.getQuestionsAndAnswers(userService.getUserById(1));
 
         return ResponseEntity.ok(questionsAndAnswers);
     }

@@ -1,6 +1,6 @@
 package com.kslj.mannam.domain.assistant.service;
 
-import com.kslj.mannam.domain.assistant.dto.AssistantAnswerDto;
+import com.kslj.mannam.domain.assistant.dto.AssistantDto;
 import com.kslj.mannam.domain.assistant.dto.AssistantResponseDto;
 import com.kslj.mannam.domain.assistant.entity.AssistantAnswer;
 import com.kslj.mannam.domain.assistant.entity.AssistantQuestion;
@@ -15,7 +15,6 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +67,7 @@ public class AssistantService {
 
             AssistantAnswer savedAnswer = assistantAnswerRepository.save(newAnswer);
 
-            AssistantAnswerDto answerDto = AssistantAnswerDto.builder()
+            AssistantDto answerDto = AssistantDto.builder()
                     .content(answer)
                     .createdAt(LocalDateTime.now())
                     .build();
@@ -90,14 +89,7 @@ public class AssistantService {
     // 질문, 답변 불러오기
     public AssistantResponseDto getQuestionsAndAnswers(User user) {
         List<AssistantQuestion> questions = assistantQuestionRepository.findAllWithAnswerByUserId(user.getId());
-        List<AssistantAnswer> answers = new ArrayList<>();
-        for(AssistantQuestion question : questions) {
-            answers.add(question.getAnswer());
-        }
 
-        return AssistantResponseDto.builder()
-                .assistantQuestions(questions)
-                .assistantAnswers(answers)
-                .build();
+        return AssistantResponseDto.fromEntity(questions);
     }
 }

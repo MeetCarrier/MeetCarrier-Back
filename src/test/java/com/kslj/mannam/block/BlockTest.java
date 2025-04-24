@@ -1,7 +1,7 @@
 package com.kslj.mannam.block;
 
 import com.kslj.mannam.TestUtils;
-import com.kslj.mannam.domain.block.dto.BlockRequestDto;
+import com.kslj.mannam.domain.block.dto.BlockDto;
 import com.kslj.mannam.domain.block.entity.Block;
 import com.kslj.mannam.domain.block.service.BlockService;
 import com.kslj.mannam.domain.user.entity.User;
@@ -24,8 +24,8 @@ public class BlockTest {
     private TestUtils testUtils;
 
     // 블락 데이터 생성 메서드
-    private BlockRequestDto createBlockRequestDto(String BlockedPhone, String BlockedInfo) {
-        return BlockRequestDto.builder()
+    private BlockDto createBlockRequestDto(String BlockedPhone, String BlockedInfo) {
+        return BlockDto.builder()
                 .blockedPhone(BlockedPhone)
                 .blockedInfo(BlockedInfo)
                 .build();
@@ -36,16 +36,16 @@ public class BlockTest {
     public void createBlockAndGetTest() {
         // given
         User testUser = testUtils.createAndGetTestUser();
-        BlockRequestDto testDto = createBlockRequestDto("010-1234-1234", "테스트 번호");
+        BlockDto testDto = createBlockRequestDto("010-1234-1234", "테스트 번호");
 
         // when
         for (int i=0; i<5; i++)
             blockService.createBlock(testUser, testDto);
-        List<Block> blocks = blockService.getBlocks(testUser);
+        List<BlockDto> blocks = blockService.getBlocks(testUser);
 
         // then
-        for(Block block : blocks)
-            System.out.println("block = " + block.getId() + ", " + block.getBlockedPhone() + ", " + block.getBlockedInfo());
+        for(BlockDto block : blocks)
+            System.out.println(block.getBlockedPhone() + ", " + block.getBlockedInfo());
         Assertions.assertThat(blocks.size()).isEqualTo(5);
     }
 
@@ -54,18 +54,18 @@ public class BlockTest {
     public void updateBlockTest() {
         // given
         User testUser = testUtils.createAndGetTestUser();
-        BlockRequestDto testDto = createBlockRequestDto("010-1234-1234", "테스트 번호");
+        BlockDto testDto = createBlockRequestDto("010-1234-1234", "테스트 번호");
 
         long blockId = blockService.createBlock(testUser, testDto);
 
         // when
-        BlockRequestDto updateDto = createBlockRequestDto("010-7484-5883", "업데이트 번호");
+        BlockDto updateDto = createBlockRequestDto("010-7484-5883", "업데이트 번호");
         blockService.updateBlock(blockId, updateDto);
 
-        Block updatedBlock = blockService.getBlocks(testUser).get(0);
+        BlockDto updatedBlock = blockService.getBlocks(testUser).get(0);
 
         // then
-        System.out.println("updatedBlock = " + updatedBlock.getId() + ", " + updatedBlock.getBlockedPhone() + ", " + updatedBlock.getBlockedInfo());
+        System.out.println(updatedBlock.getBlockedPhone() + ", " + updatedBlock.getBlockedInfo());
         Assertions.assertThat(updatedBlock.getBlockedPhone()).isEqualTo(updateDto.getBlockedPhone());
     }
 
@@ -75,7 +75,7 @@ public class BlockTest {
     public void DeleteBlockTest() {
         // given
         User testUser = testUtils.createAndGetTestUser();
-        BlockRequestDto testDto = createBlockRequestDto("010-1234-1234", "테스트 번호");
+        BlockDto testDto = createBlockRequestDto("010-1234-1234", "테스트 번호");
 
         // when
         long blockId = blockService.createBlock(testUser, testDto);
@@ -84,7 +84,7 @@ public class BlockTest {
             blockService.createBlock(testUser, testDto);
 
         blockService.deleteBlock(blockId);
-        List<Block> blocks = blockService.getBlocks(testUser);
+        List<BlockDto> blocks = blockService.getBlocks(testUser);
 
         // then
         Assertions.assertThat(blocks.size()).isEqualTo(4);

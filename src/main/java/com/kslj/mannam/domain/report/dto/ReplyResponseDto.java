@@ -15,5 +15,5 @@ import java.time.LocalDateTime;
 public class ReplyResponseDto {
     private String replyContent;
     private LocalDateTime repliedAt;
-    private User replier;
+    private String replierNickname;
 }

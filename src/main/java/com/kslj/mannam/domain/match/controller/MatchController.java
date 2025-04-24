@@ -1,10 +1,12 @@
 package com.kslj.mannam.domain.match.controller;
 
 import com.kslj.mannam.domain.match.dto.MatchRequestDto;
+import com.kslj.mannam.domain.match.dto.MatchResponseDto;
 import com.kslj.mannam.domain.match.dto.StatusUpdateDto;
 import com.kslj.mannam.domain.match.entity.Match;
 import com.kslj.mannam.domain.match.enums.MatchStatus;
 import com.kslj.mannam.domain.match.service.MatchService;
+import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,25 +15,28 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
 @Controller
+@RequestMapping("/matches")
 public class MatchController {
 
     private final MatchService matchService;
+    private final UserService userService;
 
     // 현재 유저 매칭 목록 조회
-    @GetMapping("/matches")
-    public ResponseEntity<List<Match>> getMatches(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        List<Match> matches = matchService.getMatches(userDetails.getUser());
+    @GetMapping
+    public ResponseEntity<?> getMatches(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        List<MatchResponseDto> matches = matchService.getMatches(userService.getUserById(1));
 
         return ResponseEntity.ok(matches);
     }
 
     // 매칭 상태 업데이트
-    @PatchMapping("/matches/{matchId}")
+    @PatchMapping("/{matchId}")
     public ResponseEntity<?> updateStatus(@PathVariable("matchId") long matchId,
                                           @RequestBody StatusUpdateDto dto) {
         MatchStatus matchStatus = dto.getMatchStatus();
@@ -41,7 +46,7 @@ public class MatchController {
     }
 
     // 매칭 삭제
-    @DeleteMapping("/matches/{matchId}")
+    @DeleteMapping("/{matchId}")
     public ResponseEntity<?> deleteMatch(@PathVariable("matchId") long matchId) {
         long deletedMatchId = matchService.deleteMatch(matchId);
 

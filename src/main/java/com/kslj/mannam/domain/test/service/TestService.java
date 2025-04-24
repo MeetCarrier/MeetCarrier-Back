@@ -1,6 +1,7 @@
 package com.kslj.mannam.domain.test.service;
 
 import com.kslj.mannam.domain.test.dto.TestRequestDto;
+import com.kslj.mannam.domain.test.dto.TestResponseDto;
 import com.kslj.mannam.domain.test.entity.Test;
 import com.kslj.mannam.domain.test.repository.TestRepository;
 import com.kslj.mannam.domain.user.entity.User;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -32,9 +34,12 @@ public class TestService {
 
     // 테스트 결과 목록
     @Transactional
-    public List<Test> getTestByUserId(User user) {
+    public List<TestResponseDto> getTestByUserId(User user) {
+        List<Test> tests = testRepository.findTop10ByUserOrderByCreatedAtDesc(user);
 
-        return testRepository.findTop10ByUserOrderByCreatedAtDesc(user);
+        return tests.stream()
+                .map(TestResponseDto::fromEntity)
+                .collect(Collectors.toList());
     }
 
     // 테스트 결과 삭제

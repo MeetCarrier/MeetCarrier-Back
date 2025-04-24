@@ -17,5 +17,6 @@ public class ReviewResponseDto {
     int rating;
     String content;
     LocalDateTime createdAt;
-    User reviewer;
+    long reviewerId;
+    String reviewerName;
 }

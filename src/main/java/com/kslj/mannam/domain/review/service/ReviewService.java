@@ -48,7 +48,8 @@ public class ReviewService {
                     .rating(review.getRating())
                     .content(review.getContent())
                     .createdAt(review.getCreatedAt())
-                    .reviewer(review.getReviewer())
+                    .reviewerId(review.getReviewer().getId())
+                    .reviewerName(review.getReviewer().getNickname())
                     .build();
 
             reviewDtos.add(reviewDto);
@@ -63,6 +64,7 @@ public class ReviewService {
 
         if(review.getReviewer().equals(reviewer)) {
             review.updateRatingAndContent(requestDto.getRating(), requestDto.getContent());
+            reviewRepository.save(review);
         }
         else {
             throw new RuntimeException("작성자가 일치하지 않습니다.");

@@ -56,6 +56,7 @@ public class MeetingService {
                 .orElseThrow(() -> new IllegalArgumentException("약속 정보를 찾을 수 없습니다. meetingId = " + meetingId));
 
         meeting.updateMeeting(requestDto.getDate(), requestDto.getLocation(), requestDto.getNote());
+        meetingRepository.save(meeting);
     }
 
     // 대면 약속 삭제

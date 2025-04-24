@@ -7,8 +7,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -32,7 +30,7 @@ public class Report {
     private ReportStatus status = ReportStatus.Registered;
 
     @Column(name = "report_content", nullable = false)
-    private String reportContent;
+    private String content;
 
     @Column(columnDefinition = "TEXT")
     private String images;
@@ -45,6 +43,7 @@ public class Report {
     @JoinColumn(name = "reporter_id", nullable = false)
     private User user;
 
+    @Setter
     @OneToOne(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
     private ReportReply reply;
 

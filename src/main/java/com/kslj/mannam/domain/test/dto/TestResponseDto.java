@@ -1,5 +1,6 @@
 package com.kslj.mannam.domain.test.dto;
 
+import com.kslj.mannam.domain.test.entity.Test;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,4 +16,12 @@ public class TestResponseDto {
     int depressionScore;
     int relationshipScore;
     LocalDateTime createdAt;
+
+    public static TestResponseDto fromEntity(Test test) {
+        return TestResponseDto.builder()
+                .depressionScore(test.getDepressionScore())
+                .relationshipScore(test.getRelationshipScore())
+                .createdAt(test.getCreatedAt())
+                .build();
+    }
 }

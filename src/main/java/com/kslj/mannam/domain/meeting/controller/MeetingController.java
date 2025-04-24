@@ -3,6 +3,7 @@ package com.kslj.mannam.domain.meeting.controller;
 import com.kslj.mannam.domain.meeting.dto.MeetingRequestDto;
 import com.kslj.mannam.domain.meeting.dto.MeetingResponseDto;
 import com.kslj.mannam.domain.meeting.service.MeetingService;
+import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,11 +21,12 @@ import java.util.List;
 public class MeetingController {
 
     private final MeetingService meetingService;
+    private final UserService userService;
 
     // 대면 약속 생성
     @PostMapping("/{matchId}")
     public ResponseEntity<Long> createMeeting(
-            @PathVariable long matchId,
+            @PathVariable(value = "matchId") long matchId,
             @RequestBody MeetingRequestDto requestDto
     ) {
         long meetingId = meetingService.createMeeting(matchId, requestDto);
@@ -34,14 +36,14 @@ public class MeetingController {
     // 대면 약속 조회
     @GetMapping
     public ResponseEntity<List<MeetingResponseDto>> getMeetings(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        List<MeetingResponseDto> response = meetingService.getMeetings(userDetails.getUser());
+        List<MeetingResponseDto> response = meetingService.getMeetings(userService.getUserById(1));
         return ResponseEntity.ok(response);
     }
 
     // 대면 약속 수정
     @PatchMapping("/{meetingId}")
     public ResponseEntity<Void> updateMeeting(
-            @PathVariable long meetingId,
+            @PathVariable(value = "meetingId") long meetingId,
             @RequestBody MeetingRequestDto requestDto
     ) {
         meetingService.updateMeeting(meetingId, requestDto);
@@ -50,7 +52,7 @@ public class MeetingController {
 
     // 대면 약속 삭제
     @DeleteMapping("/{meetingId}")
-    public ResponseEntity<Void> deleteMeeting(@PathVariable long meetingId) {
+    public ResponseEntity<Void> deleteMeeting(@PathVariable(value = "meetingId") long meetingId) {
         meetingService.deleteMeeting(meetingId);
         return ResponseEntity.ok().build();
     }

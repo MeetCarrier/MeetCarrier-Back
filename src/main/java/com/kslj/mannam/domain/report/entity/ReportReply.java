@@ -36,4 +36,11 @@ public class ReportReply {
     public void updateContent(String content) {
         this.content = content;
     }
+
+    public void unlinkReport() {
+        if (this.report != null) {
+            this.report.setReply(null);
+            this.report = null;
+        }
+    }
 }

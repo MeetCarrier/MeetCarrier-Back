@@ -3,6 +3,7 @@ package com.kslj.mannam.domain.journal.controller;
 import com.kslj.mannam.domain.journal.dto.JournalRequestDto;
 import com.kslj.mannam.domain.journal.dto.JournalResponseDto;
 import com.kslj.mannam.domain.journal.service.JournalService;
+import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,28 +17,30 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @Controller
+@RequestMapping("/journals")
 public class JournalController {
 
     private final JournalService journalService;
+    private final UserService userService;
 
-    @GetMapping("/journals/{year}/{month}")
+    @GetMapping("/{year}/{month}")
     public ResponseEntity<List<JournalResponseDto>> JournalList(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                                 @PathVariable(value = "year") int year,
                                                                 @PathVariable(value = "month") int month) {
-        List<JournalResponseDto> journalList = journalService.getJournalsByYearAndMonth(userDetails.getUser(), year, month);
+        List<JournalResponseDto> journalList = journalService.getJournalsByYearAndMonth(userService.getUserById(1), year, month);
 
         return ResponseEntity.ok(journalList);
     }
 
-    @PostMapping("/journals/register")
+    @PostMapping("/register")
     public ResponseEntity<?> CreateJournal(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                            @RequestBody JournalRequestDto requestDto) {
-        long savedJournalId = journalService.saveJournal(requestDto, userDetails.getUser());
+        long savedJournalId = journalService.saveJournal(requestDto, userService.getUserById(1));
 
         return ResponseEntity.ok("일기가 등록되었습니다. JournalId = " + savedJournalId);
     }
 
-    @PatchMapping("/journals/{journalId}")
+    @PatchMapping("/{journalId}")
     public ResponseEntity<?> UpdateJournal(@PathVariable(value = "journalId") long journalId,
                                            @RequestBody JournalRequestDto requestDto) {
         long updatedJournalId = journalService.updateJournal(journalId, requestDto);
@@ -45,7 +48,7 @@ public class JournalController {
         return ResponseEntity.ok("일기가 업데이트되었습니다. JournalId = " + updatedJournalId);
     }
 
-    @DeleteMapping("/journals/{journalId}")
+    @DeleteMapping("/{journalId}")
     public ResponseEntity<?> DeleteJournal(@PathVariable(value = "journalId") long journalId) {
         long deletedJournalId = journalService.deleteJournal(journalId);
 

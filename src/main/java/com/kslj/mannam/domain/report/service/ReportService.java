@@ -2,6 +2,7 @@ package com.kslj.mannam.domain.report.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kslj.mannam.domain.report.dto.ReportListDto;
 import com.kslj.mannam.domain.report.dto.ReportRequestDto;
 import com.kslj.mannam.domain.report.dto.ReportResponseDto;
 import com.kslj.mannam.domain.report.entity.Report;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -35,7 +37,7 @@ public class ReportService {
         // Report 객체 생성
         Report newReport = Report.builder()
                 .type(reportRequestDto.getReportType())
-                .reportContent(reportRequestDto.getReportContent())
+                .content(reportRequestDto.getReportContent())
                 .user(user)
                 .images(imageJson)
                 .build();
@@ -49,8 +51,12 @@ public class ReportService {
     }
 
     // 신고 리스트 불러오기
-    public List<Report> getReports(User user) {
-        return reportRepository.findAllByUser(user);
+    public List<ReportListDto> getReports(User user) {
+        List<Report> reports = reportRepository.findAllByUser(user);
+
+        return reports.stream()
+                .map(ReportListDto::fromEntity)
+                .collect(Collectors.toList());
     }
 
     // 신고 상세 정보 확인
@@ -77,8 +83,9 @@ public class ReportService {
                 .reportType(report.getType())
                 .reportStatus(report.getStatus())
                 .reportedAt(report.getReportedAt())
-                .reportContent(report.getReportContent())
-                .reporter(report.getUser())
+                .reportContent(report.getContent())
+                .reporterId(report.getUser().getId())
+                .reporterNickname(report.getUser().getNickname())
                 .reportImages(images)
                 .build();
     }

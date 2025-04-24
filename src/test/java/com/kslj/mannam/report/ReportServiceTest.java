@@ -2,6 +2,7 @@ package com.kslj.mannam.report;
 
 import com.kslj.mannam.TestUtils;
 import com.kslj.mannam.domain.report.dto.ReplyRequestDto;
+import com.kslj.mannam.domain.report.dto.ReportListDto;
 import com.kslj.mannam.domain.report.dto.ReportRequestDto;
 import com.kslj.mannam.domain.report.dto.ReportResponseDto;
 import com.kslj.mannam.domain.report.entity.Report;
@@ -96,7 +97,7 @@ public class ReportServiceTest {
 
         //when
         reportService.deleteReport(savedReportId1);
-        List<Report> reports = reportService.getReports(foundUser);
+        List<ReportListDto> reports = reportService.getReports(foundUser);
 
         //then
         Assertions.assertEquals(2, reports.size());

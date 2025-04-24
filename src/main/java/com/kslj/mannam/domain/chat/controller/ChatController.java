@@ -5,19 +5,17 @@ import com.kslj.mannam.domain.chat.dto.ChatResponseDto;
 import com.kslj.mannam.domain.chat.service.ChatService;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.service.UserService;
-import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.nio.file.AccessDeniedException;
-import java.security.Principal;
 import java.util.List;
 
 @Slf4j
@@ -45,7 +43,7 @@ public class ChatController {
         // 메시지 저장
         chatService.saveChatMessage(dto, roomId, sender);
 
-        ChatResponseDto response = dto.toChatResponseDto(sender);
+        ChatResponseDto response = dto.fromEntity(sender);
         log.info("채팅 브로드캐스트: roomId={}, response={}", roomId, response);
 
         // 채팅방 유저들에게 브로드캐스트

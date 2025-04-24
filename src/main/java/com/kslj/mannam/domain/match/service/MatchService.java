@@ -1,6 +1,7 @@
 package com.kslj.mannam.domain.match.service;
 
 import com.kslj.mannam.domain.match.dto.MatchRequestDto;
+import com.kslj.mannam.domain.match.dto.MatchResponseDto;
 import com.kslj.mannam.domain.match.entity.Match;
 import com.kslj.mannam.domain.match.enums.MatchStatus;
 import com.kslj.mannam.domain.match.repository.MatchRepository;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -34,8 +36,12 @@ public class MatchService {
 
     // 매칭 정보들 조회
     @Transactional
-    public List<Match> getMatches(User user) {
-        return matchRepository.findAllByUser1OrUser2(user, user);
+    public List<MatchResponseDto> getMatches(User user) {
+        List<Match> matches = matchRepository.findAllByUser1OrUser2(user, user);
+
+        return matches.stream()
+                .map(MatchResponseDto::fromEntity)
+                .collect(Collectors.toList());
     }
 
     // 특정 매칭 정보 조회

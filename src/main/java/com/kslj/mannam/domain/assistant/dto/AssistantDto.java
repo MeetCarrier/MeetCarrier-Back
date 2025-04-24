@@ -9,10 +9,9 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class AssistantQuestionDto {
+@NoArgsConstructor
+public class AssistantDto {
     String content;
     LocalDateTime createdAt;
-
 }
