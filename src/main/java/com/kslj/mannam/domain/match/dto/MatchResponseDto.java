@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+// 매칭 조회 시 반환할 데이터
 public class MatchResponseDto {
     long id;
     LocalDateTime matchedAt;

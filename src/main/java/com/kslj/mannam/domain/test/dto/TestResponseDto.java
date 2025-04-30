@@ -14,12 +14,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class TestResponseDto {
     int depressionScore;
+    int efficacyScore;
     int relationshipScore;
     LocalDateTime createdAt;
 
     public static TestResponseDto fromEntity(Test test) {
         return TestResponseDto.builder()
                 .depressionScore(test.getDepressionScore())
+                .efficacyScore(test.getEfficacyScore())
                 .relationshipScore(test.getRelationshipScore())
                 .createdAt(test.getCreatedAt())
                 .build();

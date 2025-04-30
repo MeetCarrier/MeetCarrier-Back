@@ -5,13 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-// 매칭 생성 시 저장할 데이터
-public class MatchRequestDto {
-    double score;
-    long user1Id;
-    long user2Id;
+@AllArgsConstructor
+public class MatchTimeoutDto {
+    private List<Long> recommendedUserIds;
+    private String message;
 }

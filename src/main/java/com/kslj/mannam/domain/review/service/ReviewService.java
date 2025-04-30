@@ -1,5 +1,6 @@
 package com.kslj.mannam.domain.review.service;
 
+import com.kslj.mannam.domain.review.dto.ReviewByReviewerIdDto;
 import com.kslj.mannam.domain.review.dto.ReviewRequestDto;
 import com.kslj.mannam.domain.review.dto.ReviewResponseDto;
 import com.kslj.mannam.domain.review.entity.Review;
@@ -50,6 +51,28 @@ public class ReviewService {
                     .createdAt(review.getCreatedAt())
                     .reviewerId(review.getReviewer().getId())
                     .reviewerName(review.getReviewer().getNickname())
+                    .build();
+
+            reviewDtos.add(reviewDto);
+        }
+
+        return reviewDtos;
+    }
+
+    // 작성자 기준으로 리뷰 조회
+    public List<ReviewByReviewerIdDto> getReviewByReviewerId(long userId) {
+        List<ReviewByReviewerIdDto> reviewDtos = new ArrayList<>();
+
+        List<Review> reviews = reviewRepository.findReviewByReviewerId(userId);
+
+        for(Review review : reviews) {
+            ReviewByReviewerIdDto reviewDto = ReviewByReviewerIdDto.builder()
+                    .reviewId(review.getId())
+                    .rating(review.getRating())
+                    .content(review.getContent())
+                    .createdAt(review.getCreatedAt())
+                    .userId(review.getUser().getId())
+                    .userName(review.getUser().getNickname())
                     .build();
 
             reviewDtos.add(reviewDto);

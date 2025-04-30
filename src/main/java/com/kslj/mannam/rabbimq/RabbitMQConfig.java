@@ -22,4 +22,14 @@ public class RabbitMQConfig {
     public Queue aiRequestQueue() {
         return new Queue("ai_request_queue", true);
     }
+
+    @Bean
+    public Queue matchRequestQueue() {
+        return new Queue("match_request_queue", true);
+    }
+
+    @Bean
+    public Queue matchResponseQueue() {
+        return new Queue("match_response_queue", true);
+    }
 }

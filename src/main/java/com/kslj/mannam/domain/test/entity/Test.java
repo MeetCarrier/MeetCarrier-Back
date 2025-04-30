@@ -21,6 +21,9 @@ public class Test {
     @Column(name = "depression_score", nullable = false)
     private int depressionScore;
 
+    @Column(name = "efficacy_score", nullable = false)
+    private int efficacyScore;
+
     @Column(name = "relationship_score", nullable = false)
     private int relationshipScore;
 

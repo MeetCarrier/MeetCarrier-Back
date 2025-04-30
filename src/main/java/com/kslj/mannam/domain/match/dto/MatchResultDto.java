@@ -7,11 +7,9 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-// 매칭 생성 시 저장할 데이터
-public class MatchRequestDto {
-    double score;
-    long user1Id;
-    long user2Id;
+@AllArgsConstructor
+public class MatchResultDto {
+    private long matchedUserId;
+    private double finalScore;
 }

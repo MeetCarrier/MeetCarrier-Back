@@ -25,6 +25,7 @@ public class TestService {
         Test newTest = Test.builder()
                 .depressionScore(requestDto.getDepressionScore())
                 .relationshipScore(requestDto.getRelationshipScore())
+                .efficacyScore(requestDto.getEfficacyScore())
                 .user(user)
                 .build();
 

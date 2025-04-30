@@ -29,7 +29,7 @@ public class Match {
     private MatchStatus status = MatchStatus.Matched;
 
     @Column(nullable = false)
-    private int score;
+    private double score;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user1_id", nullable = false)

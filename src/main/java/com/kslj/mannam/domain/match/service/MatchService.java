@@ -6,6 +6,7 @@ import com.kslj.mannam.domain.match.entity.Match;
 import com.kslj.mannam.domain.match.enums.MatchStatus;
 import com.kslj.mannam.domain.match.repository.MatchRepository;
 import com.kslj.mannam.domain.user.entity.User;
+import com.kslj.mannam.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,14 +20,15 @@ import java.util.stream.Collectors;
 public class MatchService {
 
     private final MatchRepository matchRepository;
+    private final UserService userService;
 
     // 매칭 정보 생성
     @Transactional
     public long createMatch(MatchRequestDto matchRequestDto) {
         Match newMatch = Match.builder()
                 .score(matchRequestDto.getScore())
-                .user1(matchRequestDto.getUser1())
-                .user2(matchRequestDto.getUser2())
+                .user1(userService.getUserById(matchRequestDto.getUser1Id()))
+                .user2(userService.getUserById(matchRequestDto.getUser2Id()))
                 .build();
 
         Match savedMatch = matchRepository.save(newMatch);
