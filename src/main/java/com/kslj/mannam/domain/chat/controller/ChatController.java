@@ -5,6 +5,14 @@ import com.kslj.mannam.domain.chat.dto.ChatResponseDto;
 import com.kslj.mannam.domain.chat.service.ChatService;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +29,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @Controller
+@Tag(name = "채팅", description = "채팅 메시지 전송 및 조회 API")
 public class ChatController {
 
     private final ChatService chatService;
@@ -51,6 +60,31 @@ public class ChatController {
                 "/topic/room/" + roomId, response);
     }
 
+    @Operation(
+            summary     = "채팅 메시지 조회",
+            description = "지정된 채팅방(roomId)의 최근 채팅 메시지들을 조회합니다.",
+            parameters = {
+                    @Parameter(
+                            name        = "roomId",
+                            description = "조회할 채팅방의 ID",
+                            required    = true,
+                            in          = ParameterIn.PATH,
+                            schema      = @Schema(type = "integer", format = "int64")
+                    )
+            },
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description  = "조회 성공",
+                            content      = @Content(
+                                    mediaType = "application/json",
+                                    array        = @ArraySchema(
+                                            schema = @Schema(implementation = ChatResponseDto.class)
+                                    )
+                            )
+                    )
+            }
+    )
     @GetMapping("/chat/{roomId}")
     public ResponseEntity<?> getChatMessages(@PathVariable(value="roomId") long roomId) throws Exception {
         List<ChatResponseDto> chatMessages = chatService.getChatMessages(roomId);

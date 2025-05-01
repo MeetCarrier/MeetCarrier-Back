@@ -18,6 +18,7 @@ public class UserSignUpRequestDto {
     private String nickname;
     private Gender gender;
     private String region;
+    private Long age;
     private String personalities;
     private String preferences;
     private String interests;
@@ -32,6 +33,7 @@ public class UserSignUpRequestDto {
                 .nickname(this.nickname)
                 .gender(this.gender)
                 .region(this.region)
+                .age(this.age)
                 .personalities(this.personalities)
                 .preferences(this.preferences)
                 .interests(this.interests)

@@ -52,6 +52,9 @@ public class User {
     @Column(nullable = false)
     private float footprint;
 
+    @Column(nullable = false)
+    private Long age;
+
     private String questions;
 
     @Column(name = "img_url")
@@ -95,6 +98,10 @@ public class User {
         this.region = region;
     }
 
+    public void updateAge(Long age) {
+        this.age = age;
+    }
+
     public void updatePersonalities(String personalities) {
         this.personalities = personalities;
     }
@@ -128,6 +135,7 @@ public class User {
         this.nickname = dto.getNickname();
         this.region = dto.getRegion();
         this.gender = dto.getGender();
+        this.age = dto.getAge();
         this.personalities = dto.getPersonalities();
         this.preferences = dto.getPreferences();
         this.interests = dto.getInterests();

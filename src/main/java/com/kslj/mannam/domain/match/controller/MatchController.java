@@ -13,6 +13,15 @@ import com.kslj.mannam.domain.user.enums.Gender;
 import com.kslj.mannam.domain.user.enums.SocialType;
 import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +37,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Controller
 @RequestMapping("/matches")
+@Tag(name = "매칭", description = "사용자 매칭 관리 API")
 public class MatchController {
 
     private final MatchService matchService;
@@ -36,6 +46,22 @@ public class MatchController {
     private final TestService testService;
 
     // 현재 유저 매칭 목록 조회
+    @Operation(
+            summary     = "매칭 목록 조회",
+            description = "로그인한 사용자의 매칭 목록을 조회합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description  = "조회 성공",
+                            content      = @Content(
+                                    mediaType = "application/json",
+                                    array     = @ArraySchema(
+                                            schema = @Schema(implementation = MatchResponseDto.class)
+                                    )
+                            )
+                    )
+            }
+    )
     @GetMapping
     public ResponseEntity<?> getMatches(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         List<MatchResponseDto> matches = matchService.getMatches(userDetails.getUser());
@@ -44,6 +70,39 @@ public class MatchController {
     }
 
     // 매칭 상태 업데이트
+    // 매칭 상태 업데이트
+    @Operation(
+            summary     = "매칭 상태 업데이트",
+            description = "지정된 매칭의 상태를 변경합니다.",
+            parameters = {
+                    @Parameter(
+                            name        = "matchId",
+                            description = "업데이트할 매칭의 ID",
+                            required    = true,
+                            in          = ParameterIn.PATH,
+                            schema      = @Schema(type = "integer", format = "int64")
+                    )
+            },
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "상태 변경 정보",
+                    required    = true,
+                    content     = @Content(
+                            mediaType = "application/json",
+                            schema    = @Schema(implementation = StatusUpdateDto.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description  = "업데이트 성공",
+                            content      = @Content(
+                                    mediaType = "text/plain",
+                                    schema    = @Schema(type = "string"),
+                                    examples  = @ExampleObject(value = "상태가 업데이트되었습니다. matchId = 123")
+                            )
+                    )
+            }
+    )
     @PatchMapping("/{matchId}")
     public ResponseEntity<?> updateStatus(@PathVariable("matchId") long matchId,
                                           @RequestBody StatusUpdateDto dto) {
@@ -54,6 +113,31 @@ public class MatchController {
     }
 
     // 매칭 삭제
+    // 매칭 삭제
+    @Operation(
+            summary     = "매칭 삭제",
+            description = "지정된 매칭을 삭제합니다.",
+            parameters = {
+                    @Parameter(
+                            name        = "matchId",
+                            description = "삭제할 매칭의 ID",
+                            required    = true,
+                            in          = ParameterIn.PATH,
+                            schema      = @Schema(type = "integer", format = "int64")
+                    )
+            },
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description  = "삭제 성공",
+                            content      = @Content(
+                                    mediaType = "text/plain",
+                                    schema    = @Schema(type = "string"),
+                                    examples  = @ExampleObject(value = "매칭 정보가 삭제되었습니다. deletedMatchId = 123")
+                            )
+                    )
+            }
+    )
     @DeleteMapping("/{matchId}")
     public ResponseEntity<?> deleteMatch(@PathVariable("matchId") long matchId) {
         long deletedMatchId = matchService.deleteMatch(matchId);

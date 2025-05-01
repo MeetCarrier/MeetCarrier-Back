@@ -8,10 +8,10 @@ public class UpdateUserRequestDto {
     String nickname;
     Gender gender;
     String region;
+    Long age;
     String personalities;
     String preferences;
     String interests;
-    String footprint;
     String questions;
     String imgUrl;
     String phone;

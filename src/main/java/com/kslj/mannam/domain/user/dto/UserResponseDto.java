@@ -18,6 +18,7 @@ public class UserResponseDto {
     String nickname;
     Gender gender;
     String region;
+    Long age;
     String personalities;
     String preferences;
     String interests;
@@ -32,6 +33,7 @@ public class UserResponseDto {
                 .nickname(user.getNickname())
                 .gender(user.getGender())
                 .region(user.getRegion())
+                .age(user.getAge())
                 .personalities(user.getPersonalities())
                 .preferences(user.getPreferences())
                 .interests(user.getInterests())

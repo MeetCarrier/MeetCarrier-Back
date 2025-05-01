@@ -5,11 +5,17 @@ import com.kslj.mannam.domain.user.dto.UserResponseDto;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.impl.bootstrap.HttpServer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,17 +25,30 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RequiredArgsConstructor
+@Tag(name = "유저", description = "유저 관리 API")
 @Controller
 public class UserController {
 
     private final UserService userService;
 
     @GetMapping("/user")
+    @Operation(summary = "유저 정보 조회", description = "현재 로그인 중인 유저의 정보를 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = UserResponseDto.class)))
     public ResponseEntity<?> getUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok(UserResponseDto.fromEntity(userDetails.getUser()));
     }
 
     @GetMapping("/user/{userId}")
+    @Operation(
+            summary = "특정 유저 정보 조회",
+            description = "전달된 userId로 특정 유저의 정보를 조회합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = UserResponseDto.class))),
+                    @ApiResponse(responseCode = "410", description = "조회한 유저가 탈퇴한 유저"),
+            },
+            parameters = {
+                @Parameter(name = "userId", description = "조회할 유저의 ID", required = true, example = "1")
+            })
     public ResponseEntity<?> getUserById(@PathVariable(value="userId") long userId) {
         User user = userService.getUserById(userId);
 
@@ -41,6 +60,13 @@ public class UserController {
     }
 
     @PatchMapping("/user")
+    @Operation(
+            summary = "유저 정보 수정",
+            description = "전달된 정보들로 데이터베이스에 저장된 유저의 정보를 수정합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "수정 완료")
+            }
+    )
     public ResponseEntity<?> updateUser(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                         @RequestBody UpdateUserRequestDto dto) {
         userService.updateUser(userDetails.getUser(), dto);
@@ -48,6 +74,7 @@ public class UserController {
     }
 
     @PostMapping("/logout")
+    @Hidden
     public ResponseEntity<?> logout(HttpServletRequest request) {
         request.getSession().invalidate();                     // 세션 무효화
         SecurityContextHolder.clearContext();                  // SecurityContext 초기화
@@ -55,6 +82,13 @@ public class UserController {
     }
 
     @DeleteMapping("/user/withdraw")
+    @Operation(
+            summary = "유저 탈퇴",
+            description = "현재 로그인된 유저를 탈퇴 처리합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "탈퇴 처리 완료")
+            }
+    )
     public ResponseEntity<?> withdrawUser(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                           HttpServletRequest request,
                                           HttpServletResponse response) {

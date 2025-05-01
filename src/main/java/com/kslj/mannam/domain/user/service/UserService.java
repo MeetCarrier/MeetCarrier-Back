@@ -58,6 +58,7 @@ public class UserService {
         if (dto.getNickname() != null) user.updateNickname(dto.getNickname());
         if (dto.getGender() != null) user.updateGender(dto.getGender());
         if (dto.getRegion() != null) user.updateRegion(dto.getRegion());
+        if (dto.getAge() != null) user.updateAge(dto.getAge());
         if (dto.getPersonalities() != null) user.updatePersonalities(dto.getPersonalities());
         if (dto.getPreferences() != null) user.updatePreferences(dto.getPreferences());
         if (dto.getInterests() != null) user.updateInterests(dto.getInterests());
