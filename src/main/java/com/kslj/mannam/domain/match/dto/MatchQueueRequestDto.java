@@ -17,6 +17,7 @@ public class MatchQueueRequestDto {
     long userId;                    // 유저 ID
     String region;                  // 지역
     String interests;               // 관심사
+    Long age;                        // 나이
     int depressionScore;            // 우울 점수
     int efficacyScore;              // 자기 효능감 점수
     int relationshipScore;          // 대인관계 점수

@@ -54,6 +54,7 @@ public class MatchQueueManager {
                 .userId(user.getId())
                 .region(user.getRegion())
                 .interests(user.getInterests())
+                .age(user.getAge())
                 .depressionScore(test.getDepressionScore())
                 .efficacyScore(test.getEfficacyScore())
                 .relationshipScore(test.getRelationshipScore())
@@ -71,6 +72,10 @@ public class MatchQueueManager {
 
         List<MatchQueueRequestDto> waitingUsers = matchingQueue.values().stream()
                 .map(MatchingQueueEntry::getUserData)
+                .filter(userData ->
+                    userData.getAge() >= newUserData.getAge() - 5 &&
+                    userData.getAge() <= newUserData.getAge() + 5
+                )
                 .toList();
 
         MatchFilterRequestDto request = MatchFilterRequestDto.builder()
