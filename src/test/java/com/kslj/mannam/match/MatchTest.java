@@ -2,6 +2,7 @@ package com.kslj.mannam.match;
 
 import com.kslj.mannam.TestUtils;
 import com.kslj.mannam.domain.match.dto.MatchRequestDto;
+import com.kslj.mannam.domain.match.dto.MatchResponseDto;
 import com.kslj.mannam.domain.match.entity.Match;
 import com.kslj.mannam.domain.match.enums.MatchStatus;
 import com.kslj.mannam.domain.match.service.MatchService;
@@ -31,14 +32,15 @@ public class MatchTest {
         User testUser1 = testUtils.createAndGetTestUser();
         User testUser2 = testUtils.createAndGetTestUser();
 
-        MatchRequestDto requestDto = MatchRequestDto.builder().score(70).user1(testUser1).user2(testUser2).build();
+        MatchRequestDto requestDto = MatchRequestDto.builder().score(70).user1Id(testUser1.getId()).user2Id(testUser2.getId()).build();
 
         // when
         long matchId = matchService.createMatch(requestDto);
-        List<Match> match = matchService.getMatches(testUser1);
+        List<MatchResponseDto> match = matchService.getMatches(testUser1);
 
         // then
-        Assertions.assertThat(match.get(0).getScore()).isEqualTo(requestDto.getScore());
+        Assertions.assertThat(match.get(0).getUser1Id()).isEqualTo(testUser1.getId());
+        Assertions.assertThat(match.get(0).getUser2Id()).isEqualTo(testUser2.getId());
     }
 
     // 매칭 정보 상태 변경 테스트
@@ -48,12 +50,12 @@ public class MatchTest {
         User testUser1 = testUtils.createAndGetTestUser();
         User testUser2 = testUtils.createAndGetTestUser();
 
-        MatchRequestDto requestDto = MatchRequestDto.builder().score(70).user1(testUser1).user2(testUser2).build();
+        MatchRequestDto requestDto = MatchRequestDto.builder().score(70).user1Id(testUser1.getId()).user2Id(testUser2.getId()).build();
         long matchId = matchService.createMatch(requestDto);
 
         // when
-        matchService.updateMathStatus(matchId, MatchStatus.Surveying);
-        List<Match> match = matchService.getMatches(testUser1);
+        matchService.updateMatchStatus(matchId, MatchStatus.Surveying);
+        List<MatchResponseDto> match = matchService.getMatches(testUser1);
 
         // then
         Assertions.assertThat(match.get(0).getStatus()).isEqualTo(MatchStatus.Surveying);
@@ -68,7 +70,7 @@ public class MatchTest {
         User testUser2 = testUtils.createAndGetTestUser();
 
         for (int i=0; i<3; i++) {
-            MatchRequestDto requestDto = MatchRequestDto.builder().score(70).user1(testUser1).user2(testUser2).build();
+            MatchRequestDto requestDto = MatchRequestDto.builder().score(70).user1Id(testUser1.getId()).user2Id(testUser2.getId()).build();
             matchId = matchService.createMatch(requestDto);
         }
 

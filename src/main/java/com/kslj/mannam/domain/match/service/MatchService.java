@@ -55,7 +55,7 @@ public class MatchService {
 
     // 매칭 정보 업데이트
     @Transactional
-    public long updateMathStatus(long matchId, MatchStatus status) {
+    public long updateMatchStatus(long matchId, MatchStatus status) {
         Optional<Match> match = matchRepository.findById(matchId);
 
         if (match.isEmpty()) {

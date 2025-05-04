@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class MatchResultDto {
     private long matchedUserId;
     private double finalScore;
+    private long surveySessionId;
 }

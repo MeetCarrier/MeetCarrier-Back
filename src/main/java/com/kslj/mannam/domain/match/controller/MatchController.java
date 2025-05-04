@@ -70,7 +70,6 @@ public class MatchController {
     }
 
     // 매칭 상태 업데이트
-    // 매칭 상태 업데이트
     @Operation(
             summary     = "매칭 상태 업데이트",
             description = "지정된 매칭의 상태를 변경합니다.",
@@ -108,11 +107,10 @@ public class MatchController {
                                           @RequestBody StatusUpdateDto dto) {
         MatchStatus matchStatus = dto.getMatchStatus();
 
-        matchService.updateMathStatus(matchId, matchStatus);
+        matchService.updateMatchStatus(matchId, matchStatus);
         return ResponseEntity.ok("상태가 업데이트되었습니다. matchId = " + matchId);
     }
 
-    // 매칭 삭제
     // 매칭 삭제
     @Operation(
             summary     = "매칭 삭제",

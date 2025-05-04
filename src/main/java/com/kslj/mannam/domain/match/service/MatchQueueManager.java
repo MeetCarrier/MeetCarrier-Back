@@ -4,6 +4,7 @@ import com.kslj.mannam.domain.match.dto.*;
 import com.kslj.mannam.domain.review.dto.ReviewByReviewerIdDto;
 import com.kslj.mannam.domain.review.dto.ReviewQueueDto;
 import com.kslj.mannam.domain.review.service.ReviewService;
+import com.kslj.mannam.domain.survey.service.SurveyService;
 import com.kslj.mannam.domain.test.dto.TestResponseDto;
 import com.kslj.mannam.domain.test.service.TestService;
 import com.kslj.mannam.domain.user.entity.User;
@@ -27,6 +28,7 @@ public class MatchQueueManager {
     private final MatchService matchService;
     private final TestService testService;
     private final ReviewService reviewService;
+    private final SurveyService surveyService;
     private final RabbitTemplate rabbitTemplate;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -142,18 +144,21 @@ public class MatchQueueManager {
         removeUser(matchedInfo.getUserId());
 
         // 매칭 엔티티 생성
-        matchService.createMatch(MatchRequestDto.builder()
+        long matchId = matchService.createMatch(MatchRequestDto.builder()
                 .score(matchedInfo.getFinalScore())
                 .user1Id(userId)
                 .user2Id(matchedInfo.getUserId())
                 .build()
         );
 
+        long surveySessionId = surveyService.createSurveySession(matchId);
+        surveyService.createSurveyQuestions(surveySessionId);
+
         // 매칭 성공 메시지 전송 (신규 유저)
-        sendMatchSuccess(userId, matchedInfo.getUserId(), matchedInfo.getFinalScore());
+        sendMatchSuccess(matchedInfo.getUserId(), matchedInfo.getFinalScore(), surveySessionId);
 
         // 매칭 성공 메시지 전송 (기존 유저)
-        sendMatchSuccess(matchedInfo.getUserId(), userId, matchedInfo.getFinalScore());
+        sendMatchSuccess(userId, matchedInfo.getFinalScore(), surveySessionId);
     }
 
     // 매칭 성공한 유저 삭제
@@ -170,10 +175,11 @@ public class MatchQueueManager {
     }
 
     // 매칭 성공 시 메시지 전달
-    private void sendMatchSuccess(long requesterId, long matchedId, double score) {
+    private void sendMatchSuccess(long matchedId, double score, long surveySessionId) {
         MatchResultDto result = MatchResultDto.builder()
                 .matchedUserId(matchedId)
                 .finalScore(score)
+                .surveySessionId(surveySessionId)
                 .build();
 
         // 실제로 로그인하고 사용할 때 이용
