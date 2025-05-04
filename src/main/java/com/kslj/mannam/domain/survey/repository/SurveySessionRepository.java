@@ -14,6 +14,7 @@ import java.util.Optional;
 
 @Repository
 public interface SurveySessionRepository extends JpaRepository<SurveySession, Long> {
+    SurveySession findSurveySessionByMatchId(long matchId);
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select s from SurveySession s where s.id = :id")
     Optional<SurveySession> findByIdForUpdate(@Param("id") Long id);

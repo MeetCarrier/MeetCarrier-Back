@@ -1,6 +1,6 @@
 package com.kslj.mannam.domain.assistant.service;
 
-import com.kslj.mannam.domain.assistant.dto.AssistantDto;
+import com.kslj.mannam.domain.assistant.dto.AssistantDataDto;
 import com.kslj.mannam.domain.assistant.dto.AssistantResponseDto;
 import com.kslj.mannam.domain.assistant.entity.AssistantAnswer;
 import com.kslj.mannam.domain.assistant.entity.AssistantQuestion;
@@ -67,7 +67,7 @@ public class AssistantService {
 
             AssistantAnswer savedAnswer = assistantAnswerRepository.save(newAnswer);
 
-            AssistantDto answerDto = AssistantDto.builder()
+            AssistantDataDto answerDto = AssistantDataDto.builder()
                     .content(answer)
                     .createdAt(LocalDateTime.now())
                     .build();

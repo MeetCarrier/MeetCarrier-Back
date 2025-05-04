@@ -45,8 +45,8 @@ public class MeetingServiceTest {
         User user2 = testUtils.createAndGetTestUser();
         long matchId = matchService.createMatch(MatchRequestDto.builder()
                 .score(90)
-                .user1(user1)
-                .user2(user2)
+                .user1Id(user1.getId())
+                .user2Id(user2.getId())
                 .build());
         MeetingRequestDto requestDto = createMeetingRequestDto("강남역 카페", "서로 이야기 나눠보는 시간");
 
@@ -68,8 +68,8 @@ public class MeetingServiceTest {
         User user2 = testUtils.createAndGetTestUser();
         long matchId = matchService.createMatch(MatchRequestDto.builder()
                 .score(90)
-                .user1(user1)
-                .user2(user2)
+                .user1Id(user1.getId())
+                .user2Id(user2.getId())
                 .build());
         MeetingRequestDto requestDto = createMeetingRequestDto("홍대 카페", "첫 만남");
 
@@ -94,8 +94,8 @@ public class MeetingServiceTest {
         User user2 = testUtils.createAndGetTestUser();
         long matchId = matchService.createMatch(MatchRequestDto.builder()
                 .score(90)
-                .user1(user1)
-                .user2(user2)
+                .user1Id(user1.getId())
+                .user2Id(user2.getId())
                 .build());
         MeetingRequestDto requestDto = createMeetingRequestDto("서울역 카페", "짧은 만남");
 

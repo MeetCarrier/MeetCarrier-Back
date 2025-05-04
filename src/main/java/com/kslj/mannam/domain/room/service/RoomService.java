@@ -12,6 +12,7 @@ public class RoomService {
 
     private final RoomRepository roomRepository;
 
+    // 채팅방 생성
     public long createRoom(Match match) {
         Room newRoom = Room.builder()
                 .match(match)
@@ -20,5 +21,12 @@ public class RoomService {
         Room savedRoom = roomRepository.save(newRoom);
 
         return savedRoom.getId();
+    }
+
+    // 채팅방 ID 조회
+    public long getRoomId(long matchId) {
+        Room room = roomRepository.getRoomByMatchId(matchId);
+
+        return room.getId();
     }
 }

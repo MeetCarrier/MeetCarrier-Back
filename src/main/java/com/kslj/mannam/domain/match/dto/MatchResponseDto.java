@@ -18,6 +18,7 @@ public class MatchResponseDto {
     long id;
     LocalDateTime matchedAt;
     MatchStatus status;
+    long relatedId;
     long user1Id;
     String user1Nickname;
     String user1ImageUrl;
@@ -25,11 +26,13 @@ public class MatchResponseDto {
     String user2Nickname;
     String user2ImageUrl;
 
-    public static MatchResponseDto fromEntity(Match match) {
+
+    public static MatchResponseDto fromEntity(Match match, Long relatedId) {
         return MatchResponseDto.builder()
                 .id(match.getId())
                 .matchedAt(match.getMatchedAt())
                 .status(match.getStatus())
+                .relatedId(relatedId)
                 .user1Id(match.getUser1().getId())
                 .user1Nickname(match.getUser1().getNickname())
                 .user1ImageUrl(match.getUser1().getImgUrl())

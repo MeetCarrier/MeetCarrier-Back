@@ -15,16 +15,16 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AssistantResponseDto {
-    List<AssistantDto> assistantQuestions;
-    List<AssistantDto> assistantAnswers;
+    List<AssistantDataDto> assistantQuestions;
+    List<AssistantDataDto> assistantAnswers;
 
     public static AssistantResponseDto fromEntity(List<AssistantQuestion> questions) {
-        List<AssistantDto> questionDtos = new ArrayList<>();
-        List<AssistantDto> answerDtos = new ArrayList<>();
+        List<AssistantDataDto> questionDtos = new ArrayList<>();
+        List<AssistantDataDto> answerDtos = new ArrayList<>();
 
         for (AssistantQuestion question : questions) {
             questionDtos.add(
-                    AssistantDto.builder()
+                    AssistantDataDto.builder()
                             .content(question.getContent())
                             .createdAt(question.getSentAt())
                             .build()
@@ -33,7 +33,7 @@ public class AssistantResponseDto {
             AssistantAnswer answer = question.getAnswer();
             if (answer != null) {
                 answerDtos.add(
-                        AssistantDto.builder()
+                        AssistantDataDto.builder()
                                 .content(answer.getContent())
                                 .createdAt(answer.getSentAt())
                                 .build()

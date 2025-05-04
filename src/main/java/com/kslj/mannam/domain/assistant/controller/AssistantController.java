@@ -1,6 +1,7 @@
 package com.kslj.mannam.domain.assistant.controller;
 
-import com.kslj.mannam.domain.assistant.dto.AssistantDto;
+import com.kslj.mannam.domain.assistant.dto.AssistantDataDto;
+import com.kslj.mannam.domain.assistant.dto.AssistantQuestionDto;
 import com.kslj.mannam.domain.assistant.dto.AssistantResponseDto;
 import com.kslj.mannam.domain.assistant.service.AssistantService;
 import com.kslj.mannam.domain.user.dto.UserSignUpRequestDto;
@@ -55,19 +56,19 @@ public class AssistantController {
         return ResponseEntity.ok(id);
     }
 
-    @MessageMapping("/send")
-    public void sendQuestion(@RequestParam(name="content") String content) {
+    @MessageMapping("/assistant/send")
+    public void sendQuestion(AssistantQuestionDto dto) {
 
         // 임시로 user 설정. UserDetailsImpl을 이용하도록 변경 예정
         User sender = userService.getUserById(1);
 
-        log.info("질문 수신: userId={}, content={}", sender.getId(), content);
+        log.info("질문 수신: userId={}, content={}", sender.getId(), dto.getContent());
 
         // 질문 저장
-        assistantService.createQuestionAndSendToAI(sender, content);
+        assistantService.createQuestionAndSendToAI(sender, dto.getContent());
 
-        AssistantDto questionDto = AssistantDto.builder()
-                .content(content)
+        AssistantDataDto questionDto = AssistantDataDto.builder()
+                .content(dto.getContent())
                 .createdAt(LocalDateTime.now())
                 .build();
 

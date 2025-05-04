@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AssistantDto {
+public class AssistantDataDto {
     String content;
     LocalDateTime createdAt;
 }

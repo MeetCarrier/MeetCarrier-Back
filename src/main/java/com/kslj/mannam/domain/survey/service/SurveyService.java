@@ -40,13 +40,24 @@ public class SurveyService {
     // 설문지 세션 생성
     @Transactional
     public long createSurveySession(long matchId) {
+        Match match = matchService.getMatch(matchId);
+        match.updateStatus(MatchStatus.Surveying);
+
         SurveySession surveySession = SurveySession.builder()
-                .match(matchService.getMatch(matchId))
+                .match(match)
                 .build();
 
         SurveySession savedSession = surveySessionRepository.save(surveySession);
 
         return savedSession.getId();
+    }
+
+    // 설문지 세션 ID 조회
+    @Transactional
+    public long getSurveySessionId(long matchId) {
+        SurveySession session = surveySessionRepository.findSurveySessionByMatchId(matchId);
+
+        return session.getId();
     }
 
     // 설문지 질문 등록 (질문은 서버에서 처리? 클라이언트 측에서 랜덤하게 몇 개 뽑아서 나에게 전달?)
