@@ -1,13 +1,12 @@
 package com.kslj.mannam.domain.match.service;
 
-import com.kslj.mannam.domain.chat.service.ChatService;
 import com.kslj.mannam.domain.match.dto.MatchRequestDto;
 import com.kslj.mannam.domain.match.dto.MatchResponseDto;
 import com.kslj.mannam.domain.match.entity.Match;
 import com.kslj.mannam.domain.match.enums.MatchStatus;
 import com.kslj.mannam.domain.match.repository.MatchRepository;
 import com.kslj.mannam.domain.room.service.RoomService;
-import com.kslj.mannam.domain.survey.service.SurveyService;
+import com.kslj.mannam.domain.survey.repository.SurveySessionRepository;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -17,15 +16,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
 public class MatchService {
 
     private final MatchRepository matchRepository;
+    private final SurveySessionRepository surveySessionRepository;
     private final UserService userService;
-    private final SurveyService surveyService;
     private final RoomService roomService;
 
     // 매칭 정보 생성
@@ -51,7 +49,7 @@ public class MatchService {
         for (Match match : matches) {
             Long relatedId = null;
             switch (match.getStatus()) {
-                case Surveying -> relatedId = surveyService.getSurveySessionId(match.getId());
+                case Surveying -> relatedId = surveySessionRepository.findSurveySessionByMatchId(match.getId()).getId();
                 case Chatting -> relatedId = roomService.getRoomId(match.getId());
             }
             responses.add(MatchResponseDto.fromEntity(match, relatedId));
