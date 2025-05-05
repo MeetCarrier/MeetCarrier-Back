@@ -1,5 +1,7 @@
 package com.kslj.mannam.domain.match.controller;
 
+import com.kslj.mannam.domain.block.dto.BlockDto;
+import com.kslj.mannam.domain.block.service.BlockService;
 import com.kslj.mannam.domain.match.dto.*;
 import com.kslj.mannam.domain.match.enums.MatchStatus;
 import com.kslj.mannam.domain.match.service.MatchQueueManager;
@@ -44,6 +46,7 @@ public class MatchController {
     private final UserService userService;
     private final MatchQueueManager matchQueueManager;
     private final TestService testService;
+    private final BlockService blockService;
 
     // 현재 유저 매칭 목록 조회
     @Operation(
@@ -161,6 +164,7 @@ public class MatchController {
 
         long userId = userService.createUser(userSignUpRequestDto);
         User user = userService.getUserById(userId);
+        user.updatePhone("010-4321-1234");
 
         TestRequestDto testRequestDto = TestRequestDto.builder()
                 .depressionScore(60)
@@ -168,6 +172,13 @@ public class MatchController {
                 .relationshipScore(60)
                 .build();
         testService.createTest(testRequestDto, user);
+
+        BlockDto blockDto = BlockDto.builder()
+                .blockedPhone("010-1234-1234")
+                .blockedInfo("친구A")
+                .build();
+
+        blockService.createBlock(user, blockDto);
 
         // long userId = userDetails.getUser().getId();
         matchQueueManager.registerUserSession(userId);  // 세션 등록
@@ -181,6 +192,7 @@ public class MatchController {
                 .userId(1L)
                 .region("Busan")
                 .age(23L)
+                .phone("010-1234-1234")
                 .interests("reading,sports")
                 .depressionScore(65)
                 .efficacyScore(40)
@@ -194,6 +206,7 @@ public class MatchController {
                 .userId(2L)
                 .region("Seoul")
                 .age(28L)
+                .phone("010-5678-5678")
                 .interests("music,travel,gaming")
                 .depressionScore(78)
                 .efficacyScore(66)
@@ -210,6 +223,7 @@ public class MatchController {
                 .userId(3L)
                 .region("Daegu")
                 .age(17L)
+                .phone("010-0000-0000")
                 .interests("gaming")
                 .depressionScore(44)
                 .efficacyScore(53)

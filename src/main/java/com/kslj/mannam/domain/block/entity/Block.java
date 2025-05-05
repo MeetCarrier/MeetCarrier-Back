@@ -31,6 +31,7 @@ public class Block {
     @Column(name = "blocked_info")
     private String blockedInfo;
 
+    @Builder.Default
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 

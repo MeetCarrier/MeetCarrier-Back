@@ -1,5 +1,7 @@
 package com.kslj.mannam.domain.match.service;
 
+import com.kslj.mannam.domain.block.dto.BlockDto;
+import com.kslj.mannam.domain.block.service.BlockService;
 import com.kslj.mannam.domain.match.dto.*;
 import com.kslj.mannam.domain.review.dto.ReviewByReviewerIdDto;
 import com.kslj.mannam.domain.review.dto.ReviewQueueDto;
@@ -29,6 +31,8 @@ public class MatchQueueManager {
     private final TestService testService;
     private final ReviewService reviewService;
     private final SurveyService surveyService;
+    private final BlockService blockService;
+
     private final RabbitTemplate rabbitTemplate;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -57,12 +61,12 @@ public class MatchQueueManager {
                 .region(user.getRegion())
                 .interests(user.getInterests())
                 .age(user.getAge())
+                .phone(user.getPhone())
                 .depressionScore(test.getDepressionScore())
                 .efficacyScore(test.getEfficacyScore())
                 .relationshipScore(test.getRelationshipScore())
                 .reviews(reviews)
                 .build();
-
 
         // 기존 매칭 큐 + newEntry -> python 필터링 호출
         MatchingQueueEntry newEntry = MatchingQueueEntry.builder()
@@ -72,11 +76,18 @@ public class MatchQueueManager {
 
         UUID requestId = UUID.randomUUID();
 
+        List<String> blockedPhones = blockService.getBlocks(user).stream()
+                .map(BlockDto::getBlockedPhone)
+                .toList();
+
+        // 나이차가 위아래로 5살까지만 매칭 대상에 포함되도록 설정
+        // 블락한 유저는 매칭 대상에서 제외하도록 설정
         List<MatchQueueRequestDto> waitingUsers = matchingQueue.values().stream()
                 .map(MatchingQueueEntry::getUserData)
                 .filter(userData ->
                     userData.getAge() >= newUserData.getAge() - 5 &&
-                    userData.getAge() <= newUserData.getAge() + 5
+                    userData.getAge() <= newUserData.getAge() + 5 &&
+                    !blockedPhones.contains(userData.getPhone())
                 )
                 .toList();
 
