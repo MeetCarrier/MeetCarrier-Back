@@ -34,7 +34,7 @@ public class UserController {
     @GetMapping("/user")
     @Operation(summary = "유저 정보 조회", description = "현재 로그인 중인 유저의 정보를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = UserResponseDto.class)))
-    public ResponseEntity<?> getUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<?> getUser() {
         // 테스트 용도
         User testUser = userService.getUserById(1);
 
@@ -71,7 +71,7 @@ public class UserController {
                     @ApiResponse(responseCode = "200", description = "수정 완료")
             }
     )
-    public ResponseEntity<?> updateUser(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    public ResponseEntity<?> updateUser(
                                         @RequestBody UpdateUserRequestDto dto) {
         // 테스트 용도
         User testUser = userService.getUserById(1);
