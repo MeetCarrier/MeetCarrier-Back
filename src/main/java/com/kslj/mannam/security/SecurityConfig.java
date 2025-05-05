@@ -9,7 +9,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -28,10 +30,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(Customizer.withDefaults())
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/file/**")
-                        .disable()
-                )
+                .csrf(csrf -> {
+                    // 개발 중에는 disable(), 운영 시에는 repository 설정
+                    csrf.disable();
+                    // 운영용 예시:
+                    // csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+                })
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()   // static 파일 접근 허용
                         .requestMatchers("/journal/**").authenticated()     // 인증이 필요한 엔드포인트
