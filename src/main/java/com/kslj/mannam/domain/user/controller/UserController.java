@@ -35,7 +35,11 @@ public class UserController {
     @Operation(summary = "유저 정보 조회", description = "현재 로그인 중인 유저의 정보를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = UserResponseDto.class)))
     public ResponseEntity<?> getUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(UserResponseDto.fromEntity(userDetails.getUser()));
+        // 테스트 용도
+        User testUser = userService.getUserById(1);
+
+        // return ResponseEntity.ok(UserResponseDto.fromEntity(userDetails.getUser()));
+        return ResponseEntity.ok(UserResponseDto.fromEntity(testUser));
     }
 
     @GetMapping("/user/{userId}")
@@ -69,7 +73,11 @@ public class UserController {
     )
     public ResponseEntity<?> updateUser(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                         @RequestBody UpdateUserRequestDto dto) {
-        userService.updateUser(userDetails.getUser(), dto);
+        // 테스트 용도
+        User testUser = userService.getUserById(1);
+        userService.updateUser(testUser, dto);
+
+        // userService.updateUser(userDetails.getUser(), dto);
         return ResponseEntity.ok().build();
     }
 
