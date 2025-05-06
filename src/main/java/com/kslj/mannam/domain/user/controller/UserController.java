@@ -66,7 +66,7 @@ public class UserController {
     @PatchMapping("/user")
     @Operation(
             summary = "유저 정보 수정",
-            description = "전달된 정보들로 데이터베이스에 저장된 유저의 정보를 수정합니다.",
+            description = "전달된 정보들로 데이터베이스에 저장된 유저의 정보를 수정합니다.\n요청 전송 시 필요한 부분의 데이터만 채워서 보내면 됩니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "수정 완료")
             }

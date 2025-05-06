@@ -51,12 +51,13 @@ public class MeetingService {
     }
 
     // 대면 약속 수정
-    public void updateMeeting(long meetingId, MeetingRequestDto requestDto) {
+    public void updateMeeting(long meetingId, MeetingRequestDto dto) {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new IllegalArgumentException("약속 정보를 찾을 수 없습니다. meetingId = " + meetingId));
 
-        meeting.updateMeeting(requestDto.getDate(), requestDto.getLocation(), requestDto.getNote());
-        meetingRepository.save(meeting);
+        if(dto.getDate() != null) meeting.updateDate(dto.getDate());
+        if(dto.getLocation() != null) meeting.updateLocation(dto.getLocation());
+        if(dto.getNote() != null) meeting.updateNote(dto.getNote());
     }
 
     // 대면 약속 삭제

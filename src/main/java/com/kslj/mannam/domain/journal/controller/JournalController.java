@@ -105,7 +105,7 @@ public class JournalController {
 
     @Operation(
             summary     = "일기 수정",
-            description = "지정된 ID의 일기를 수정합니다.",
+            description = "지정된 ID의 일기를 수정합니다.\n요청 전송 시 필요한 부분의 데이터만 채워서 보내면 됩니다.",
             parameters = {
                     @Parameter(
                             name        = "journalId",

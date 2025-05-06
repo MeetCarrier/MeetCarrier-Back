@@ -30,9 +30,15 @@ public class Meeting {
     @JoinColumn(name = "match_id", nullable = false)
     private Match match;
 
-    public void updateMeeting(LocalDateTime date, String location, String note) {
+    public void updateDate(LocalDateTime date) {
         this.date = date;
+    }
+
+    public void updateLocation(String location) {
         this.location = location;
+    }
+
+    public void updateNote(String note) {
         this.note = note;
     }
 }
