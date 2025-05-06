@@ -86,8 +86,8 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new RuntimeException("리뷰를 찾을 수 없습니다. reviewId = " + reviewId));
 
         if(review.getReviewer().equals(reviewer)) {
-            review.updateRatingAndContent(requestDto.getRating(), requestDto.getContent());
-            reviewRepository.save(review);
+            if (requestDto.getContent() != null) review.updateContent(requestDto.getContent());
+            if (requestDto.getRating() != null) review.updateRating(requestDto.getRating());
         }
         else {
             throw new RuntimeException("작성자가 일치하지 않습니다.");

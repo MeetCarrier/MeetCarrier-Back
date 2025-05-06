@@ -44,9 +44,6 @@ public class User {
     private String personalities;
 
     @Column(nullable = false)
-    private String preferences;
-
-    @Column(nullable = false)
     private String interests;
 
     @Column(nullable = false)
@@ -106,10 +103,6 @@ public class User {
         this.personalities = personalities;
     }
 
-    public void updatePreferences(String preferences) {
-        this.preferences = preferences;
-    }
-
     public void updateInterests(String interests) {
         this.interests = interests;
     }
@@ -137,7 +130,6 @@ public class User {
         this.gender = dto.getGender();
         this.age = dto.getAge();
         this.personalities = dto.getPersonalities();
-        this.preferences = dto.getPreferences();
         this.interests = dto.getInterests();
         this.footprint = 36.5f;
         this.isDeleted = false;
