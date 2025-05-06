@@ -10,7 +10,7 @@ public class UpdateUserRequestDto {
     String region;
     Long age;
     String personalities;
-    String preferences;
+
     String interests;
     String questions;
     String imgUrl;

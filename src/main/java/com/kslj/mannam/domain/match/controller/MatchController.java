@@ -158,7 +158,6 @@ public class MatchController {
                 .region("Daegu")
                 .age(25L)
                 .personalities("소심,느긋")
-                .preferences("sports,gaming")
                 .interests("sports,gaming")
                 .build();
 

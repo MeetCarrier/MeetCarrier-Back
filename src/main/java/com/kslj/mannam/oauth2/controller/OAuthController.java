@@ -40,7 +40,6 @@ public class OAuthController {
                 .gender(request.getGender())
                 .region(request.getRegion())
                 .personalities(request.getPersonalities())
-                .preferences(request.getPreferences())
                 .interests(request.getInterests())
                 .build();
 

@@ -33,7 +33,6 @@ public class UserServiceTest {
                 .gender(Gender.Male)
                 .region("서울")
                 .personalities("스포츠")
-                .preferences("게임")
                 .interests("롤")
                 .build();
 
@@ -56,7 +55,6 @@ public class UserServiceTest {
                 .gender(Gender.Male)
                 .region("서울")
                 .personalities("스포츠")
-                .preferences("게임")
                 .interests("롤")
                 .build();
 

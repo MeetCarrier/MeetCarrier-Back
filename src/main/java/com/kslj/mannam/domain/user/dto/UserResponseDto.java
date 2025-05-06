@@ -20,7 +20,6 @@ public class UserResponseDto {
     String region;
     Long age;
     String personalities;
-    String preferences;
     String interests;
     float footprint;
     String questions;
@@ -35,7 +34,6 @@ public class UserResponseDto {
                 .region(user.getRegion())
                 .age(user.getAge())
                 .personalities(user.getPersonalities())
-                .preferences(user.getPreferences())
                 .interests(user.getInterests())
                 .footprint(user.getFootprint())
                 .questions(user.getQuestions())

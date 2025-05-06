@@ -49,7 +49,6 @@ public class AssistantController {
                 .gender(Gender.Male)
                 .personalities("소심")
                 .interests("게임")
-                .preferences("축구")
                 .socialId("1234")
                 .build());
         long id = assistantService.createQuestionAndSendToAI(userService.getUserById(userId), content).getId();
