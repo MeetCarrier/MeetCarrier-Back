@@ -64,6 +64,9 @@ public class UserService {
         if (dto.getQuestions() != null) user.updateQuestions(dto.getQuestions());
         if (dto.getImgUrl() != null) user.updateImgUrl(dto.getImgUrl());
         if (dto.getPhone() != null) user.updatePhone(dto.getPhone());
+        if (dto.getMaxAgeGap() != null) user.updateMaxAgeGap(dto.getMaxAgeGap());
+        if (dto.getAllowOppositeGender() != null) user.updateAllowOppositeGender(dto.getAllowOppositeGender());
+        if (dto.getMaxMatchingDistance() != null) user.updateMaxMatchingDistance(dto.getMaxMatchingDistance());
     }
 
     @Transactional

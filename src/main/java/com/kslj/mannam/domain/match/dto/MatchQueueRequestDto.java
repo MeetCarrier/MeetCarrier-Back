@@ -1,6 +1,7 @@
 package com.kslj.mannam.domain.match.dto;
 
 import com.kslj.mannam.domain.review.dto.ReviewQueueDto;
+import com.kslj.mannam.domain.user.enums.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +18,7 @@ public class MatchQueueRequestDto {
     long userId;                    // 유저 ID
     String region;                  // 지역
     String interests;               // 관심사
+    Gender gender;                  // 성별
     Long age;                       // 나이
     String phone;                   // 전화번호
     int depressionScore;            // 우울 점수

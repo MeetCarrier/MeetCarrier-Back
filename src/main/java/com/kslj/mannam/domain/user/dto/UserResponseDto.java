@@ -24,6 +24,8 @@ public class UserResponseDto {
     float footprint;
     String questions;
     String imgUrl;
+    Integer maxAgeGap;
+    Boolean allowOppositeGender;
 
     public static UserResponseDto fromEntity(User user) {
         return UserResponseDto.builder()
@@ -38,6 +40,8 @@ public class UserResponseDto {
                 .footprint(user.getFootprint())
                 .questions(user.getQuestions())
                 .imgUrl(user.getImgUrl())
+                .maxAgeGap(user.getMaxAgeGap())
+                .allowOppositeGender(user.isAllowOppositeGender())
                 .build();
     }
 }

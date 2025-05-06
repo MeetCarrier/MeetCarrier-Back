@@ -59,11 +59,24 @@ public class User {
 
     private String phone;
 
+    @Builder.Default
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    @Builder.Default
+    @Column(name = "max_age_gap", nullable = false)
+    private int maxAgeGap = 5;
+
+    @Builder.Default
+    @Column(name = "allow_opposite_gender", nullable = false)
+    private boolean allowOppositeGender = false;
+
+    @Builder.Default
+    @Column(name = "max_matching_distance", nullable = false)
+    private double maxMatchingDistance = 10;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     List<Block> blocks;
@@ -119,6 +132,18 @@ public class User {
         this.phone = phone;
     }
 
+    public void updateMaxAgeGap(int maxAgeGap) {
+        this.maxAgeGap = maxAgeGap;
+    }
+
+    public void updateAllowOppositeGender(boolean allowOppositeGender) {
+        this.allowOppositeGender = allowOppositeGender;
+    }
+
+    public void updateMaxMatchingDistance(double maxMatchingDistance) {
+        this.maxMatchingDistance = maxMatchingDistance;
+    }
+
     public void withdraw() {
         this.isDeleted = true;
         this.deletedAt = LocalDateTime.now();
@@ -132,6 +157,9 @@ public class User {
         this.personalities = dto.getPersonalities();
         this.interests = dto.getInterests();
         this.footprint = 36.5f;
+        this.maxAgeGap = 5;
+        this.allowOppositeGender = false;
+        this.maxMatchingDistance = 10;
         this.isDeleted = false;
         this.deletedAt = null;
     }
