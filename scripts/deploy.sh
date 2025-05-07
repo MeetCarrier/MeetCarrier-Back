@@ -5,7 +5,8 @@ APP_NAME=demo
 JAR_NAME=$(ls $REPOSITORY/build/libs/ | grep '.jar' | tail -n 1)
 JAR_PATH=$REPOSITORY/build/libs/$JAR_NAME
 
-CURRENT_PID=$(pgrep -f $JAR_NAME)
+PORT=8080
+CURRENT_PID=$(lsof -t -i:$PORT)
 
 if [ -z $CURRENT_PID ] #2
 then

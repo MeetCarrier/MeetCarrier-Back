@@ -26,6 +26,7 @@ public class UserResponseDto {
     String imgUrl;
     Integer maxAgeGap;
     Boolean allowOppositeGender;
+    Double maxMatchingDistance;
 
     public static UserResponseDto fromEntity(User user) {
         return UserResponseDto.builder()
@@ -42,6 +43,7 @@ public class UserResponseDto {
                 .imgUrl(user.getImgUrl())
                 .maxAgeGap(user.getMaxAgeGap())
                 .allowOppositeGender(user.isAllowOppositeGender())
+                .maxMatchingDistance(user.getMaxMatchingDistance())
                 .build();
     }
 }
