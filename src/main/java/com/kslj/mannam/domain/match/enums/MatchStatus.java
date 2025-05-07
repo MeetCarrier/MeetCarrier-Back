@@ -7,5 +7,6 @@ public enum MatchStatus {
     Meeting,
     Reviewing,
     Completed,
-    Cancelled,
+    Survey_Cancelled,
+    Chat_Cancelled,
 }

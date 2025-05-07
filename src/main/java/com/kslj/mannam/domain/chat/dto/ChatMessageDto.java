@@ -19,7 +19,7 @@ public class ChatMessageDto {
 
     public ChatResponseDto fromEntity(User sender) {
         return ChatResponseDto.builder()
-                .messageType(type)
+                .type(type)
                 .message(message)
                 .imageUrl(imageUrl)
                 .sender(sender.getId())

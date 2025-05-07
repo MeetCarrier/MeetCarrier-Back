@@ -2,6 +2,7 @@ package com.kslj.mannam.domain.chat.controller;
 
 import com.kslj.mannam.domain.chat.dto.ChatMessageDto;
 import com.kslj.mannam.domain.chat.dto.ChatResponseDto;
+import com.kslj.mannam.domain.chat.enums.MessageType;
 import com.kslj.mannam.domain.chat.service.ChatService;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.service.UserService;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -58,6 +60,33 @@ public class ChatController {
         // 채팅방 유저들에게 브로드캐스트
         messagingTemplate.convertAndSend(
                 "/topic/room/" + roomId, response);
+    }
+
+    @MessageMapping("/chat/leave")
+    public void leaveRoom(ChatMessageDto dto) throws Exception {
+        long roomId = dto.getRoomId();
+
+        // 임시로 user 설정. 차후 UserDetailsImpl을 이용하도록 변경 필요
+        User sender = userService.getUserById(1);
+
+        if(!chatService.inspectUser(roomId, sender)){
+            throw new AccessDeniedException("해당 채팅방 참여자가 아닙니다.");
+        }
+
+        chatService.leaveRoom(roomId, sender);
+
+        // 나감 알림 메시지 생성
+        ChatResponseDto leaveNotice = ChatResponseDto.builder()
+                .sender(sender.getId())
+                .message("상대방이 채팅방을 나갔습니다.")
+                .type(MessageType.LEAVE)
+                .sentAt(LocalDateTime.now())
+                .build();
+
+        // 상대방에게 알림
+        messagingTemplate.convertAndSend(
+                "/topic/room/" + roomId, leaveNotice
+        );
     }
 
     @Operation(

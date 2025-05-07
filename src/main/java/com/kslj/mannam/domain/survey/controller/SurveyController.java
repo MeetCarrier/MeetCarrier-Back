@@ -2,6 +2,7 @@ package com.kslj.mannam.domain.survey.controller;
 
 import com.kslj.mannam.domain.survey.dto.SurveyAnswerRequestDto;
 import com.kslj.mannam.domain.survey.dto.SurveyAnswerResponseDto;
+import com.kslj.mannam.domain.survey.dto.SurveyLeaveDto;
 import com.kslj.mannam.domain.survey.dto.SurveyQuestionResponseDto;
 import com.kslj.mannam.domain.survey.service.SurveyService;
 import com.kslj.mannam.domain.user.entity.User;
@@ -10,6 +11,7 @@ import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -64,5 +66,11 @@ public class SurveyController {
         User user = userService.getUserById(userId);
         surveyService.submitSurveyAnswer(sessionId, requestDto, user);
         return ResponseEntity.ok().build();
+    }
+
+    @MessageMapping("/survey/leave")
+    public void surveyLeave(SurveyLeaveDto dto) {
+        User user = userService.getUserById(dto.getLeaverId());
+        surveyService.leaveSession(dto.getSessionId(), user);
     }
 }

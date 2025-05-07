@@ -7,10 +7,10 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class SurveyAnswerResponseDto {
-    private String content;
-    private long questionId;
-    private long userId;
+@NoArgsConstructor
+public class SurveyLeaveDto {
+    private Long sessionId;
+    private Long leaverId;
+    private String leaverNickname;
 }

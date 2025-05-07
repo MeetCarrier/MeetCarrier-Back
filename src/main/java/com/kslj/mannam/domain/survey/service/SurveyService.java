@@ -4,10 +4,7 @@ import com.kslj.mannam.domain.match.entity.Match;
 import com.kslj.mannam.domain.match.enums.MatchStatus;
 import com.kslj.mannam.domain.match.service.MatchService;
 import com.kslj.mannam.domain.room.service.RoomService;
-import com.kslj.mannam.domain.survey.dto.SurveyAnswerRequestDto;
-import com.kslj.mannam.domain.survey.dto.SurveyAnswerResponseDto;
-import com.kslj.mannam.domain.survey.dto.SurveyCompleteDto;
-import com.kslj.mannam.domain.survey.dto.SurveyQuestionResponseDto;
+import com.kslj.mannam.domain.survey.dto.*;
 import com.kslj.mannam.domain.survey.entity.SurveyAnswer;
 import com.kslj.mannam.domain.survey.entity.SurveyQuestion;
 import com.kslj.mannam.domain.survey.entity.SurveySession;
@@ -18,6 +15,7 @@ import com.kslj.mannam.domain.survey.repository.SurveySessionRepository;
 import com.kslj.mannam.domain.user.entity.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class SurveyService {
@@ -132,6 +131,7 @@ public class SurveyService {
             SurveyAnswerResponseDto responseDto = SurveyAnswerResponseDto.builder()
                     .content(surveyAnswer.getContent())
                     .questionId(surveyAnswer.getSurveyQuestion().getId())
+                    .userId(surveyAnswer.getUser().getId())
                     .build();
 
             responseDtos.add(responseDto);
@@ -140,6 +140,7 @@ public class SurveyService {
         return responseDtos;
     }
 
+    // 완료 알람 전송
     public void notifyComplete(long sessionId, long roomId) {
         // 전달할 데이터 생성
         SurveyCompleteDto dto = SurveyCompleteDto.builder()
@@ -150,5 +151,27 @@ public class SurveyService {
         // 클라이언트에게 메시지 전송
         System.out.println("dto = " + dto);
         messagingTemplate.convertAndSend("/topic/survey/" + sessionId + "/complete", dto);
+    }
+
+    // 설문지 중 나가기
+    @Transactional
+    public void leaveSession(long sessionId, User user) {
+        SurveySession session = surveySessionRepository.findById(sessionId)
+                .orElseThrow(() -> new EntityNotFoundException("SurveySession not found: " + sessionId));
+
+        Match match = session.getMatch();
+
+        match.updateStatus(MatchStatus.Survey_Cancelled);
+
+        // 상대방에게 보낼 메시지 구성
+        SurveyLeaveDto leaveDto = SurveyLeaveDto.builder()
+                .sessionId(sessionId)
+                .leaverId(user.getId())
+                .leaverNickname(user.getNickname())
+                .build();
+
+        log.info("leaveDto = " + leaveDto);
+        // 알림 전송
+        messagingTemplate.convertAndSend("/topic/survey/" + sessionId + "/leave", leaveDto);
     }
 }
