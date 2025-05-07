@@ -51,7 +51,16 @@ public class MatchController {
     // 현재 유저 매칭 목록 조회
     @Operation(
             summary     = "매칭 목록 조회",
-            description = "로그인한 사용자의 매칭 목록을 조회합니다.",
+            description = "로그인한 사용자의 매칭 목록을 조회합니다.<br><br>" +
+                    "매칭 상태 설명:<br>" +
+                    "- Matched: 매칭 완료, 설문 진행 전(백엔드 전용)<br>" +
+                    "- Surveying: 설문 단계 진행 중<br>" +
+                    "- Chatting: 채팅 중<br>" +
+                    "- Meeting: 오프라인 만남 진행 중<br>" +
+                    "- Reviewing: 만남 이후 리뷰 작성 가능<br>" +
+                    "- Completed: 모든 절차 완료<br>" +
+                    "- Survey_Cancelled: 설문 단계에서 취소<br>" +
+                    "- Chat_Cancelled: 채팅 단계에서 취소",
             responses = {
                     @ApiResponse(
                             responseCode = "200",

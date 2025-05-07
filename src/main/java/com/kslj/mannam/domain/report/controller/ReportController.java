@@ -37,8 +37,16 @@ public class ReportController {
     // 신고 내역 조회
     @GetMapping
     @Operation(
-            summary     = "신고 내역 조회",
-            description = "현재 로그인한 사용자가 등록한 모든 신고 내역을 조회합니다.",
+            summary = "신고 상세 조회",
+            description = "지정된 ID의 신고 상세 정보를 조회합니다.<br><br>" +
+                    "<b>ReportStatus (신고 처리 상태)</b><br>" +
+                    "- Registered: 신고가 등록된 상태<br>" +
+                    "- Processed: 신고가 처리된 상태<br><br>" +
+                    "<b>ReportType (신고 종류)</b><br>" +
+                    "- User: 사용자에 대한 신고<br>" +
+                    "- Bug: 앱 또는 시스템 버그 신고<br>" +
+                    "- Chatbot: 챗봇의 문제에 대한 신고<br>" +
+                    "- Question: 질문 내용에 대한 신고",
             responses = {
                     @ApiResponse(
                             responseCode = "200",

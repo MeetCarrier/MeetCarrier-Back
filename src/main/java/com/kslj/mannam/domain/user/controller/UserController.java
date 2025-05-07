@@ -32,7 +32,16 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/user")
-    @Operation(summary = "유저 정보 조회", description = "현재 로그인 중인 유저의 정보를 조회합니다.")
+    @Operation(
+            summary = "유저 정보 조회",
+            description = "현재 로그인 중인 유저의 정보를 조회합니다.<br><br>" +
+                    "<b>Gender (성별)</b><br>" +
+                    "- Male: 남성<br>" +
+                    "- Female: 여성<br><br>" +
+                    "<b>SocialType (소셜 로그인 타입)</b><br>" +
+                    "- Kakao: 카카오 로그인<br>" +
+                    "- Google: 구글 로그인"
+    )
     @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = UserResponseDto.class)))
     public ResponseEntity<?> getUser() {
         // 테스트 용도
