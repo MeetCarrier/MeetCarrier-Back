@@ -8,7 +8,6 @@
 <h1>회원가입 상세 정보 입력</h1>
 
 <form method="post" action="/oauth/signup/detail">
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
     <label for="nickname">닉네임:</label>
     <input type="text" id="nickname" name="nickname" required><br><br>
 
@@ -26,6 +25,9 @@
 
     <label for="interests">관심사:</label>
     <input type="text" id="interests" name="interests"><br><br>
+
+    <label for="age">나이:</label>
+    <input type="text" id="age" name="age"><br><br>
 
     <button type="submit">제출</button>
 </form>

@@ -41,6 +41,7 @@ public class OAuthController {
                 .region(request.getRegion())
                 .personalities(request.getPersonalities())
                 .interests(request.getInterests())
+                .age(request.getAge())
                 .build();
 
         userService.createUser(newUser);
