@@ -170,9 +170,9 @@ public class SurveyController {
     public ResponseEntity<Void> submitSurveyAnswer(
             @PathVariable long sessionId,
             @PathVariable long userId,
-            @RequestBody SurveyAnswerRequestDto requestDto) {
+            @RequestBody List<SurveyAnswerRequestDto> answers) {
         User user = userService.getUserById(userId);
-        surveyService.submitSurveyAnswer(sessionId, requestDto, user);
+        surveyService.submitSurveyAnswer(sessionId, answers, user);
         return ResponseEntity.ok().build();
     }
 

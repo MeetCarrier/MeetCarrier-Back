@@ -94,23 +94,27 @@ public class SurveyService {
 
     // 설문지 답변 등록
     @Transactional
-    public void submitSurveyAnswer(long sessionId, SurveyAnswerRequestDto requestDto, User user) {
+    public void submitSurveyAnswer(long sessionId, List<SurveyAnswerRequestDto> answers, User user) {
         SurveySession session = surveySessionRepository.findByIdForUpdate(sessionId)
                 .orElseThrow(() -> new EntityNotFoundException("SurveySession not found: " + sessionId));
-        SurveyQuestion question = surveyQuestionRepository.getSurveyQuestionById(requestDto.getQuestionId());
 
-        // 답변 등록
-        SurveyAnswer surveyAnswer = SurveyAnswer.builder()
-                .content(requestDto.getContent())
-                .user(user)
-                .surveySession(session)
-                .surveyQuestion(question)
-                .build();
+        for(SurveyAnswerRequestDto answer : answers) {
+            SurveyQuestion question = surveyQuestionRepository.getSurveyQuestionById(answer.getQuestionId());
 
-        surveyAnswerRepository.save(surveyAnswer);
+            // 답변 등록
+            SurveyAnswer surveyAnswer = SurveyAnswer.builder()
+                    .content(answer.getContent())
+                    .user(user)
+                    .surveySession(session)
+                    .surveyQuestion(question)
+                    .build();
+
+            surveyAnswerRepository.save(surveyAnswer);
+        }
+
+        session.incrementAnsweredCount();
 
         // 답변 수 체크
-        session.incrementAnsweredCount();
         if (session.getAnsweredCount() >= 2) {
             Match match = session.getMatch();
             // 답변 수가 n개 이상이면 답변 완료 판단 -> 채팅방 생성 서비스 호출, 매칭 상태 갱신
