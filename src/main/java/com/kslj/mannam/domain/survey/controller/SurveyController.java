@@ -156,7 +156,9 @@ public class SurveyController {
                     required    = true,
                     content     = @Content(
                             mediaType = "application/json",
-                            schema    = @Schema(implementation = SurveyAnswerRequestDto.class)
+                            array        = @ArraySchema(
+                                    schema = @Schema(implementation = SurveyAnswerRequestDto.class)
+                            )
                     )
             ),
             responses = {
