@@ -23,7 +23,7 @@ public class OAuthController {
 
     @GetMapping("/oauth/signup/detail")
     public String showSignUpForm() {
-        return "redirect:/register";
+        return "signup_detail";
     }
 
     @PostMapping("/oauth/signup/detail")
