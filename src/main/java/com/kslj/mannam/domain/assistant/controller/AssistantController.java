@@ -41,7 +41,7 @@ public class AssistantController {
     private final SimpMessagingTemplate messagingTemplate;
 
     @PostMapping("/test")
-    public ResponseEntity<?> createQuestion(@RequestParam(name="content") String content) {
+    public ResponseEntity<?> createQuestion(@RequestParam("content") String content) {
         long userId = userService.createUser(UserSignUpRequestDto.builder()
                 .region("서울")
                 .socialType(SocialType.Google)

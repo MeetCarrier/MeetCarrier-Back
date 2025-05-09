@@ -65,7 +65,7 @@ public class ReportReplyController {
     )
     @PostMapping("/{reportId}")
     public ResponseEntity<?> createReportReply(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                               @PathVariable(value = "reportId") long reportId,
+                                               @PathVariable("reportId") long reportId,
                                                @RequestBody ReplyRequestDto replyRequestDto) {
         long replyId = reportReplyService.createReportReply(reportId, replyRequestDto, userService.getUserById(1));
 
@@ -90,7 +90,7 @@ public class ReportReplyController {
             }
     )
     @DeleteMapping("/{replyId}")
-    public ResponseEntity<?> deleteReportReply(@PathVariable(value = "replyId") long replyId) {
+    public ResponseEntity<?> deleteReportReply(@PathVariable("replyId") long replyId) {
         long deleteId = reportReplyService.deleteReportReply(replyId);
 
         return ResponseEntity.ok("답변이 삭제되었습니다. replyId = " + deleteId);
@@ -122,7 +122,7 @@ public class ReportReplyController {
             }
     )
     @PatchMapping("/{replyId}")
-    public ResponseEntity<?> updateReportReply(@PathVariable(value = "replyId") long replyId,
+    public ResponseEntity<?> updateReportReply(@PathVariable("replyId") long replyId,
                                                @RequestBody ReplyRequestDto replyRequestDto) {
         long updateId = reportReplyService.updateReportReply(replyId, replyRequestDto);
 

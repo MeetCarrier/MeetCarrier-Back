@@ -50,7 +50,7 @@ public class OAuthController {
     }
 
     @GetMapping("/oauth/signup/nick/check")
-    public ResponseEntity<?> checkNickDuplication(@RequestParam(value = "nickname") String nickname) {
+    public ResponseEntity<?> checkNickDuplication(@RequestParam("nickname") String nickname) {
         boolean checkNickDuplication = userService.checkNickDuplication(nickname);
 
         if (checkNickDuplication) {

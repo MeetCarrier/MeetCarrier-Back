@@ -115,7 +115,7 @@ public class ChatController {
             }
     )
     @GetMapping("/chat/{roomId}")
-    public ResponseEntity<?> getChatMessages(@PathVariable(value="roomId") long roomId) throws Exception {
+    public ResponseEntity<?> getChatMessages(@PathVariable("roomId") long roomId) throws Exception {
         List<ChatResponseDto> chatMessages = chatService.getChatMessages(roomId);
 
         return ResponseEntity.ok(chatMessages);

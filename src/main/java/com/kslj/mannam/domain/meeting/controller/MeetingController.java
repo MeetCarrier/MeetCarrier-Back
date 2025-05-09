@@ -68,7 +68,7 @@ public class MeetingController {
     )
     @PostMapping("/{matchId}")
     public ResponseEntity<Long> createMeeting(
-            @PathVariable(value = "matchId") long matchId,
+            @PathVariable("matchId") long matchId,
             @RequestBody MeetingRequestDto requestDto
     ) {
         long meetingId = meetingService.createMeeting(matchId, requestDto);
@@ -128,7 +128,7 @@ public class MeetingController {
     )
     @PatchMapping("/{meetingId}")
     public ResponseEntity<Void> updateMeeting(
-            @PathVariable(value = "meetingId") long meetingId,
+            @PathVariable("meetingId") long meetingId,
             @RequestBody MeetingRequestDto requestDto
     ) {
         meetingService.updateMeeting(meetingId, requestDto);
@@ -156,7 +156,7 @@ public class MeetingController {
             }
     )
     @DeleteMapping("/{meetingId}")
-    public ResponseEntity<Void> deleteMeeting(@PathVariable(value = "meetingId") long meetingId) {
+    public ResponseEntity<Void> deleteMeeting(@PathVariable("meetingId") long meetingId) {
         meetingService.deleteMeeting(meetingId);
         return ResponseEntity.ok().build();
     }

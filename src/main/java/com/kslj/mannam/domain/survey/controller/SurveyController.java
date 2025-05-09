@@ -58,7 +58,7 @@ public class SurveyController {
     )
     @PostMapping("/{sessionId}/questions")
     public ResponseEntity<Void> createSurveyQuestion(
-            @PathVariable long sessionId) {
+            @PathVariable("sessionId") long sessionId) {
         surveyService.createSurveyQuestions(sessionId);
         return ResponseEntity.ok().build();
     }
@@ -91,7 +91,7 @@ public class SurveyController {
     )
     @GetMapping("/{sessionId}/questions")
     public ResponseEntity<List<SurveyQuestionResponseDto>> getSurveyQuestions(
-            @PathVariable long sessionId) {
+            @PathVariable("sessionId") long sessionId) {
         List<SurveyQuestionResponseDto> questions =
                 surveyService.getSurveyQuestions(sessionId);
         return ResponseEntity.ok(questions);
@@ -125,7 +125,7 @@ public class SurveyController {
     )
     @GetMapping("/{sessionId}/answers")
     public ResponseEntity<List<SurveyAnswerResponseDto>> getSurveyAnswers(
-            @PathVariable long sessionId) {
+            @PathVariable("sessionId") long sessionId) {
         List<SurveyAnswerResponseDto> answers =
                 surveyService.getSurveyAnswers(sessionId);
         return ResponseEntity.ok(answers);
@@ -170,8 +170,8 @@ public class SurveyController {
     )
     @PostMapping("/{sessionId}/answers/{userId}")
     public ResponseEntity<Void> submitSurveyAnswer(
-            @PathVariable long sessionId,
-            @PathVariable long userId,
+            @PathVariable("sessionId") long sessionId,
+            @PathVariable("userId") long userId,
             @RequestBody List<SurveyAnswerRequestDto> answers) {
         User user = userService.getUserById(userId);
         surveyService.submitSurveyAnswer(sessionId, answers, user);

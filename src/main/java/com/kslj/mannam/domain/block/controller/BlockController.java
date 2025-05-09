@@ -152,7 +152,7 @@ public class BlockController {
             }
     )
     @DeleteMapping("/{blockId}")
-    public ResponseEntity<?> deleteBlock(@PathVariable(value = "blockId") long blockId) {
+    public ResponseEntity<?> deleteBlock(@PathVariable("blockId") long blockId) {
         long deletedBlockId = blockService.deleteBlock(blockId);
 
         return ResponseEntity.ok("번호가 삭제되었습니다. deletedBlockId = " + deletedBlockId);

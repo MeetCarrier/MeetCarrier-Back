@@ -66,8 +66,8 @@ public class JournalController {
     )
     @GetMapping("/{year}/{month}")
     public ResponseEntity<List<JournalResponseDto>> JournalList(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                                @PathVariable(value = "year") int year,
-                                                                @PathVariable(value = "month") int month) {
+                                                                @PathVariable("year") int year,
+                                                                @PathVariable("month") int month) {
         List<JournalResponseDto> journalList = journalService.getJournalsByYearAndMonth(userService.getUserById(1), year, month);
 
         return ResponseEntity.ok(journalList);
@@ -135,7 +135,7 @@ public class JournalController {
             }
     )
     @PatchMapping("/{journalId}")
-    public ResponseEntity<?> UpdateJournal(@PathVariable(value = "journalId") long journalId,
+    public ResponseEntity<?> UpdateJournal(@PathVariable("journalId") long journalId,
                                            @RequestBody JournalRequestDto requestDto) {
         long updatedJournalId = journalService.updateJournal(journalId, requestDto);
 
@@ -166,7 +166,7 @@ public class JournalController {
             }
     )
     @DeleteMapping("/{journalId}")
-    public ResponseEntity<?> DeleteJournal(@PathVariable(value = "journalId") long journalId) {
+    public ResponseEntity<?> DeleteJournal(@PathVariable("journalId") long journalId) {
         long deletedJournalId = journalService.deleteJournal(journalId);
 
         return ResponseEntity.ok("일기가 삭제되었습니다. JournalId = " + deletedJournalId);

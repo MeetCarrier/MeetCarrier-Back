@@ -66,12 +66,23 @@ public class SurveyService {
                 .findById(sessionId)
                 .orElseThrow(() -> new EntityNotFoundException("SurveySession not found: " + sessionId));
 
-        // 임의 설정. 질문 생성 뒤 그 질문들의 ID 반환
+        // 임의 설정. 질문 생성.
         SurveyQuestion question1 = SurveyQuestion.builder()
-                .content("질문1")
+                .content("죽기 전에 꼭 해보고 싶은 버킷리스트 한 가지와 이유는?")
                 .surveySession(session)
                 .build();
+        SurveyQuestion question2 = SurveyQuestion.builder()
+                .content("가장 최근에 행복했던 순간은 언제였나요?")
+                .surveySession(session)
+                .build();
+        SurveyQuestion question3 = SurveyQuestion.builder()
+                .content("당신이 가장 자랑스러웠던 순간은?")
+                .surveySession(session)
+                .build();
+
         surveyQuestionRepository.save(question1);
+        surveyQuestionRepository.save(question2);
+        surveyQuestionRepository.save(question3);
     }
 
     // 설문지 질문 조회

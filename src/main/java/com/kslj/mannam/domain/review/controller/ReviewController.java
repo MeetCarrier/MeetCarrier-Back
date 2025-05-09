@@ -60,7 +60,7 @@ public class ReviewController {
                     @ApiResponse(responseCode = "204", description = "리뷰가 존재하지 않음")
             }
     )
-    public ResponseEntity<?> getReviews(@PathVariable(value = "userId") long userId) {
+    public ResponseEntity<?> getReviews(@PathVariable("userId") long userId) {
         List<ReviewResponseDto> reviews = reviewService.getReview(userId);
 
         if (reviews.isEmpty()) {
@@ -103,7 +103,7 @@ public class ReviewController {
                     )
             }
     )
-    public ResponseEntity<?> createReview(@PathVariable(value = "userId") long userId,
+    public ResponseEntity<?> createReview(@PathVariable("userId") long userId,
                                           @RequestBody ReviewRequestDto requestDto,
                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
         long reviewId = reviewService.createReview(userId, requestDto, userService.getUserById(1));

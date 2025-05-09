@@ -91,7 +91,7 @@ public class ReportController {
                     )
             }
     )
-    public ResponseEntity<ReportResponseDto> findReportById(@PathVariable(value = "reportId") long reportId) {
+    public ResponseEntity<ReportResponseDto> findReportById(@PathVariable("reportId") long reportId) {
         ReportResponseDto responseDto = reportService.getReportDetail(reportId);
 
         return ResponseEntity.ok(responseDto);
@@ -153,7 +153,7 @@ public class ReportController {
                     )
             }
     )
-    public ResponseEntity<?> deleteReport(@PathVariable(value = "reportId") long reportId) {
+    public ResponseEntity<?> deleteReport(@PathVariable("reportId") long reportId) {
         long deleteReportId = reportService.deleteReport(reportId);
 
         return ResponseEntity.ok("신고가 삭제되었습니다. reportId = " + deleteReportId);

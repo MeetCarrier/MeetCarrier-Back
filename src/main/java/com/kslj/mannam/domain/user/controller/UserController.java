@@ -43,12 +43,12 @@ public class UserController {
                     "- Google: 구글 로그인"
     )
     @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = UserResponseDto.class)))
-    public ResponseEntity<?> getUser() {
+    public ResponseEntity<?> getUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         // 테스트 용도
-        User testUser = userService.getUserById(1);
+        // User testUser = userService.getUserById(1);
 
-        // return ResponseEntity.ok(UserResponseDto.fromEntity(userDetails.getUser()));
-        return ResponseEntity.ok(UserResponseDto.fromEntity(testUser));
+        return ResponseEntity.ok(UserResponseDto.fromEntity(userDetails.getUser()));
+        // return ResponseEntity.ok(UserResponseDto.fromEntity(testUser));
     }
 
     @GetMapping("/user/{userId}")
@@ -62,7 +62,7 @@ public class UserController {
             parameters = {
                 @Parameter(name = "userId", description = "조회할 유저의 ID", required = true, example = "1")
             })
-    public ResponseEntity<?> getUserById(@PathVariable(value="userId") long userId) {
+    public ResponseEntity<?> getUserById(@PathVariable("userId") long userId) {
         User user = userService.getUserById(userId);
 
         if (user.isDeleted()) {
