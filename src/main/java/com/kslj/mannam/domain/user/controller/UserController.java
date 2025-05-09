@@ -43,12 +43,12 @@ public class UserController {
                     "- Google: 구글 로그인"
     )
     @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = UserResponseDto.class)))
-    public ResponseEntity<?> getUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<?> getUser() {
         // 테스트 용도
-        // User testUser = userService.getUserById(1);
+        User testUser = userService.getUserById(1);
 
-        return ResponseEntity.ok(UserResponseDto.fromEntity(userDetails.getUser()));
-        // return ResponseEntity.ok(UserResponseDto.fromEntity(testUser));
+        // return ResponseEntity.ok(UserResponseDto.fromEntity(userDetails.getUser()));
+        return ResponseEntity.ok(UserResponseDto.fromEntity(testUser));
     }
 
     @GetMapping("/user/{userId}")
