@@ -2,6 +2,7 @@ package com.kslj.mannam.domain.match.dto;
 
 import com.kslj.mannam.domain.match.entity.Match;
 import com.kslj.mannam.domain.match.enums.MatchStatus;
+import com.kslj.mannam.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,8 +19,10 @@ public class MatchResponseDto {
     long id;
     LocalDateTime matchedAt;
     MatchStatus status;
-    long relatedId;
-    long user1Id;
+    boolean agreed;
+    long sessionId;
+    Long roomId;
+    Long user1Id;
     String user1Nickname;
     String user1ImageUrl;
     long user2Id;
@@ -27,12 +30,16 @@ public class MatchResponseDto {
     String user2ImageUrl;
 
 
-    public static MatchResponseDto fromEntity(Match match, Long relatedId) {
+    public static MatchResponseDto fromEntity(Match match, Long sessionId, Long roomId, User user) {
+        boolean agreed = match.isEntered(user);
+
         return MatchResponseDto.builder()
                 .id(match.getId())
                 .matchedAt(match.getMatchedAt())
                 .status(match.getStatus())
-                .relatedId(relatedId)
+                .agreed(agreed)
+                .sessionId(sessionId)
+                .roomId(roomId)
                 .user1Id(match.getUser1().getId())
                 .user1Nickname(match.getUser1().getNickname())
                 .user1ImageUrl(match.getUser1().getImgUrl())

@@ -128,10 +128,11 @@ public class SurveyService {
         // 답변 수 체크
         if (session.getAnsweredCount() >= 2) {
             Match match = session.getMatch();
-            // 답변 수가 n개 이상이면 답변 완료 판단 -> 채팅방 생성 서비스 호출, 매칭 상태 갱신
+
             long roomId = roomService.createRoom(match);
-            matchService.updateMatchStatus(match.getId(), MatchStatus.Chatting);
+            matchService.updateMatchStatus(match.getId(), MatchStatus.Chatting); // 전체 상태 변경
             session.updateSessionStatus(SessionStatus.Done);
+
             notifyComplete(session.getId(), roomId);
         }
     }

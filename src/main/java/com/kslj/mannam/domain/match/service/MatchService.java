@@ -9,6 +9,7 @@ import com.kslj.mannam.domain.room.service.RoomService;
 import com.kslj.mannam.domain.survey.repository.SurveySessionRepository;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,12 +48,16 @@ public class MatchService {
         List<MatchResponseDto> responses = new ArrayList<>();
 
         for (Match match : matches) {
-            Long relatedId = null;
-            switch (match.getStatus()) {
-                case Surveying -> relatedId = surveySessionRepository.findSurveySessionByMatchId(match.getId()).getId();
-                case Chatting -> relatedId = roomService.getRoomId(match.getId());
+            Long sessionId = surveySessionRepository.findSurveySessionByMatchId(match.getId()).getId();
+
+            Long roomId = null;
+            MatchStatus status = match.getStatus();
+
+            if (status != MatchStatus.Surveying && status != MatchStatus.Survey_Cancelled && status != MatchStatus.Matched) {
+                roomId = roomService.getRoomId(match.getId());
             }
-            responses.add(MatchResponseDto.fromEntity(match, relatedId));
+
+            responses.add(MatchResponseDto.fromEntity(match, sessionId, roomId, user));
         }
 
         return responses;
@@ -93,5 +98,17 @@ public class MatchService {
             matchRepository.delete(targetMatch);
             return matchId;
         }
+    }
+
+    @Transactional
+    public void markUserEnteredChat(Long matchId, User user) {
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new EntityNotFoundException("Match not found"));
+
+        if (!match.hasUser(user)) {
+            throw new IllegalArgumentException("User not part of this match");
+        }
+
+        match.markUserEntered(user);
     }
 }
