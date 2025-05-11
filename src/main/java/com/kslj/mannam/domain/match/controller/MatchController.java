@@ -74,9 +74,9 @@ public class MatchController {
                     )
             }
     )
-    @GetMapping
-    public ResponseEntity<?> getMatches() {
-        List<MatchResponseDto> matches = matchService.getMatches(userService.getUserById(1));
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getMatches(@PathVariable("userId") Long userId) {
+        List<MatchResponseDto> matches = matchService.getMatches(userService.getUserById(userId));
 
         return ResponseEntity.ok(matches);
     }
