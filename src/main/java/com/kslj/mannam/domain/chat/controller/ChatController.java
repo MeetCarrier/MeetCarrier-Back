@@ -43,7 +43,7 @@ public class ChatController {
         long roomId = dto.getRoomId();
 
         // 임시로 user 설정. 이후, UserDetailsImpl을 이용하도록 변경 필요.
-        User sender = userService.getUserById(1);
+        User sender = userService.getUserById(dto.getUserId());
 
         if(!chatService.inspectUser(roomId, sender)){
             throw new AccessDeniedException("해당 채팅방 참여자가 아닙니다.");

@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ChatMessageDto {
     long roomId;
+    long userId;
     MessageType type;
     String message;
     String imageUrl;
