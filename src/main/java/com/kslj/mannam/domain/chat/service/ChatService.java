@@ -83,6 +83,7 @@ public class ChatService {
                     .message(chat.getMessage())
                     .imageUrl(chat.getImageUrl())
                     .sender(chat.getUser().getId())
+                    .sentAt(chat.getSentAt())
                     .build());
         }
 
