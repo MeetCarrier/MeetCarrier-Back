@@ -17,5 +17,7 @@ public class ChatResponseDto {
     private String message;
     private String imageUrl;
     private long sender;
+
+    @Builder.Default
     private LocalDateTime sentAt = LocalDateTime.now();
 }
