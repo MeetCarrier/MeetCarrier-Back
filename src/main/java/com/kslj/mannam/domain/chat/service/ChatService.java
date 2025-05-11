@@ -74,7 +74,7 @@ public class ChatService {
         // 채팅방 조회
         Room room = roomRepository.findById(roomId).orElseThrow();
 
-        // 채팅방 조회
+        // 해당 채팅방 채팅 이력 조회
         List<Chat> chatMessages = chatRepository.findChatByRoom(room);
 
         for (Chat chat : chatMessages) {
@@ -83,6 +83,7 @@ public class ChatService {
                     .message(chat.getMessage())
                     .imageUrl(chat.getImageUrl())
                     .sender(chat.getUser().getId())
+                    .sentAt(chat.getSentAt())
                     .build());
         }
 
