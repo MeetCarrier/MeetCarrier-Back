@@ -75,8 +75,8 @@ public class MatchController {
             }
     )
     @GetMapping
-    public ResponseEntity<?> getMatches(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        List<MatchResponseDto> matches = matchService.getMatches(userDetails.getUser());
+    public ResponseEntity<?> getMatches() {
+        List<MatchResponseDto> matches = matchService.getMatches(userService.getUserById(1));
 
         return ResponseEntity.ok(matches);
     }
