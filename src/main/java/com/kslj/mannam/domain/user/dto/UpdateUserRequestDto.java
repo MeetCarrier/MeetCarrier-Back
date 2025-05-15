@@ -11,7 +11,8 @@ public class UpdateUserRequestDto {
     Long age;
     String personalities;
     String interests;
-    String questions;
+    String question;
+    String questionList;
     String imgUrl;
     String phone;
     Integer maxAgeGap;

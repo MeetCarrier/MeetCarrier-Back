@@ -26,12 +26,13 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = "유저", description = "유저 관리 API")
+@RequestMapping("/user")
 @Controller
 public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/user")
+    @GetMapping
     @Operation(
             summary = "유저 정보 조회",
             description = "현재 로그인 중인 유저의 정보를 조회합니다.<br><br>" +
@@ -51,7 +52,7 @@ public class UserController {
         return ResponseEntity.ok(UserResponseDto.fromEntity(testUser));
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/{userId}")
     @Operation(
             summary = "특정 유저 정보 조회",
             description = "전달된 userId로 특정 유저의 정보를 조회합니다.",
@@ -72,7 +73,7 @@ public class UserController {
         return ResponseEntity.ok(UserResponseDto.fromEntity(user));
     }
 
-    @PatchMapping("/user")
+    @PatchMapping
     @Operation(
             summary = "유저 정보 수정",
             description = "전달된 정보들로 데이터베이스에 저장된 유저의 정보를 수정합니다.\n요청 전송 시 필요한 부분의 데이터만 채워서 보내면 됩니다.",
@@ -91,14 +92,20 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    @Hidden
+    @Operation(
+            summary = "로그아웃",
+            description = "현재 로그인된 유저를 로그아웃 처리합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "로그아웃 완료")
+            }
+    )
     public ResponseEntity<?> logout(HttpServletRequest request) {
         request.getSession().invalidate();                     // 세션 무효화
         SecurityContextHolder.clearContext();                  // SecurityContext 초기화
         return ResponseEntity.ok("로그아웃 완료");
     }
 
-    @DeleteMapping("/user/withdraw")
+    @DeleteMapping("/withdraw")
     @Operation(
             summary = "유저 탈퇴",
             description = "현재 로그인된 유저를 탈퇴 처리합니다.",

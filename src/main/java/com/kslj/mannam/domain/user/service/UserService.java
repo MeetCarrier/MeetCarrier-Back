@@ -61,7 +61,8 @@ public class UserService {
         if (dto.getAge() != null) user.updateAge(dto.getAge());
         if (dto.getPersonalities() != null) user.updatePersonalities(dto.getPersonalities());
         if (dto.getInterests() != null) user.updateInterests(dto.getInterests());
-        if (dto.getQuestions() != null) user.updateQuestions(dto.getQuestions());
+        if (dto.getQuestion() != null) user.updateQuestion(dto.getQuestion());
+        if (dto.getQuestionList() != null) user.updateQuestionList(dto.getQuestionList());
         if (dto.getImgUrl() != null) user.updateImgUrl(dto.getImgUrl());
         if (dto.getPhone() != null) user.updatePhone(dto.getPhone());
         if (dto.getMaxAgeGap() != null) user.updateMaxAgeGap(dto.getMaxAgeGap());

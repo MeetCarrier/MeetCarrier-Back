@@ -22,7 +22,8 @@ public class UserResponseDto {
     String personalities;
     String interests;
     float footprint;
-    String questions;
+    String question;
+    String questionList;
     String imgUrl;
     Integer maxAgeGap;
     Boolean allowOppositeGender;
@@ -39,7 +40,8 @@ public class UserResponseDto {
                 .personalities(user.getPersonalities())
                 .interests(user.getInterests())
                 .footprint(user.getFootprint())
-                .questions(user.getQuestions())
+                .question(user.getQuestion())
+                .questionList(user.getQuestionList())
                 .imgUrl(user.getImgUrl())
                 .maxAgeGap(user.getMaxAgeGap())
                 .allowOppositeGender(user.isAllowOppositeGender())

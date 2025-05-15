@@ -6,6 +6,12 @@ import com.kslj.mannam.domain.room.service.RoomService;
 import com.kslj.mannam.domain.survey.repository.SurveySessionRepository;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -27,9 +33,39 @@ public class RoomController {
     private final UserService userService;
 
     @PostMapping("/{matchId}/{userId}/enter")
-    public ResponseEntity<?> enterChatRoom(
+    @Operation(
+            summary     = "채팅방 입장",
+            description = "지정된 매칭(matchId)에 대해 유저(userId)를 채팅방에 입장시킵니다. 생성된 sessionId 및 roomId 정보를 반환합니다.",
+            parameters = {
+                    @Parameter(
+                            name        = "matchId",
+                            description = "입장할 매칭의 ID",
+                            required    = true,
+                            in          = ParameterIn.PATH,
+                            schema      = @Schema(type = "integer", format = "int64")
+                    ),
+                    @Parameter(
+                            name        = "userId",
+                            description = "입장할 유저의 ID",
+                            required    = true,
+                            in          = ParameterIn.PATH,
+                            schema      = @Schema(type = "integer", format = "int64")
+                    )
+            },
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description  = "입장 성공",
+                            content      = @Content(
+                                    mediaType = "text/plain",
+                                    schema    = @Schema(type = "string", example = "sessionId: 10, roomId: 5, userId: 3 입장")
+                            )
+                    )
+            }
+    )
+    public ResponseEntity<String> enterChatRoom(
             @PathVariable("matchId") Long matchId,
-            @PathVariable("userId") Long userId
+            @PathVariable("userId")  Long userId
     ) {
         User currentUser = userService.getUserById(userId);
 
@@ -37,9 +73,15 @@ public class RoomController {
         matchService.markUserEnteredChat(matchId, currentUser);
 
         // 2. 관련 정보 조회
-        Long sessionId = surveySessionRepository.findSurveySessionByMatchId(matchId).getId();
+        Long sessionId = surveySessionRepository
+                .findSurveySessionByMatchId(matchId)
+                .getId();
         long roomId = roomService.getRoomId(matchId);
 
-        return ResponseEntity.ok("sessionId: " + sessionId + ", roomId: " + roomId + ", userId: " + userId + "입장");
+        String message = String.format(
+                "sessionId: %d, roomId: %d, userId: %d 입장",
+                sessionId, roomId, userId
+        );
+        return ResponseEntity.ok(message);
     }
 }

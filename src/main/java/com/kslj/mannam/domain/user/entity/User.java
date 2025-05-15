@@ -52,7 +52,10 @@ public class User {
     @Column(nullable = false)
     private Long age;
 
-    private String questions;
+    private String question;
+    
+    @Column(name = "question_list")
+    private String questionList;
 
     @Column(name = "img_url")
     private String imgUrl;
@@ -120,8 +123,12 @@ public class User {
         this.interests = interests;
     }
 
-    public void updateQuestions(String questions) {
-        this.questions = questions;
+    public void updateQuestion(String question) {
+        this.question = question;
+    }
+
+    public void updateQuestionList(String questionList) {
+        this.questionList = questionList;
     }
 
     public void updateImgUrl(String imgUrl) {
