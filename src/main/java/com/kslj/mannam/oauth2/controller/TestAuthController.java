@@ -1,0 +1,50 @@
+package com.kslj.mannam.oauth2.controller;
+
+import com.kslj.mannam.domain.user.dto.UserResponseDto;
+import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
+import com.kslj.mannam.oauth2.service.UserDetailsServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/auth/test")
+@RequiredArgsConstructor
+public class TestAuthController {
+
+    private final UserDetailsServiceImpl userDetailsService;
+
+    @PostMapping("/login")
+    public ResponseEntity<String> loginAsTestUser(HttpServletRequest request) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername("testUser");
+
+        UsernamePasswordAuthenticationToken authentication
+                = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(authentication);
+
+        HttpSessionSecurityContextRepository repo = new HttpSessionSecurityContextRepository();
+        repo.saveContext(context, request, null);
+
+        return ResponseEntity.ok("Logged in as testUser");
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDto> getCurrentUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        UserResponseDto response = UserResponseDto.fromEntity(userDetails.getUser());
+        return ResponseEntity.ok(response);
+    }
+}

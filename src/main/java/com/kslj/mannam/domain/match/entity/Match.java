@@ -39,11 +39,11 @@ public class Match {
     @JoinColumn(name = "user2_id", nullable = false)
     private User user2;
 
-    @Column(nullable = false)
+    @Column(name="user1_entered", nullable = false)
     @Builder.Default
     private boolean user1Entered = false;
 
-    @Column(nullable = false)
+    @Column(name="user2_entered", nullable = false)
     @Builder.Default
     private boolean user2Entered = false;
 
