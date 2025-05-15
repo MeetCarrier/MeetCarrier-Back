@@ -36,33 +36,6 @@ public class SurveyController {
     private final SurveyService surveyService;
     private final UserService userService;
 
-    // 설문 세션에 사용할 질문 생성
-    @Operation(
-            summary     = "설문 질문 생성",
-            description = "지정된 세션(sessionId)에 사용할 설문 질문들을 생성합니다.",
-            parameters = {
-                    @Parameter(
-                            name        = "sessionId",
-                            description = "질문을 생성할 설문 세션의 ID",
-                            required    = true,
-                            in          = ParameterIn.PATH,
-                            schema      = @Schema(type = "integer", format = "int64")
-                    )
-            },
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description  = "생성 성공"
-                    )
-            }
-    )
-    @PostMapping("/{sessionId}/questions")
-    public ResponseEntity<Void> createSurveyQuestion(
-            @PathVariable("sessionId") long sessionId) {
-        surveyService.createSurveyQuestions(sessionId);
-        return ResponseEntity.ok().build();
-    }
-
     // 설문 질문 조회
     @Operation(
             summary     = "설문 질문 조회",
@@ -183,5 +156,16 @@ public class SurveyController {
     public void surveyLeave(SurveyLeaveDto dto) {
         User user = userService.getUserById(dto.getLeaverId());
         surveyService.leaveSession(dto.getSessionId(), user);
+    }
+
+    @PostMapping("/{matchId}/{sessionId}/questions")
+    public ResponseEntity<List<SurveyQuestionResponseDto>> testCreateQuestions(
+            @PathVariable("matchId") long matchId,
+            @PathVariable("sessionId") long sessionId
+    ) {
+        surveyService.createSurveyQuestions(matchId, sessionId);
+        List<SurveyQuestionResponseDto> questions = surveyService.getSurveyQuestions(sessionId);
+
+        return ResponseEntity.ok(questions);
     }
 }

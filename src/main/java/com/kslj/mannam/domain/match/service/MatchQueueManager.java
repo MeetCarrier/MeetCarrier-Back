@@ -172,7 +172,7 @@ public class MatchQueueManager {
         );
 
         long surveySessionId = surveyService.createSurveySession(matchId);
-        surveyService.createSurveyQuestions(surveySessionId);
+        surveyService.createSurveyQuestions(matchId, surveySessionId);
 
         // 매칭 성공 메시지 전송 (신규 유저)
         sendMatchSuccess(matchedInfo.getUserId(), matchedInfo.getFinalScore(), surveySessionId);

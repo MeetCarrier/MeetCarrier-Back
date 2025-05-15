@@ -16,12 +16,19 @@ import com.kslj.mannam.domain.user.entity.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -59,30 +66,57 @@ public class SurveyService {
         return session.getId();
     }
 
-    // 설문지 질문 등록 (질문은 서버에서 처리? 클라이언트 측에서 랜덤하게 몇 개 뽑아서 나에게 전달?)
+    // 설문지 질문 생성
     @Transactional
-    public void createSurveyQuestions(long sessionId) {
+    public void createSurveyQuestions(long matchId, long sessionId) {
         SurveySession session = surveySessionRepository
                 .findById(sessionId)
                 .orElseThrow(() -> new EntityNotFoundException("SurveySession not found: " + sessionId));
 
-        // 임의 설정. 질문 생성.
-        SurveyQuestion question1 = SurveyQuestion.builder()
-                .content("죽기 전에 꼭 해보고 싶은 버킷리스트 한 가지와 이유는?")
-                .surveySession(session)
-                .build();
-        SurveyQuestion question2 = SurveyQuestion.builder()
-                .content("가장 최근에 행복했던 순간은 언제였나요?")
-                .surveySession(session)
-                .build();
-        SurveyQuestion question3 = SurveyQuestion.builder()
-                .content("당신이 가장 자랑스러웠던 순간은?")
-                .surveySession(session)
-                .build();
+        Match match = matchService.getMatch(matchId);
+        String user1Question = match.getUser1().getQuestion();
+        String user2Question = match.getUser2().getQuestion();
 
-        surveyQuestionRepository.save(question1);
-        surveyQuestionRepository.save(question2);
-        surveyQuestionRepository.save(question3);
+        // 질문 랜덤하게 뽑기
+        List<String> questionPool = loadQuestionsFromFile();
+        Collections.shuffle(questionPool);
+        List<String> selectedQuestions = new ArrayList<>();
+
+        // 설정한 질문이 둘 다 없는 경우 -> 5개, 설정한 질문이 둘 중 하나만 있는 경우 -> 4개, 둘 다 질문을 설정한 경우 -> 3개
+        if(user1Question == null && user2Question == null) {
+            selectedQuestions = questionPool.stream().limit(5).toList();
+        }
+        else if (user1Question != null && user2Question != null) {
+            selectedQuestions = questionPool.stream().limit(3).toList();
+        }
+        else {
+            selectedQuestions = questionPool.stream().limit(4).toList();
+        }
+
+        // 랜덤으로 뽑은 질문 저장
+        for (String content : selectedQuestions) {
+            SurveyQuestion question = SurveyQuestion.builder()
+                    .content(content)
+                    .surveySession(session)
+                    .build();
+            surveyQuestionRepository.save(question);
+        }
+
+        // 사용자가 설정한 질문을 줄러와 저장
+        if(user1Question != null) {
+            SurveyQuestion question = SurveyQuestion.builder()
+                    .content(user1Question)
+                    .surveySession(session)
+                    .build();
+            surveyQuestionRepository.save(question);
+        }
+        if(user2Question != null) {
+            SurveyQuestion question = SurveyQuestion.builder()
+                    .content(user2Question)
+                    .surveySession(session)
+                    .build();
+            surveyQuestionRepository.save(question);
+        }
     }
 
     // 설문지 질문 조회
@@ -156,19 +190,6 @@ public class SurveyService {
         return responseDtos;
     }
 
-    // 완료 알람 전송
-    public void notifyComplete(long sessionId, long roomId) {
-        // 전달할 데이터 생성
-        SurveyCompleteDto dto = SurveyCompleteDto.builder()
-                .sessionId(sessionId)
-                .roomId(roomId)
-                .build();
-
-        // 클라이언트에게 메시지 전송
-        System.out.println("dto = " + dto);
-        messagingTemplate.convertAndSend("/topic/survey/" + sessionId + "/complete", dto);
-    }
-
     // 설문지 중 나가기
     @Transactional
     public void leaveSession(long sessionId, User user) {
@@ -189,5 +210,29 @@ public class SurveyService {
         log.info("leaveDto = " + leaveDto);
         // 알림 전송
         messagingTemplate.convertAndSend("/topic/survey/" + sessionId + "/leave", leaveDto);
+    }
+
+    // 완료 알람 전송
+    private void notifyComplete(long sessionId, long roomId) {
+        // 전달할 데이터 생성
+        SurveyCompleteDto dto = SurveyCompleteDto.builder()
+                .sessionId(sessionId)
+                .roomId(roomId)
+                .build();
+
+        // 클라이언트에게 메시지 전송
+        System.out.println("dto = " + dto);
+        messagingTemplate.convertAndSend("/topic/survey/" + sessionId + "/complete", dto);
+    }
+
+    // 질문 리스트 가져오기
+    private List<String> loadQuestionsFromFile() {
+        try {
+            ClassPathResource resource = new ClassPathResource("questions.txt");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
+            return reader.lines().collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException("질문 리스트 가져오던 중 오류 발생", e);
+        }
     }
 }
