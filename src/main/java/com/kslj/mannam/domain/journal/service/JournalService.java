@@ -7,6 +7,8 @@ import com.kslj.mannam.domain.journal.dto.JournalResponseDto;
 import com.kslj.mannam.domain.journal.entity.Journal;
 import com.kslj.mannam.domain.journal.repository.JournalRepository;
 import com.kslj.mannam.domain.user.entity.User;
+import com.kslj.mannam.domain.user.enums.ActionType;
+import com.kslj.mannam.domain.user.service.UserActionLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ public class JournalService {
 
     private final JournalRepository journalRepository;
     private final ObjectMapper objectMapper;
+    private final UserActionLogService userActionLogService;
 
     // 년, 월 기준으로 일기 검색 후 목록 제공
     @Transactional(readOnly = true)
@@ -78,6 +81,7 @@ public class JournalService {
         }
 
         Journal savedJournal = journalRepository.save(newJournal);
+        userActionLogService.logUserAction(user, ActionType.WRITE_JOURNAL);
         return savedJournal.getId();
     }
 
