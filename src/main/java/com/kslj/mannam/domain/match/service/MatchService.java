@@ -8,7 +8,10 @@ import com.kslj.mannam.domain.match.repository.MatchRepository;
 import com.kslj.mannam.domain.room.service.RoomService;
 import com.kslj.mannam.domain.survey.repository.SurveySessionRepository;
 import com.kslj.mannam.domain.user.entity.User;
+import com.kslj.mannam.domain.user.enums.ActionType;
+import com.kslj.mannam.domain.user.service.UserActionLogService;
 import com.kslj.mannam.domain.user.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,17 +28,23 @@ public class MatchService {
     private final SurveySessionRepository surveySessionRepository;
     private final UserService userService;
     private final RoomService roomService;
+    private final UserActionLogService userActionLogService;
 
     // 매칭 정보 생성
     @Transactional
     public long createMatch(MatchRequestDto matchRequestDto) {
+        User user1 = userService.getUserById(matchRequestDto.getUser1Id());
+        User user2 = userService.getUserById(matchRequestDto.getUser2Id());
+
         Match newMatch = Match.builder()
                 .score(matchRequestDto.getScore())
-                .user1(userService.getUserById(matchRequestDto.getUser1Id()))
-                .user2(userService.getUserById(matchRequestDto.getUser2Id()))
+                .user1(user1)
+                .user2(user2)
                 .build();
 
         Match savedMatch = matchRepository.save(newMatch);
+        userActionLogService.logUserAction(user1, ActionType.COMPLETE_MATCH);
+        userActionLogService.logUserAction(user2, ActionType.COMPLETE_MATCH);
 
         return savedMatch.getId();
     }
@@ -47,12 +56,16 @@ public class MatchService {
         List<MatchResponseDto> responses = new ArrayList<>();
 
         for (Match match : matches) {
-            Long relatedId = null;
-            switch (match.getStatus()) {
-                case Surveying -> relatedId = surveySessionRepository.findSurveySessionByMatchId(match.getId()).getId();
-                case Chatting -> relatedId = roomService.getRoomId(match.getId());
+            Long sessionId = surveySessionRepository.findSurveySessionByMatchId(match.getId()).getId();
+
+            Long roomId = null;
+            MatchStatus status = match.getStatus();
+
+            if (status != MatchStatus.Surveying && status != MatchStatus.Survey_Cancelled && status != MatchStatus.Matched) {
+                roomId = roomService.getRoomId(match.getId());
             }
-            responses.add(MatchResponseDto.fromEntity(match, relatedId));
+
+            responses.add(MatchResponseDto.fromEntity(match, sessionId, roomId, user));
         }
 
         return responses;
@@ -67,7 +80,7 @@ public class MatchService {
 
     // 매칭 정보 업데이트
     @Transactional
-    public long updateMatchStatus(long matchId, MatchStatus status) {
+    public void updateMatchStatus(long matchId, MatchStatus status) {
         Optional<Match> match = matchRepository.findById(matchId);
 
         if (match.isEmpty()) {
@@ -76,7 +89,11 @@ public class MatchService {
             Match targetMatch = match.get();
 
             targetMatch.updateStatus(status);
-            return matchRepository.save(targetMatch).getId();
+            matchRepository.save(targetMatch);
+            if(status == MatchStatus.Completed){
+                userActionLogService.logUserAction(match.get().getUser1(), ActionType.COMPLETE_MATCH);
+                userActionLogService.logUserAction(match.get().getUser2(), ActionType.COMPLETE_MATCH);
+            }
         }
     }
 
@@ -93,5 +110,17 @@ public class MatchService {
             matchRepository.delete(targetMatch);
             return matchId;
         }
+    }
+
+    @Transactional
+    public void markUserEnteredChat(Long matchId, User user) {
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new EntityNotFoundException("Match not found"));
+
+        if (!match.hasUser(user)) {
+            throw new IllegalArgumentException("User not part of this match");
+        }
+
+        match.markUserEntered(user);
     }
 }

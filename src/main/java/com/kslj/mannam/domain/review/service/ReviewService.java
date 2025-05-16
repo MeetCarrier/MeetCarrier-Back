@@ -6,6 +6,7 @@ import com.kslj.mannam.domain.review.dto.ReviewResponseDto;
 import com.kslj.mannam.domain.review.entity.Review;
 import com.kslj.mannam.domain.review.repository.ReviewRepository;
 import com.kslj.mannam.domain.user.entity.User;
+import com.kslj.mannam.domain.user.service.UserActionLogService;
 import com.kslj.mannam.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final UserService userService;
+    private final UserActionLogService userActionLogService;
 
     // 리뷰 등록
     public long createReview(long userId, ReviewRequestDto requestDto, User reviewer) {
@@ -32,6 +34,7 @@ public class ReviewService {
                 .build();
 
         Review savedReview = reviewRepository.save(newReview);
+        userActionLogService.logUserReview(targetUser, newReview);
 
         return savedReview.getId();
     }
@@ -86,8 +89,8 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new RuntimeException("리뷰를 찾을 수 없습니다. reviewId = " + reviewId));
 
         if(review.getReviewer().equals(reviewer)) {
-            review.updateRatingAndContent(requestDto.getRating(), requestDto.getContent());
-            reviewRepository.save(review);
+            if (requestDto.getContent() != null) review.updateContent(requestDto.getContent());
+            if (requestDto.getRating() != null) review.updateRating(requestDto.getRating());
         }
         else {
             throw new RuntimeException("작성자가 일치하지 않습니다.");

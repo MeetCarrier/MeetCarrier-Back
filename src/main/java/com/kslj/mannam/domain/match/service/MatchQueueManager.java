@@ -10,6 +10,7 @@ import com.kslj.mannam.domain.survey.service.SurveyService;
 import com.kslj.mannam.domain.test.dto.TestResponseDto;
 import com.kslj.mannam.domain.test.service.TestService;
 import com.kslj.mannam.domain.user.entity.User;
+import com.kslj.mannam.domain.user.enums.Gender;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -60,6 +61,7 @@ public class MatchQueueManager {
                 .userId(user.getId())
                 .region(user.getRegion())
                 .interests(user.getInterests())
+                .gender(user.getGender())
                 .age(user.getAge())
                 .phone(user.getPhone())
                 .depressionScore(test.getDepressionScore())
@@ -74,19 +76,26 @@ public class MatchQueueManager {
                 .joinTime(LocalDateTime.now())
                 .build();
 
+        // 요청 ID 생성
         UUID requestId = UUID.randomUUID();
 
         List<String> blockedPhones = blockService.getBlocks(user).stream()
                 .map(BlockDto::getBlockedPhone)
                 .toList();
 
-        // 나이차가 위아래로 5살까지만 매칭 대상에 포함되도록 설정
+        // 사용자가 설정한 나이차까지만 매칭 대상에 포함되도록 설정
+        // 사용자가 이성 매칭 OFF 시 동성만 매칭 대상에 포함되도록 설정
         // 블락한 유저는 매칭 대상에서 제외하도록 설정
+        int maxAgeGap = user.getMaxAgeGap();
+        boolean allowOppositeGender = user.isAllowOppositeGender();
+        Gender userGender = user.getGender();
+
         List<MatchQueueRequestDto> waitingUsers = matchingQueue.values().stream()
                 .map(MatchingQueueEntry::getUserData)
                 .filter(userData ->
-                    userData.getAge() >= newUserData.getAge() - 5 &&
-                    userData.getAge() <= newUserData.getAge() + 5 &&
+                    userData.getAge() >= newUserData.getAge() - maxAgeGap &&
+                    userData.getAge() <= newUserData.getAge() + maxAgeGap &&
+                    (allowOppositeGender || userData.getGender() == userGender) &&
                     !blockedPhones.contains(userData.getPhone())
                 )
                 .toList();
@@ -163,7 +172,7 @@ public class MatchQueueManager {
         );
 
         long surveySessionId = surveyService.createSurveySession(matchId);
-        surveyService.createSurveyQuestions(surveySessionId);
+        surveyService.createSurveyQuestions(matchId, surveySessionId);
 
         // 매칭 성공 메시지 전송 (신규 유저)
         sendMatchSuccess(matchedInfo.getUserId(), matchedInfo.getFinalScore(), surveySessionId);

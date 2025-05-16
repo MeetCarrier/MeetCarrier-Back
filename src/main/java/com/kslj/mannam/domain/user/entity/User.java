@@ -44,29 +44,43 @@ public class User {
     private String personalities;
 
     @Column(nullable = false)
-    private String preferences;
-
-    @Column(nullable = false)
     private String interests;
 
+    @Builder.Default
     @Column(nullable = false)
-    private float footprint;
+    private double footprint = 36.5;
 
     @Column(nullable = false)
     private Long age;
 
-    private String questions;
+    private String question;
+    
+    @Column(name = "question_list")
+    private String questionList;
 
     @Column(name = "img_url")
     private String imgUrl;
 
     private String phone;
 
+    @Builder.Default
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    @Builder.Default
+    @Column(name = "max_age_gap", nullable = false)
+    private int maxAgeGap = 5;
+
+    @Builder.Default
+    @Column(name = "allow_opposite_gender", nullable = false)
+    private boolean allowOppositeGender = false;
+
+    @Builder.Default
+    @Column(name = "max_matching_distance", nullable = false)
+    private double maxMatchingDistance = 10;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     List<Block> blocks;
@@ -106,16 +120,16 @@ public class User {
         this.personalities = personalities;
     }
 
-    public void updatePreferences(String preferences) {
-        this.preferences = preferences;
-    }
-
     public void updateInterests(String interests) {
         this.interests = interests;
     }
 
-    public void updateQuestions(String questions) {
-        this.questions = questions;
+    public void updateQuestion(String question) {
+        this.question = question;
+    }
+
+    public void updateQuestionList(String questionList) {
+        this.questionList = questionList;
     }
 
     public void updateImgUrl(String imgUrl) {
@@ -124,6 +138,22 @@ public class User {
 
     public void updatePhone(String phone) {
         this.phone = phone;
+    }
+
+    public void updateMaxAgeGap(int maxAgeGap) {
+        this.maxAgeGap = maxAgeGap;
+    }
+
+    public void updateAllowOppositeGender(boolean allowOppositeGender) {
+        this.allowOppositeGender = allowOppositeGender;
+    }
+
+    public void updateMaxMatchingDistance(double maxMatchingDistance) {
+        this.maxMatchingDistance = maxMatchingDistance;
+    }
+
+    public void updateFootprint(double footprint) {
+        this.footprint = footprint;
     }
 
     public void withdraw() {
@@ -137,9 +167,11 @@ public class User {
         this.gender = dto.getGender();
         this.age = dto.getAge();
         this.personalities = dto.getPersonalities();
-        this.preferences = dto.getPreferences();
         this.interests = dto.getInterests();
         this.footprint = 36.5f;
+        this.maxAgeGap = 5;
+        this.allowOppositeGender = false;
+        this.maxMatchingDistance = 10;
         this.isDeleted = false;
         this.deletedAt = null;
     }

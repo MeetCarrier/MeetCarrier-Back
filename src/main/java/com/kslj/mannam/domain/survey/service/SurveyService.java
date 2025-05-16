@@ -4,10 +4,7 @@ import com.kslj.mannam.domain.match.entity.Match;
 import com.kslj.mannam.domain.match.enums.MatchStatus;
 import com.kslj.mannam.domain.match.service.MatchService;
 import com.kslj.mannam.domain.room.service.RoomService;
-import com.kslj.mannam.domain.survey.dto.SurveyAnswerRequestDto;
-import com.kslj.mannam.domain.survey.dto.SurveyAnswerResponseDto;
-import com.kslj.mannam.domain.survey.dto.SurveyCompleteDto;
-import com.kslj.mannam.domain.survey.dto.SurveyQuestionResponseDto;
+import com.kslj.mannam.domain.survey.dto.*;
 import com.kslj.mannam.domain.survey.entity.SurveyAnswer;
 import com.kslj.mannam.domain.survey.entity.SurveyQuestion;
 import com.kslj.mannam.domain.survey.entity.SurveySession;
@@ -18,13 +15,22 @@ import com.kslj.mannam.domain.survey.repository.SurveySessionRepository;
 import com.kslj.mannam.domain.user.entity.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class SurveyService {
@@ -60,19 +66,57 @@ public class SurveyService {
         return session.getId();
     }
 
-    // 설문지 질문 등록 (질문은 서버에서 처리? 클라이언트 측에서 랜덤하게 몇 개 뽑아서 나에게 전달?)
+    // 설문지 질문 생성
     @Transactional
-    public void createSurveyQuestions(long sessionId) {
+    public void createSurveyQuestions(long matchId, long sessionId) {
         SurveySession session = surveySessionRepository
                 .findById(sessionId)
                 .orElseThrow(() -> new EntityNotFoundException("SurveySession not found: " + sessionId));
 
-        // 임의 설정. 질문 생성 뒤 그 질문들의 ID 반환
-        SurveyQuestion question1 = SurveyQuestion.builder()
-                .content("질문1")
-                .surveySession(session)
-                .build();
-        surveyQuestionRepository.save(question1);
+        Match match = matchService.getMatch(matchId);
+        String user1Question = match.getUser1().getQuestion();
+        String user2Question = match.getUser2().getQuestion();
+
+        // 질문 랜덤하게 뽑기
+        List<String> questionPool = loadQuestionsFromFile();
+        Collections.shuffle(questionPool);
+        List<String> selectedQuestions = new ArrayList<>();
+
+        // 설정한 질문이 둘 다 없는 경우 -> 5개, 설정한 질문이 둘 중 하나만 있는 경우 -> 4개, 둘 다 질문을 설정한 경우 -> 3개
+        if(user1Question == null && user2Question == null) {
+            selectedQuestions = questionPool.stream().limit(5).toList();
+        }
+        else if (user1Question != null && user2Question != null) {
+            selectedQuestions = questionPool.stream().limit(3).toList();
+        }
+        else {
+            selectedQuestions = questionPool.stream().limit(4).toList();
+        }
+
+        // 랜덤으로 뽑은 질문 저장
+        for (String content : selectedQuestions) {
+            SurveyQuestion question = SurveyQuestion.builder()
+                    .content(content)
+                    .surveySession(session)
+                    .build();
+            surveyQuestionRepository.save(question);
+        }
+
+        // 사용자가 설정한 질문을 줄러와 저장
+        if(user1Question != null) {
+            SurveyQuestion question = SurveyQuestion.builder()
+                    .content(user1Question)
+                    .surveySession(session)
+                    .build();
+            surveyQuestionRepository.save(question);
+        }
+        if(user2Question != null) {
+            SurveyQuestion question = SurveyQuestion.builder()
+                    .content(user2Question)
+                    .surveySession(session)
+                    .build();
+            surveyQuestionRepository.save(question);
+        }
     }
 
     // 설문지 질문 조회
@@ -95,29 +139,34 @@ public class SurveyService {
 
     // 설문지 답변 등록
     @Transactional
-    public void submitSurveyAnswer(long sessionId, SurveyAnswerRequestDto requestDto, User user) {
+    public void submitSurveyAnswer(long sessionId, List<SurveyAnswerRequestDto> answers, User user) {
         SurveySession session = surveySessionRepository.findByIdForUpdate(sessionId)
                 .orElseThrow(() -> new EntityNotFoundException("SurveySession not found: " + sessionId));
-        SurveyQuestion question = surveyQuestionRepository.getSurveyQuestionById(requestDto.getQuestionId());
 
-        // 답변 등록
-        SurveyAnswer surveyAnswer = SurveyAnswer.builder()
-                .content(requestDto.getContent())
-                .user(user)
-                .surveySession(session)
-                .surveyQuestion(question)
-                .build();
+        for(SurveyAnswerRequestDto answer : answers) {
+            SurveyQuestion question = surveyQuestionRepository.getSurveyQuestionById(answer.getQuestionId());
 
-        surveyAnswerRepository.save(surveyAnswer);
+            // 답변 등록
+            SurveyAnswer surveyAnswer = SurveyAnswer.builder()
+                    .content(answer.getContent())
+                    .user(user)
+                    .surveySession(session)
+                    .surveyQuestion(question)
+                    .build();
+
+            surveyAnswerRepository.save(surveyAnswer);
+        }
+
+        session.incrementAnsweredCount();
 
         // 답변 수 체크
-        session.incrementAnsweredCount();
         if (session.getAnsweredCount() >= 2) {
             Match match = session.getMatch();
-            // 답변 수가 n개 이상이면 답변 완료 판단 -> 채팅방 생성 서비스 호출, 매칭 상태 갱신
+
             long roomId = roomService.createRoom(match);
-            matchService.updateMatchStatus(match.getId(), MatchStatus.Chatting);
+            matchService.updateMatchStatus(match.getId(), MatchStatus.Chatting); // 전체 상태 변경
             session.updateSessionStatus(SessionStatus.Done);
+
             notifyComplete(session.getId(), roomId);
         }
     }
@@ -132,6 +181,7 @@ public class SurveyService {
             SurveyAnswerResponseDto responseDto = SurveyAnswerResponseDto.builder()
                     .content(surveyAnswer.getContent())
                     .questionId(surveyAnswer.getSurveyQuestion().getId())
+                    .userId(surveyAnswer.getUser().getId())
                     .build();
 
             responseDtos.add(responseDto);
@@ -140,7 +190,30 @@ public class SurveyService {
         return responseDtos;
     }
 
-    public void notifyComplete(long sessionId, long roomId) {
+    // 설문지 중 나가기
+    @Transactional
+    public void leaveSession(long sessionId, User user) {
+        SurveySession session = surveySessionRepository.findById(sessionId)
+                .orElseThrow(() -> new EntityNotFoundException("SurveySession not found: " + sessionId));
+
+        Match match = session.getMatch();
+
+        match.updateStatus(MatchStatus.Survey_Cancelled);
+
+        // 상대방에게 보낼 메시지 구성
+        SurveyLeaveDto leaveDto = SurveyLeaveDto.builder()
+                .sessionId(sessionId)
+                .leaverId(user.getId())
+                .leaverNickname(user.getNickname())
+                .build();
+
+        log.info("leaveDto = " + leaveDto);
+        // 알림 전송
+        messagingTemplate.convertAndSend("/topic/survey/" + sessionId + "/leave", leaveDto);
+    }
+
+    // 완료 알람 전송
+    private void notifyComplete(long sessionId, long roomId) {
         // 전달할 데이터 생성
         SurveyCompleteDto dto = SurveyCompleteDto.builder()
                 .sessionId(sessionId)
@@ -150,5 +223,16 @@ public class SurveyService {
         // 클라이언트에게 메시지 전송
         System.out.println("dto = " + dto);
         messagingTemplate.convertAndSend("/topic/survey/" + sessionId + "/complete", dto);
+    }
+
+    // 질문 리스트 가져오기
+    private List<String> loadQuestionsFromFile() {
+        try {
+            ClassPathResource resource = new ClassPathResource("questions.txt");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
+            return reader.lines().collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException("질문 리스트 가져오던 중 오류 발생", e);
+        }
     }
 }

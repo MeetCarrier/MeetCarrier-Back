@@ -51,7 +51,16 @@ public class MatchController {
     // 현재 유저 매칭 목록 조회
     @Operation(
             summary     = "매칭 목록 조회",
-            description = "로그인한 사용자의 매칭 목록을 조회합니다.",
+            description = "로그인한 사용자의 매칭 목록을 조회합니다.<br><br>" +
+                    "매칭 상태 설명:<br>" +
+                    "- Matched: 매칭 완료, 설문 진행 전(백엔드 전용)<br>" +
+                    "- Surveying: 설문 단계 진행 중<br>" +
+                    "- Chatting: 채팅 중<br>" +
+                    "- Meeting: 오프라인 만남 진행 중<br>" +
+                    "- Reviewing: 만남 이후 리뷰 작성 가능<br>" +
+                    "- Completed: 모든 절차 완료<br>" +
+                    "- Survey_Cancelled: 설문 단계에서 취소<br>" +
+                    "- Chat_Cancelled: 채팅 단계에서 취소",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -65,9 +74,9 @@ public class MatchController {
                     )
             }
     )
-    @GetMapping
-    public ResponseEntity<?> getMatches(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        List<MatchResponseDto> matches = matchService.getMatches(userDetails.getUser());
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getMatches(@PathVariable("userId") Long userId) {
+        List<MatchResponseDto> matches = matchService.getMatches(userService.getUserById(userId));
 
         return ResponseEntity.ok(matches);
     }
@@ -154,12 +163,11 @@ public class MatchController {
                 .socialId("12341234")
                 .socialType(SocialType.Google)
                 .nickname("테스트유저1")
-                .gender(Gender.Female)
-                .region("Daegu")
+                .gender(Gender.Male)
+                .region("Busan")
                 .age(25L)
                 .personalities("소심,느긋")
-                .preferences("sports,gaming")
-                .interests("sports,gaming")
+                .interests("Soccer,Overwatch,Baseball,Dance,YouTube,Movie")
                 .build();
 
         long userId = userService.createUser(userSignUpRequestDto);
@@ -192,11 +200,13 @@ public class MatchController {
                 .userId(1L)
                 .region("Busan")
                 .age(23L)
-                .phone("010-1234-1234")
-                .interests("reading,sports")
+                .gender(Gender.Male)
+                .phone("010-6666-1234")
+//                .interests("Movie,Karaoke,Steam,Camping,Soccer")
+                .interests("Soccer,Overwatch,Baseball,Dance,YouTube")
                 .depressionScore(65)
-                .efficacyScore(40)
-                .relationshipScore(50)
+                .efficacyScore(80)
+                .relationshipScore(60)
                 .reviews(new ArrayList<>())
                 .build();
 
@@ -206,8 +216,9 @@ public class MatchController {
                 .userId(2L)
                 .region("Seoul")
                 .age(28L)
+                .gender(Gender.Male)
                 .phone("010-5678-5678")
-                .interests("music,travel,gaming")
+                .interests("Soccer,Board,Surfing,Drama")
                 .depressionScore(78)
                 .efficacyScore(66)
                 .relationshipScore(56)
@@ -223,8 +234,9 @@ public class MatchController {
                 .userId(3L)
                 .region("Daegu")
                 .age(17L)
+                .gender(Gender.Male)
                 .phone("010-0000-0000")
-                .interests("gaming")
+                .interests("Musical,Jazz,Concert,Exhibition,Valorant")
                 .depressionScore(44)
                 .efficacyScore(53)
                 .relationshipScore(12)

@@ -20,7 +20,6 @@ public class UserSignUpRequestDto {
     private String region;
     private Long age;
     private String personalities;
-    private String preferences;
     private String interests;
 
     @Builder.Default
@@ -35,7 +34,6 @@ public class UserSignUpRequestDto {
                 .region(this.region)
                 .age(this.age)
                 .personalities(this.personalities)
-                .preferences(this.preferences)
                 .interests(this.interests)
                 .footprint(this.footprint)
                 .build();

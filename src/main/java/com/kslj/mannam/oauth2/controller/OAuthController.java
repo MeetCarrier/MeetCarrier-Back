@@ -23,7 +23,7 @@ public class OAuthController {
 
     @GetMapping("/oauth/signup/detail")
     public String showSignUpForm() {
-        return "signup_detail";
+        return "redirect:/register";
     }
 
     @PostMapping("/oauth/signup/detail")
@@ -40,17 +40,17 @@ public class OAuthController {
                 .gender(request.getGender())
                 .region(request.getRegion())
                 .personalities(request.getPersonalities())
-                .preferences(request.getPreferences())
                 .interests(request.getInterests())
+                .age(request.getAge())
                 .build();
 
         userService.createUser(newUser);
 
-        return "redirect:/welcome";
+        return "redirect:/main";
     }
 
     @GetMapping("/oauth/signup/nick/check")
-    public ResponseEntity<?> checkNickDuplication(@RequestParam(value = "nickname") String nickname) {
+    public ResponseEntity<?> checkNickDuplication(@RequestParam("nickname") String nickname) {
         boolean checkNickDuplication = userService.checkNickDuplication(nickname);
 
         if (checkNickDuplication) {

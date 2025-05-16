@@ -60,7 +60,7 @@ public class ReviewController {
                     @ApiResponse(responseCode = "204", description = "리뷰가 존재하지 않음")
             }
     )
-    public ResponseEntity<?> getReviews(@PathVariable(value = "userId") long userId) {
+    public ResponseEntity<?> getReviews(@PathVariable("userId") long userId) {
         List<ReviewResponseDto> reviews = reviewService.getReview(userId);
 
         if (reviews.isEmpty()) {
@@ -103,7 +103,7 @@ public class ReviewController {
                     )
             }
     )
-    public ResponseEntity<?> createReview(@PathVariable(value = "userId") long userId,
+    public ResponseEntity<?> createReview(@PathVariable("userId") long userId,
                                           @RequestBody ReviewRequestDto requestDto,
                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
         long reviewId = reviewService.createReview(userId, requestDto, userService.getUserById(1));
@@ -114,7 +114,7 @@ public class ReviewController {
     @PatchMapping("/{reviewId}")
     @Operation(
             summary     = "리뷰 수정",
-            description = "지정된 ID의 리뷰를 수정합니다.",
+            description = "지정된 ID의 리뷰를 수정합니다.\n요청 전송 시 필요한 부분의 데이터만 채워서 보내면 됩니다.",
             parameters = {
                     @Parameter(
                             name        = "reviewId",

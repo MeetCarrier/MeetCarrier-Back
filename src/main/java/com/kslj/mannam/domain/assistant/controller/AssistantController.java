@@ -41,7 +41,7 @@ public class AssistantController {
     private final SimpMessagingTemplate messagingTemplate;
 
     @PostMapping("/test")
-    public ResponseEntity<?> createQuestion(@RequestParam(name="content") String content) {
+    public ResponseEntity<?> createQuestion(@RequestParam("content") String content) {
         long userId = userService.createUser(UserSignUpRequestDto.builder()
                 .region("서울")
                 .socialType(SocialType.Google)
@@ -49,7 +49,6 @@ public class AssistantController {
                 .gender(Gender.Male)
                 .personalities("소심")
                 .interests("게임")
-                .preferences("축구")
                 .socialId("1234")
                 .build());
         long id = assistantService.createQuestionAndSendToAI(userService.getUserById(userId), content).getId();

@@ -13,13 +13,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ChatMessageDto {
     long roomId;
+    long userId;
     MessageType type;
     String message;
     String imageUrl;
 
     public ChatResponseDto fromEntity(User sender) {
         return ChatResponseDto.builder()
-                .messageType(type)
+                .type(type)
                 .message(message)
                 .imageUrl(imageUrl)
                 .sender(sender.getId())

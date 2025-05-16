@@ -38,8 +38,11 @@ public class Review {
     @JoinColumn(name = "reviewer_id", nullable = false)
     private User reviewer;
 
-    public void updateRatingAndContent(int rating, String content) {
+    public void updateRating(int rating) {
         this.rating = rating;
+    }
+
+    public void updateContent(String content) {
         this.content = content;
     }
 }

@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReviewRequestDto {
-    int rating;
+    Integer rating;
     String content;
 }

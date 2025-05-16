@@ -39,10 +39,27 @@ public class Match {
     @JoinColumn(name = "user2_id", nullable = false)
     private User user2;
 
+    @Column(name="user1_entered", nullable = false)
+    @Builder.Default
+    private boolean user1Entered = false;
+
+    @Column(name="user2_entered", nullable = false)
+    @Builder.Default
+    private boolean user2Entered = false;
+
     public void updateStatus(MatchStatus status) {
         this.status = status;
     }
     public boolean hasUser(User sender) {
         return user1.equals(sender) || user2.equals(sender);
+    }
+
+    public void markUserEntered(User user) {
+        if (user.equals(user1)) this.user1Entered = true;
+        else if (user.equals(user2)) this.user2Entered = true;
+    }
+
+    public boolean isEntered(User user) {
+        return user.equals(user1) ? user1Entered : user2Entered;
     }
 }

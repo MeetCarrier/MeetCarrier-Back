@@ -26,19 +26,33 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = "유저", description = "유저 관리 API")
+@RequestMapping("/user")
 @Controller
 public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/user")
-    @Operation(summary = "유저 정보 조회", description = "현재 로그인 중인 유저의 정보를 조회합니다.")
+    @GetMapping
+    @Operation(
+            summary = "유저 정보 조회",
+            description = "현재 로그인 중인 유저의 정보를 조회합니다.<br><br>" +
+                    "<b>Gender (성별)</b><br>" +
+                    "- Male: 남성<br>" +
+                    "- Female: 여성<br><br>" +
+                    "<b>SocialType (소셜 로그인 타입)</b><br>" +
+                    "- Kakao: 카카오 로그인<br>" +
+                    "- Google: 구글 로그인"
+    )
     @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = UserResponseDto.class)))
-    public ResponseEntity<?> getUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(UserResponseDto.fromEntity(userDetails.getUser()));
+    public ResponseEntity<?> getUser() {
+        // 테스트 용도
+        User testUser = userService.getUserById(1);
+
+        // return ResponseEntity.ok(UserResponseDto.fromEntity(userDetails.getUser()));
+        return ResponseEntity.ok(UserResponseDto.fromEntity(testUser));
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/{userId}")
     @Operation(
             summary = "특정 유저 정보 조회",
             description = "전달된 userId로 특정 유저의 정보를 조회합니다.",
@@ -49,7 +63,7 @@ public class UserController {
             parameters = {
                 @Parameter(name = "userId", description = "조회할 유저의 ID", required = true, example = "1")
             })
-    public ResponseEntity<?> getUserById(@PathVariable(value="userId") long userId) {
+    public ResponseEntity<?> getUserById(@PathVariable("userId") long userId) {
         User user = userService.getUserById(userId);
 
         if (user.isDeleted()) {
@@ -59,29 +73,39 @@ public class UserController {
         return ResponseEntity.ok(UserResponseDto.fromEntity(user));
     }
 
-    @PatchMapping("/user")
+    @PatchMapping
     @Operation(
             summary = "유저 정보 수정",
-            description = "전달된 정보들로 데이터베이스에 저장된 유저의 정보를 수정합니다.",
+            description = "전달된 정보들로 데이터베이스에 저장된 유저의 정보를 수정합니다.\n요청 전송 시 필요한 부분의 데이터만 채워서 보내면 됩니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "수정 완료")
             }
     )
-    public ResponseEntity<?> updateUser(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    public ResponseEntity<?> updateUser(
                                         @RequestBody UpdateUserRequestDto dto) {
-        userService.updateUser(userDetails.getUser(), dto);
+        // 테스트 용도
+        User testUser = userService.getUserById(1);
+        userService.updateUser(testUser, dto);
+
+        // userService.updateUser(userDetails.getUser(), dto);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/logout")
-    @Hidden
+    @Operation(
+            summary = "로그아웃",
+            description = "현재 로그인된 유저를 로그아웃 처리합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "로그아웃 완료")
+            }
+    )
     public ResponseEntity<?> logout(HttpServletRequest request) {
         request.getSession().invalidate();                     // 세션 무효화
         SecurityContextHolder.clearContext();                  // SecurityContext 초기화
         return ResponseEntity.ok("로그아웃 완료");
     }
 
-    @DeleteMapping("/user/withdraw")
+    @DeleteMapping("/withdraw")
     @Operation(
             summary = "유저 탈퇴",
             description = "현재 로그인된 유저를 탈퇴 처리합니다.",

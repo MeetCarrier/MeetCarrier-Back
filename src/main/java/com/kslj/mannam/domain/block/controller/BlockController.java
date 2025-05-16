@@ -1,7 +1,6 @@
 package com.kslj.mannam.domain.block.controller;
 
 import com.kslj.mannam.domain.block.dto.BlockDto;
-import com.kslj.mannam.domain.block.entity.Block;
 import com.kslj.mannam.domain.block.service.BlockService;
 import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
@@ -20,7 +19,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -92,7 +90,7 @@ public class BlockController {
     // 연락처 수정
     @Operation(
             summary     = "블락 정보 수정",
-            description = "지정된 블락(contact) 정보를 수정합니다.",
+            description = "지정된 블락(contact) 정보를 수정합니다.\n요청 전송 시 필요한 부분의 데이터만 채워서 보내면 됩니다.",
             parameters = {
                     @Parameter(
                             name        = "blockId",
@@ -154,7 +152,7 @@ public class BlockController {
             }
     )
     @DeleteMapping("/{blockId}")
-    public ResponseEntity<?> deleteBlock(@PathVariable(value = "blockId") long blockId) {
+    public ResponseEntity<?> deleteBlock(@PathVariable("blockId") long blockId) {
         long deletedBlockId = blockService.deleteBlock(blockId);
 
         return ResponseEntity.ok("번호가 삭제되었습니다. deletedBlockId = " + deletedBlockId);

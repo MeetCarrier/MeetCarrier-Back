@@ -10,9 +10,12 @@ public class UpdateUserRequestDto {
     String region;
     Long age;
     String personalities;
-    String preferences;
     String interests;
-    String questions;
+    String question;
+    String questionList;
     String imgUrl;
     String phone;
+    Integer maxAgeGap;
+    Boolean allowOppositeGender;
+    Double maxMatchingDistance;
 }

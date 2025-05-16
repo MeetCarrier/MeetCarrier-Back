@@ -5,18 +5,27 @@ APP_NAME=demo
 JAR_NAME=$(ls $REPOSITORY/build/libs/ | grep '.jar' | tail -n 1)
 JAR_PATH=$REPOSITORY/build/libs/$JAR_NAME
 
-CURRENT_PID=$(pgrep -f $JAR_NAME)
+PORT=8080
+CURRENT_PID=$(lsof -t -i:$PORT)
 
-if [ -z $CURRENT_PID ] #2
+if [ -z "$CURRENT_PID" ]
 then
   echo "> 현재 구동중인 애플리케이션이 없으므로 종료하지 않습니다."
 else
-  echo "> kill -15 $CURRENT_PID"
+  echo "> 정상 종료 시도: kill -15 $CURRENT_PID"
   sudo kill -15 $CURRENT_PID
-  sleep 5
+  sleep 3
+
+  if kill -0 $CURRENT_PID > /dev/null 2>&1
+  then
+    echo "> 프로세스가 종료되지 않아 강제 종료합니다: kill -9 $CURRENT_PID"
+    sudo kill -9 $CURRENT_PID
+  else
+    echo "> 정상적으로 종료되었습니다."
+  fi
 fi
 
-echo "> $JAR_PATH 배포" #3
+echo "> $JAR_PATH 배포"
 nohup java -jar \
-        -Dspring.profiles.active=dev \
-        build/libs/$JAR_NAME > /home/ubuntu/nohup.out 2>&1 &
+    -Dspring.profiles.active=dev \
+    $JAR_PATH > /home/ubuntu/nohup.out 2>&1 &

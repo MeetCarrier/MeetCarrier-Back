@@ -13,14 +13,14 @@ public class AwsS3Controller {
     private final AwsS3Service awsS3Service;
 
     @PostMapping
-    public ResponseEntity<String> uploadFile(@RequestParam(value = "multipartFile") MultipartFile multipartFile,
-                                             @PathVariable(value = "dirName") String dirName){
+    public ResponseEntity<String> uploadFile(@RequestParam("multipartFile") MultipartFile multipartFile,
+                                             @PathVariable("dirName") String dirName){
         return ResponseEntity.ok(awsS3Service.uploadFile(multipartFile, dirName));
     }
 
     @DeleteMapping
-    public ResponseEntity<String> deleteFile(@RequestParam(value = "fileName") String fileName,
-                                             @PathVariable(value = "dirName") String dirName) {
+    public ResponseEntity<String> deleteFile(@RequestParam("fileName") String fileName,
+                                             @PathVariable("dirName") String dirName) {
         awsS3Service.deleteFile(dirName, fileName);
         return ResponseEntity.ok(fileName);
     }

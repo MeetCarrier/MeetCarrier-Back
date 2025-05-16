@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChatResponseDto {
-    private MessageType messageType;
+    private MessageType type;
     private String message;
     private String imageUrl;
     private long sender;

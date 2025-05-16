@@ -68,7 +68,7 @@ public class MeetingController {
     )
     @PostMapping("/{matchId}")
     public ResponseEntity<Long> createMeeting(
-            @PathVariable(value = "matchId") long matchId,
+            @PathVariable("matchId") long matchId,
             @RequestBody MeetingRequestDto requestDto
     ) {
         long meetingId = meetingService.createMeeting(matchId, requestDto);
@@ -101,7 +101,7 @@ public class MeetingController {
     // 대면 약속 수정
     @Operation(
             summary     = "대면 약속 수정",
-            description = "지정된 meetingId의 대면 약속을 수정합니다.",
+            description = "지정된 meetingId의 대면 약속을 수정합니다.\n요청 전송 시 필요한 부분의 데이터만 채워서 보내면 됩니다.",
             parameters = {
                     @Parameter(
                             name        = "meetingId",
@@ -128,7 +128,7 @@ public class MeetingController {
     )
     @PatchMapping("/{meetingId}")
     public ResponseEntity<Void> updateMeeting(
-            @PathVariable(value = "meetingId") long meetingId,
+            @PathVariable("meetingId") long meetingId,
             @RequestBody MeetingRequestDto requestDto
     ) {
         meetingService.updateMeeting(meetingId, requestDto);
@@ -156,7 +156,7 @@ public class MeetingController {
             }
     )
     @DeleteMapping("/{meetingId}")
-    public ResponseEntity<Void> deleteMeeting(@PathVariable(value = "meetingId") long meetingId) {
+    public ResponseEntity<Void> deleteMeeting(@PathVariable("meetingId") long meetingId) {
         meetingService.deleteMeeting(meetingId);
         return ResponseEntity.ok().build();
     }

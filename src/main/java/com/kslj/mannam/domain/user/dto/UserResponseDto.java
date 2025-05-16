@@ -20,11 +20,14 @@ public class UserResponseDto {
     String region;
     Long age;
     String personalities;
-    String preferences;
     String interests;
-    float footprint;
-    String questions;
+    Double footprint;
+    String question;
+    String questionList;
     String imgUrl;
+    Integer maxAgeGap;
+    Boolean allowOppositeGender;
+    Double maxMatchingDistance;
 
     public static UserResponseDto fromEntity(User user) {
         return UserResponseDto.builder()
@@ -35,11 +38,14 @@ public class UserResponseDto {
                 .region(user.getRegion())
                 .age(user.getAge())
                 .personalities(user.getPersonalities())
-                .preferences(user.getPreferences())
                 .interests(user.getInterests())
                 .footprint(user.getFootprint())
-                .questions(user.getQuestions())
+                .question(user.getQuestion())
+                .questionList(user.getQuestionList())
                 .imgUrl(user.getImgUrl())
+                .maxAgeGap(user.getMaxAgeGap())
+                .allowOppositeGender(user.isAllowOppositeGender())
+                .maxMatchingDistance(user.getMaxMatchingDistance())
                 .build();
     }
 }
