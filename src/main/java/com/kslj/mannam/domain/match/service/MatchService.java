@@ -8,6 +8,8 @@ import com.kslj.mannam.domain.match.repository.MatchRepository;
 import com.kslj.mannam.domain.room.service.RoomService;
 import com.kslj.mannam.domain.survey.repository.SurveySessionRepository;
 import com.kslj.mannam.domain.user.entity.User;
+import com.kslj.mannam.domain.user.enums.ActionType;
+import com.kslj.mannam.domain.user.service.UserActionLogService;
 import com.kslj.mannam.domain.user.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -26,17 +28,23 @@ public class MatchService {
     private final SurveySessionRepository surveySessionRepository;
     private final UserService userService;
     private final RoomService roomService;
+    private final UserActionLogService userActionLogService;
 
     // 매칭 정보 생성
     @Transactional
     public long createMatch(MatchRequestDto matchRequestDto) {
+        User user1 = userService.getUserById(matchRequestDto.getUser1Id());
+        User user2 = userService.getUserById(matchRequestDto.getUser2Id());
+
         Match newMatch = Match.builder()
                 .score(matchRequestDto.getScore())
-                .user1(userService.getUserById(matchRequestDto.getUser1Id()))
-                .user2(userService.getUserById(matchRequestDto.getUser2Id()))
+                .user1(user1)
+                .user2(user2)
                 .build();
 
         Match savedMatch = matchRepository.save(newMatch);
+        userActionLogService.logUserAction(user1, ActionType.COMPLETE_MATCH);
+        userActionLogService.logUserAction(user2, ActionType.COMPLETE_MATCH);
 
         return savedMatch.getId();
     }
@@ -72,7 +80,7 @@ public class MatchService {
 
     // 매칭 정보 업데이트
     @Transactional
-    public long updateMatchStatus(long matchId, MatchStatus status) {
+    public void updateMatchStatus(long matchId, MatchStatus status) {
         Optional<Match> match = matchRepository.findById(matchId);
 
         if (match.isEmpty()) {
@@ -81,7 +89,11 @@ public class MatchService {
             Match targetMatch = match.get();
 
             targetMatch.updateStatus(status);
-            return matchRepository.save(targetMatch).getId();
+            matchRepository.save(targetMatch);
+            if(status == MatchStatus.Completed){
+                userActionLogService.logUserAction(match.get().getUser1(), ActionType.COMPLETE_MATCH);
+                userActionLogService.logUserAction(match.get().getUser2(), ActionType.COMPLETE_MATCH);
+            }
         }
     }
 

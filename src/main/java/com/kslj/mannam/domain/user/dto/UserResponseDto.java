@@ -21,7 +21,7 @@ public class UserResponseDto {
     Long age;
     String personalities;
     String interests;
-    float footprint;
+    Double footprint;
     String question;
     String questionList;
     String imgUrl;

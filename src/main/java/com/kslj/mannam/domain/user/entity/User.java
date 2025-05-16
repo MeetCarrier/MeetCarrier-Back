@@ -46,8 +46,9 @@ public class User {
     @Column(nullable = false)
     private String interests;
 
+    @Builder.Default
     @Column(nullable = false)
-    private float footprint;
+    private double footprint = 36.5;
 
     @Column(nullable = false)
     private Long age;
@@ -149,6 +150,10 @@ public class User {
 
     public void updateMaxMatchingDistance(double maxMatchingDistance) {
         this.maxMatchingDistance = maxMatchingDistance;
+    }
+
+    public void updateFootprint(double footprint) {
+        this.footprint = footprint;
     }
 
     public void withdraw() {

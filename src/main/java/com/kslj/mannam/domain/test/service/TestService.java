@@ -5,6 +5,8 @@ import com.kslj.mannam.domain.test.dto.TestResponseDto;
 import com.kslj.mannam.domain.test.entity.Test;
 import com.kslj.mannam.domain.test.repository.TestRepository;
 import com.kslj.mannam.domain.user.entity.User;
+import com.kslj.mannam.domain.user.enums.ActionType;
+import com.kslj.mannam.domain.user.service.UserActionLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 public class TestService {
 
     private final TestRepository testRepository;
+    private final UserActionLogService userActionLogService;
 
     // 테스트 결과 등록
     @Transactional
@@ -30,6 +33,7 @@ public class TestService {
                 .build();
 
         Test savedTest = testRepository.save(newTest);
+        userActionLogService.logUserAction(user, ActionType.TEST_DONE);
         return savedTest.getId();
     }
 
