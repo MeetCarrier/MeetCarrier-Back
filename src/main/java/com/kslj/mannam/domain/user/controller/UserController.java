@@ -81,13 +81,13 @@ public class UserController {
                     @ApiResponse(responseCode = "200", description = "수정 완료")
             }
     )
-    public ResponseEntity<?> updateUser(
+    public ResponseEntity<?> updateUser(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                         @RequestBody UpdateUserRequestDto dto) {
-        // 테스트 용도
-        User testUser = userService.getUserById(1);
-        userService.updateUser(testUser, dto);
+//        // 테스트 용도
+//        User testUser = userService.getUserById(1);
+//        userService.updateUser(testUser, dto);
 
-        // userService.updateUser(userDetails.getUser(), dto);
+        userService.updateUser(userDetails.getUser(), dto);
         return ResponseEntity.ok().build();
     }
 
