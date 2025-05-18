@@ -1,40 +1,43 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Test User Login</title>
+  <title>Test User Login (Axios)</title>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
-<h1>Test User 로그인</h1>
-
-<form id="login-form" method="post" action="/auth/test/login">
-  <button type="submit">로그인 (testUser)</button>
-</form>
-
-<br>
-
-<button onclick="getCurrentUser()">현재 로그인 유저 정보 확인</button>
-
+<h1>Test User 로그인 및 정보 조회 (Axios)</h1>
+<button onclick="loginAndGetUser()">테스트 유저 로그인 & 유저 정보 확인</button>
 <pre id="user-info"></pre>
 
 <script>
-  function getCurrentUser() {
-    fetch('/auth/test/me', {
-      method: 'GET',
-      credentials: 'include'  // 중요: 세션 쿠키(JSESSIONID) 포함
-    })
-            .then(response => {
-              if (!response.ok) {
-                throw new Error('로그인되어 있지 않거나 오류 발생');
-              }
-              return response.json();
-            })
-            .then(data => {
-              document.getElementById('user-info').textContent = JSON.stringify(data, null, 2);
-            })
-            .catch(error => {
-              document.getElementById('user-info').textContent = error;
-            });
+  async function loginAndGetUser() {
+    try {
+      // 로그인 요청
+      const loginRes = await axios.post(
+              'https://www.mannamdeliveries.link/auth/test/login',
+              null,
+              { withCredentials: true }
+      );
+      console.log('테스트 로그인 성공:', loginRes.data);
+
+      // 로그인 성공 후 유저 정보 요청
+      // <=== 경로 주의: 서버가 /auth/test/me 또는 /user 어떤 걸 지원하는지에 따라 다름
+      const userRes = await axios.get(
+              'https://www.mannamdeliveries.link/auth/test/me',
+              { withCredentials: true }
+      );
+      console.log('유저 정보:', userRes.data);
+
+      document.getElementById('user-info').textContent =
+              JSON.stringify(userRes.data, null, 2);
+    } catch (error) {
+      // error.response?.data를 출력하도록 개선
+      document.getElementById('user-info').textContent =
+              error.response?.data
+                      ? JSON.stringify(error.response.data, null, 2)
+                      : error.toString();
+    }
   }
 </script>
 </body>
