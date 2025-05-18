@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Test User Login</title>
+</head>
+<body>
+<h1>Test User 로그인</h1>
+
+<form id="login-form" method="post" action="/auth/test/login">
+  <button type="submit">로그인 (testUser)</button>
+</form>
+
+<br>
+
+<button onclick="getCurrentUser()">현재 로그인 유저 정보 확인</button>
+
+<pre id="user-info"></pre>
+
+<script>
+  function getCurrentUser() {
+    fetch('/auth/test/me', {
+      method: 'GET',
+      credentials: 'include'  // 중요: 세션 쿠키(JSESSIONID) 포함
+    })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('로그인되어 있지 않거나 오류 발생');
+              }
+              return response.json();
+            })
+            .then(data => {
+              document.getElementById('user-info').textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+              document.getElementById('user-info').textContent = error;
+            });
+  }
+</script>
+</body>
+</html>

@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
-@RestController
+@Controller
 @RequestMapping("/auth/test")
 @RequiredArgsConstructor
 public class TestAuthController {
@@ -46,5 +47,10 @@ public class TestAuthController {
     public ResponseEntity<UserResponseDto> getCurrentUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         UserResponseDto response = UserResponseDto.fromEntity(userDetails.getUser());
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/page")
+    public String showLoginPage() {
+        return "test-login"; // resources/templates/test-login.html
     }
 }
