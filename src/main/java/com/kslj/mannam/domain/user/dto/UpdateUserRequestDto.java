@@ -7,7 +7,8 @@ import lombok.Data;
 public class UpdateUserRequestDto {
     String nickname;
     Gender gender;
-    String region;
+    Double latitude;
+    Double longitude;
     Long age;
     String personalities;
     String interests;

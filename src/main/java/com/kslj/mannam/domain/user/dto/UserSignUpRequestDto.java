@@ -17,7 +17,6 @@ public class UserSignUpRequestDto {
     private SocialType socialType;
     private String nickname;
     private Gender gender;
-    private String region;
     private Long age;
     private String personalities;
     private String interests;
@@ -31,7 +30,6 @@ public class UserSignUpRequestDto {
                 .socialType(this.socialType)
                 .nickname(this.nickname)
                 .gender(this.gender)
-                .region(this.region)
                 .age(this.age)
                 .personalities(this.personalities)
                 .interests(this.interests)

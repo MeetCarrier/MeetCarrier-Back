@@ -43,7 +43,6 @@ public class AssistantController {
     @PostMapping("/test")
     public ResponseEntity<?> createQuestion(@RequestParam("content") String content) {
         long userId = userService.createUser(UserSignUpRequestDto.builder()
-                .region("서울")
                 .socialType(SocialType.Google)
                 .nickname("테스트유저")
                 .gender(Gender.Male)

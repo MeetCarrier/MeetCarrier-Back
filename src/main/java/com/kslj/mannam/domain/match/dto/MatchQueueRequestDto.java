@@ -16,7 +16,8 @@ import java.util.List;
 // 매칭 요청 시 전달할 데이터
 public class MatchQueueRequestDto {
     long userId;                    // 유저 ID
-    String region;                  // 지역
+    Double latitude;                // 위도
+    Double longitude;               // 경도
     String interests;               // 관심사
     Gender gender;                  // 성별
     Long age;                       // 나이

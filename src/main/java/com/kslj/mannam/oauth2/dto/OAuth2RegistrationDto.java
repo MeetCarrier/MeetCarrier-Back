@@ -15,7 +15,6 @@ public class OAuth2RegistrationDto {
     private String provider;
     private String nickname;
     private Gender gender;
-    private String region;
     private String personalities;
     private String interests;
     private Long age;

@@ -12,6 +12,7 @@ import com.kslj.mannam.domain.test.service.TestService;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.enums.Gender;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -24,6 +25,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MatchQueueManager {
@@ -59,7 +61,8 @@ public class MatchQueueManager {
 
         MatchQueueRequestDto newUserData = MatchQueueRequestDto.builder()
                 .userId(user.getId())
-                .region(user.getRegion())
+                .latitude(user.getLatitude())
+                .longitude(user.getLongitude())
                 .interests(user.getInterests())
                 .gender(user.getGender())
                 .age(user.getAge())
@@ -86,18 +89,36 @@ public class MatchQueueManager {
         // 사용자가 설정한 나이차까지만 매칭 대상에 포함되도록 설정
         // 사용자가 이성 매칭 OFF 시 동성만 매칭 대상에 포함되도록 설정
         // 블락한 유저는 매칭 대상에서 제외하도록 설정
+        // 설정한 거리 제한 이내의 유저만 포함되도록 설정
         int maxAgeGap = user.getMaxAgeGap();
         boolean allowOppositeGender = user.isAllowOppositeGender();
         Gender userGender = user.getGender();
+        double maxDistance = user.getMaxMatchingDistance();
+        double newUserLat = user.getLatitude();
+        double newUserLng = user.getLongitude();
 
         List<MatchQueueRequestDto> waitingUsers = matchingQueue.values().stream()
                 .map(MatchingQueueEntry::getUserData)
-                .filter(userData ->
-                    userData.getAge() >= newUserData.getAge() - maxAgeGap &&
-                    userData.getAge() <= newUserData.getAge() + maxAgeGap &&
-                    (allowOppositeGender || userData.getGender() == userGender) &&
-                    !blockedPhones.contains(userData.getPhone())
-                )
+                .filter(userData -> {
+                    // 나이 제한 조건
+                    boolean ageMatch = userData.getAge() >= newUserData.getAge() - maxAgeGap &&
+                            userData.getAge() <= newUserData.getAge() + maxAgeGap;
+
+                    // 성별 조건
+                    boolean genderMatch = allowOppositeGender || userData.getGender() == userGender;
+
+                    // 블락 제외 조건
+                    boolean notBlocked = !blockedPhones.contains(userData.getPhone());
+
+                    // 거리 조건
+                    double distance = getDistance(newUserLat, newUserLng, userData.getLatitude(), userData.getLongitude());
+                    boolean distanceMatch = distance <= maxDistance;
+
+                    // 로그 출력
+                    System.out.println("User: " + userData.getPhone() + " - Distance: " + distance + "km");
+
+                    return ageMatch && genderMatch && notBlocked && distanceMatch;
+                })
                 .toList();
 
         MatchFilterRequestDto request = MatchFilterRequestDto.builder()
@@ -300,5 +321,17 @@ public class MatchQueueManager {
                         .scoreMap(new HashMap<>(entry.getScoreMap())) // 복사해서 넘겨주는 게 안전
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    // 위도, 경도로부터 거리 구하기
+    public double getDistance(Double lat1, Double lng1, Double lat2, Double lng2) {
+        double R = 6371;
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLng = Math.toRadians(lng2 - lng1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
     }
 }

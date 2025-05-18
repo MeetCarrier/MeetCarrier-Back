@@ -31,7 +31,6 @@ public class UserServiceTest {
                 .socialType(SocialType.Google)
                 .nickname("Mannam")
                 .gender(Gender.Male)
-                .region("서울")
                 .personalities("스포츠")
                 .interests("롤")
                 .build();
@@ -53,7 +52,6 @@ public class UserServiceTest {
                 .socialType(SocialType.Google)
                 .nickname("Mannam")
                 .gender(Gender.Male)
-                .region("서울")
                 .personalities("스포츠")
                 .interests("롤")
                 .build();

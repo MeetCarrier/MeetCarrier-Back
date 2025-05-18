@@ -164,7 +164,6 @@ public class MatchController {
                 .socialType(SocialType.Google)
                 .nickname("테스트유저1")
                 .gender(Gender.Male)
-                .region("Busan")
                 .age(25L)
                 .personalities("소심,느긋")
                 .interests("Soccer,Overwatch,Baseball,Dance,YouTube,Movie")
@@ -173,7 +172,8 @@ public class MatchController {
         long userId = userService.createUser(userSignUpRequestDto);
         User user = userService.getUserById(userId);
         user.updatePhone("010-4321-1234");
-
+        user.updateLatitude(35.8722);
+        user.updateLongitude(128.6025);
         TestRequestDto testRequestDto = TestRequestDto.builder()
                 .depressionScore(60)
                 .efficacyScore(40)
@@ -198,11 +198,12 @@ public class MatchController {
     public ResponseEntity<String> addWaitingUser() {
         MatchQueueRequestDto waitingUser1 = MatchQueueRequestDto.builder()
                 .userId(1L)
-                .region("Busan")
                 .age(23L)
                 .gender(Gender.Male)
+                .latitude(35.8722)
+                .longitude(128.6025)
                 .phone("010-6666-1234")
-//                .interests("Movie,Karaoke,Steam,Camping,Soccer")
+                .interests("Movie,Karaoke,Steam,Camping,Soccer")
                 .interests("Soccer,Overwatch,Baseball,Dance,YouTube")
                 .depressionScore(65)
                 .efficacyScore(80)
@@ -214,9 +215,10 @@ public class MatchController {
 
         MatchQueueRequestDto waitingUser2 = MatchQueueRequestDto.builder()
                 .userId(2L)
-                .region("Seoul")
                 .age(28L)
                 .gender(Gender.Male)
+                .latitude(35.8722)
+                .longitude(128.6025)
                 .phone("010-5678-5678")
                 .interests("Soccer,Board,Surfing,Drama")
                 .depressionScore(78)
@@ -232,9 +234,10 @@ public class MatchController {
 
         MatchQueueRequestDto waitingUser3 = MatchQueueRequestDto.builder()
                 .userId(3L)
-                .region("Daegu")
-                .age(17L)
+                .age(22L)
                 .gender(Gender.Male)
+                .latitude(36.3504)
+                .longitude(127.3845)
                 .phone("010-0000-0000")
                 .interests("Musical,Jazz,Concert,Exhibition,Valorant")
                 .depressionScore(44)

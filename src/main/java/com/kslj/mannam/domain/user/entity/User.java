@@ -37,8 +37,8 @@ public class User {
     @Column(nullable = false)
     private Gender gender;
 
-    @Column(nullable = false)
-    private String region;
+    private Double latitude;
+    private Double longitude;
 
     @Column(nullable = false)
     private String personalities;
@@ -108,8 +108,12 @@ public class User {
         this.gender = gender;
     }
 
-    public void updateRegion(String region) {
-        this.region = region;
+    public void updateLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public void updateLongitude(double longitude) {
+        this.longitude = longitude;
     }
 
     public void updateAge(Long age) {
@@ -163,7 +167,6 @@ public class User {
 
     public void rejoin(UserSignUpRequestDto dto) {
         this.nickname = dto.getNickname();
-        this.region = dto.getRegion();
         this.gender = dto.getGender();
         this.age = dto.getAge();
         this.personalities = dto.getPersonalities();
@@ -174,5 +177,8 @@ public class User {
         this.maxMatchingDistance = 10;
         this.isDeleted = false;
         this.deletedAt = null;
+        this.phone = null;
+        this.latitude = null;
+        this.longitude = null;
     }
 }

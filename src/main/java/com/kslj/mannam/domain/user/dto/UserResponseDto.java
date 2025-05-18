@@ -17,7 +17,8 @@ public class UserResponseDto {
     SocialType socialType;
     String nickname;
     Gender gender;
-    String region;
+    Double latitude;
+    Double longitude;
     Long age;
     String personalities;
     String interests;
@@ -35,7 +36,8 @@ public class UserResponseDto {
                 .socialType(user.getSocialType())
                 .nickname(user.getNickname())
                 .gender(user.getGender())
-                .region(user.getRegion())
+                .latitude(user.getLatitude())
+                .longitude(user.getLongitude())
                 .age(user.getAge())
                 .personalities(user.getPersonalities())
                 .interests(user.getInterests())
