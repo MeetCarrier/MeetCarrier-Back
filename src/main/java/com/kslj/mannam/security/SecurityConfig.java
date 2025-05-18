@@ -61,7 +61,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173",
+        config.setAllowedOrigins(List.of(
+                "http://localhost:5173",
+                "https://localhost:5173",
                 "https://jiangxy.github.io",
                 "http://localhost:8080",
                 "https://www.mannamdeliveries.link")); // 프론트엔드 주소
