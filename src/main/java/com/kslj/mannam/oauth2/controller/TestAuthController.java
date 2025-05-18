@@ -4,6 +4,7 @@ import com.kslj.mannam.domain.user.dto.UserResponseDto;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import com.kslj.mannam.oauth2.service.UserDetailsServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,7 +29,7 @@ public class TestAuthController {
     private final UserDetailsServiceImpl userDetailsService;
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginAsTestUser(HttpServletRequest request) {
+    public ResponseEntity<String> loginAsTestUser(HttpServletRequest request, HttpServletResponse response) {
         UserDetails userDetails = userDetailsService.loadUserByUsername("testUser");
 
         UsernamePasswordAuthenticationToken authentication
@@ -38,7 +39,7 @@ public class TestAuthController {
         context.setAuthentication(authentication);
 
         HttpSessionSecurityContextRepository repo = new HttpSessionSecurityContextRepository();
-        repo.saveContext(context, request, null);
+        repo.saveContext(context, request, response);
 
         return ResponseEntity.ok("Logged in as testUser");
     }
