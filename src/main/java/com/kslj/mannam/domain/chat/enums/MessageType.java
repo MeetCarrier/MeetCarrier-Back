@@ -4,5 +4,6 @@ public enum MessageType {
     TEXT,
     IMAGE,
     LEAVE,
-    JOIN
+    JOIN,
+    CHATBOT
 }

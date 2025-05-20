@@ -13,6 +13,7 @@ public class RabbitMQConfig {
         return new Jackson2JsonMessageConverter();
     }
 
+    // 비서 챗봇 통신용 큐
     @Bean
     public Queue aiResponseQueue() {
         return new Queue("ai_response_queue", true);
@@ -23,6 +24,7 @@ public class RabbitMQConfig {
         return new Queue("ai_request_queue", true);
     }
 
+    // 매칭 큐
     @Bean
     public Queue matchRequestQueue() {
         return new Queue("match_request_queue", true);
@@ -31,5 +33,16 @@ public class RabbitMQConfig {
     @Bean
     public Queue matchResponseQueue() {
         return new Queue("match_response_queue", true);
+    }
+
+    // 개인 챗봇 통신용 큐
+    @Bean
+    public Queue chatbot_request_queue() {
+        return new Queue("chatbot_request_queue", true);
+    }
+
+    @Bean
+    public Queue chatbot_response_queue() {
+        return new Queue("chatbot_response_queue", true);
     }
 }
