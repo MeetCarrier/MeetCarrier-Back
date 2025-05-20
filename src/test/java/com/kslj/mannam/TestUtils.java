@@ -21,6 +21,7 @@ public class TestUtils {
                 .socialType(SocialType.Google)
                 .nickname("Mannam")
                 .gender(Gender.Male)
+                .age(23L)
                 .personalities("스포츠")
                 .interests("롤")
                 .build();

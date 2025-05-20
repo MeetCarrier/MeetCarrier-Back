@@ -30,9 +30,6 @@ public class Journal {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(columnDefinition = "TEXT")
-    private String images;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -40,9 +37,5 @@ public class Journal {
     public void updateContentAndStamp(String content, String stamp) {
         this.content = content;
         this.stamp = stamp;
-    }
-
-    public void updateImages(String images) {
-        this.images = images;
     }
 }

@@ -18,5 +18,4 @@ public class JournalResponseDto {
     private String content;
     private String stamp;
     private LocalDateTime createdAt;
-    private List<String> images;
 }

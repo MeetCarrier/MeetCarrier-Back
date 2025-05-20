@@ -1,7 +1,5 @@
 package com.kslj.mannam.domain.journal.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kslj.mannam.domain.journal.dto.JournalRequestDto;
 import com.kslj.mannam.domain.journal.dto.JournalResponseDto;
 import com.kslj.mannam.domain.journal.entity.Journal;
@@ -24,7 +22,6 @@ import java.util.Optional;
 public class JournalService {
 
     private final JournalRepository journalRepository;
-    private final ObjectMapper objectMapper;
     private final UserActionLogService userActionLogService;
 
     // 년, 월 기준으로 일기 검색 후 목록 제공
@@ -40,14 +37,11 @@ public class JournalService {
 
         for(Journal journal : journals) {
             try {
-                List<String> images = objectMapper.readValue(journal.getImages(), new TypeReference<>() {});
-
                 JournalResponseDto responseDto = JournalResponseDto.builder()
                         .id(journal.getId())
                         .content(journal.getContent())
                         .createdAt(journal.getCreatedAt())
                         .stamp(journal.getStamp())
-                        .images(images)
                         .build();
 
                 journalResponseDtos.add(responseDto);
@@ -62,23 +56,11 @@ public class JournalService {
     // 일기 작성
     @Transactional
     public long saveJournal(JournalRequestDto journalRequestDto, User user) {
-        String imagesJson;
-
-        try {
-            imagesJson = objectMapper.writeValueAsString(journalRequestDto.getImages());
-        } catch (Exception e) {
-            throw new RuntimeException("이미지 리스트 -> 문자열 변환 실패", e);
-        }
         Journal newJournal = Journal.builder()
                 .content(journalRequestDto.getContent())
                 .stamp(journalRequestDto.getStamp())
                 .user(user)
-                .images(imagesJson)
                 .build();
-
-        for (String image : journalRequestDto.getImages()) {
-            // 업로드된 이미지들 경로 변경 코드 필요
-        }
 
         Journal savedJournal = journalRepository.save(newJournal);
         userActionLogService.logUserAction(user, ActionType.WRITE_JOURNAL);
@@ -94,39 +76,6 @@ public class JournalService {
         // 일기의 내용과 도장 업데이트
         journal.updateContentAndStamp(journalRequestDto.getContent(), journalRequestDto.getStamp());
 
-        try {
-            // 현재 등록한 이미지 가져오기
-            List<String> existingImages = objectMapper.readValue(journal.getImages(), new TypeReference<>() {});
-            System.out.println("existingUrls = " + existingImages);
-
-            // 전달된 이미지 목록 가져오기
-            List<String> newImages = journalRequestDto.getImages();
-            System.out.println("newUrls = " + newImages);
-
-            // 제거할 이미지 추출
-            List<String> imagesToRemove = existingImages.stream()
-                    .filter(img -> !newImages.contains(img))
-                    .toList();
-            System.out.println("imagesToRemove = " + imagesToRemove);
-
-            // 추가할 이미지 추출
-            List<String> imagesToAdd = newImages.stream()
-                    .filter(img -> !existingImages.contains(img))
-                    .toList();
-            System.out.println("추가할 이미지 = " + imagesToAdd);
-
-            // AWS S3에서 이미지 삭제하는 함수 추가 필요
-
-            // AWS S3에 업로드된 이미지들 경로 변경 코드 필요
-
-            // 최종적으로 새로운 이미지 리스트 저장
-            String imageJson = objectMapper.writeValueAsString(newImages);
-            journal.updateImages(imageJson);
-
-        } catch (Exception e) {
-            throw new RuntimeException("이미지 리스트 -> 문자열 변환 실패", e);
-        }
-
         return journalId;
     }
 
@@ -135,16 +84,8 @@ public class JournalService {
     public long deleteJournal(Long journalId) {
         Optional<Journal> targetJournal = journalRepository.findById(journalId);
 
-        if (targetJournal.isEmpty()) {
-            throw new RuntimeException("일기를 찾을 수 없습니다. journalId = " + journalId);
-        } else {
-
-            // AWS S3에 업로드된 이미지 삭제 코드 필요
-
-            journalRepository.deleteById(journalId);
-        }
+        journalRepository.deleteById(journalId);
 
         return journalId;
     }
-
 }

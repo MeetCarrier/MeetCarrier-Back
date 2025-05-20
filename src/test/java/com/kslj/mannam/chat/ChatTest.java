@@ -54,8 +54,8 @@ public class ChatTest {
     private long createMatch(User user1, User user2) {
         MatchRequestDto matchRequestDto = MatchRequestDto.builder()
                 .score(90)
-                .user1(user1)
-                .user2(user2)
+                .user1Id(user1.getId())
+                .user2Id(user2.getId())
                 .build();
 
         return matchService.createMatch(matchRequestDto);
@@ -74,7 +74,7 @@ public class ChatTest {
         User foundUser2 = testUtils.createAndGetTestUser();
         long matchId = createMatch(foundUser1, foundUser2);
         long roomId = createRoom(matchRepository.getMatchById((matchId)));
-        ChatMessageDto messageDto = createChatMessageDto(roomId, MessageType.Text, "안녕", "");
+        ChatMessageDto messageDto = createChatMessageDto(roomId, MessageType.TEXT, "안녕", "");
 
         //when
         long savedChatId = chatService.saveChatMessage(messageDto, roomId, foundUser1);
@@ -93,9 +93,9 @@ public class ChatTest {
         User foundUser2 = testUtils.createAndGetTestUser();
         long matchId = createMatch(foundUser1, foundUser2);
         long roomId = createRoom(matchRepository.getMatchById((matchId)));
-        ChatMessageDto messageDto1 = createChatMessageDto(roomId, MessageType.Text, "안녕", "");
-        ChatMessageDto messageDto2 = createChatMessageDto(roomId, MessageType.Text, "좋은밤", "");
-        ChatMessageDto messageDto3 = createChatMessageDto(roomId, MessageType.Text, "잘하시네요", "");
+        ChatMessageDto messageDto1 = createChatMessageDto(roomId, MessageType.TEXT, "안녕", "");
+        ChatMessageDto messageDto2 = createChatMessageDto(roomId, MessageType.TEXT, "좋은밤", "");
+        ChatMessageDto messageDto3 = createChatMessageDto(roomId, MessageType.TEXT, "잘하시네요", "");
 
         long savedChatId1 = chatService.saveChatMessage(messageDto1, roomId, foundUser2);
         long savedChatId2 = chatService.saveChatMessage(messageDto2, roomId, foundUser1);
@@ -105,11 +105,11 @@ public class ChatTest {
         User foundUser4 = testUtils.createAndGetTestUser();
         long matchId2 = createMatch(foundUser3, foundUser4);
         long roomId2 = createRoom(matchRepository.getMatchById((matchId2)));
-        ChatMessageDto messageDto4 = createChatMessageDto(roomId2, MessageType.Text, "hello", "");
-        ChatMessageDto messageDto5 = createChatMessageDto(roomId2, MessageType.Text, "nice to meet you", "");
-        ChatMessageDto messageDto6 = createChatMessageDto(roomId2, MessageType.Text, "it's good time to talk", "");
-        ChatMessageDto messageDto7 = createChatMessageDto(roomId2, MessageType.Text, "yeah.", "");
-        ChatMessageDto messageDto8 = createChatMessageDto(roomId2, MessageType.Text, "how was your today", "");
+        ChatMessageDto messageDto4 = createChatMessageDto(roomId2, MessageType.TEXT, "hello", "");
+        ChatMessageDto messageDto5 = createChatMessageDto(roomId2, MessageType.TEXT, "nice to meet you", "");
+        ChatMessageDto messageDto6 = createChatMessageDto(roomId2, MessageType.TEXT, "it's good time to talk", "");
+        ChatMessageDto messageDto7 = createChatMessageDto(roomId2, MessageType.TEXT, "yeah.", "");
+        ChatMessageDto messageDto8 = createChatMessageDto(roomId2, MessageType.TEXT, "how was your today", "");
 
         long savedChatId4 = chatService.saveChatMessage(messageDto4, roomId2, foundUser3);
         long savedChatId5 = chatService.saveChatMessage(messageDto5, roomId2, foundUser3);
@@ -137,7 +137,7 @@ public class ChatTest {
         User foundUser2 = testUtils.createAndGetTestUser();
         long matchId = createMatch(foundUser1, foundUser2);
         long roomId = createRoom(matchRepository.getMatchById((matchId)));
-        ChatMessageDto messageDto = createChatMessageDto(roomId, MessageType.Text, "안녕", "");
+        ChatMessageDto messageDto = createChatMessageDto(roomId, MessageType.TEXT, "안녕", "");
 
         // when
         User user1 = testUtils.createAndGetTestUser();

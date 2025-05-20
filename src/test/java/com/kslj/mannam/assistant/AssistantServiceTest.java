@@ -1,8 +1,7 @@
 package com.kslj.mannam.assistant;
 
+import com.kslj.mannam.domain.assistant.dto.AssistantDataDto;
 import com.kslj.mannam.domain.assistant.dto.AssistantResponseDto;
-import com.kslj.mannam.domain.assistant.entity.AssistantAnswer;
-import com.kslj.mannam.domain.assistant.entity.AssistantQuestion;
 import com.kslj.mannam.domain.assistant.service.AssistantService;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.service.UserService;
@@ -29,10 +28,10 @@ public class AssistantServiceTest {
 
         AssistantResponseDto questionsAndAnswers = assistantService.getQuestionsAndAnswers(user);
 
-        for(AssistantQuestion question : questionsAndAnswers.getAssistantQuestions()) {
+        for(AssistantDataDto question : questionsAndAnswers.getAssistantQuestions()) {
             System.out.println("question = " + question.getContent());
         }
-        for(AssistantAnswer answer : questionsAndAnswers.getAssistantAnswers()) {
+        for(AssistantDataDto answer : questionsAndAnswers.getAssistantAnswers()) {
             System.out.println("answer = " + answer.getContent());
         }
         Assertions.assertEquals(5, questionsAndAnswers.getAssistantAnswers().size());
