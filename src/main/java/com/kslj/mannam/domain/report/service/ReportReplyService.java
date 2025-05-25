@@ -1,5 +1,7 @@
 package com.kslj.mannam.domain.report.service;
 
+import com.kslj.mannam.domain.notification.enums.NotificationType;
+import com.kslj.mannam.domain.notification.service.NotificationService;
 import com.kslj.mannam.domain.report.dto.ReplyRequestDto;
 import com.kslj.mannam.domain.report.entity.Report;
 import com.kslj.mannam.domain.report.entity.ReportReply;
@@ -19,6 +21,7 @@ public class ReportReplyService {
 
     private final ReportRepository reportRepository;
     private final ReportReplyRepository replyRepository;
+    private final NotificationService notificationService;
 
     // 답변 저장
     public long createReportReply(long reportId, ReplyRequestDto replyRequestDto, User user) {
@@ -40,6 +43,7 @@ public class ReportReplyService {
         report.get().updateStatus(ReportStatus.Processed);
 
         ReportReply savedReply = replyRepository.save(reply);
+        notificationService.createNotification(NotificationType.Report, report.get().getUser(), null);
 
         return savedReply.getId();
     }

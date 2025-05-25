@@ -4,10 +4,7 @@ import com.kslj.mannam.domain.assistant.dto.AssistantDataDto;
 import com.kslj.mannam.domain.assistant.dto.AssistantQuestionDto;
 import com.kslj.mannam.domain.assistant.dto.AssistantResponseDto;
 import com.kslj.mannam.domain.assistant.service.AssistantService;
-import com.kslj.mannam.domain.user.dto.UserSignUpRequestDto;
 import com.kslj.mannam.domain.user.entity.User;
-import com.kslj.mannam.domain.user.enums.Gender;
-import com.kslj.mannam.domain.user.enums.SocialType;
 import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,16 +39,9 @@ public class AssistantController {
 
     @PostMapping("/test")
     public ResponseEntity<?> createQuestion(@RequestParam("content") String content) {
-        long userId = userService.createUser(UserSignUpRequestDto.builder()
-                .socialType(SocialType.Google)
-                .nickname("테스트유저")
-                .gender(Gender.Male)
-                .personalities("소심")
-                .interests("게임")
-                .socialId("1234")
-                .build());
-        long id = assistantService.createQuestionAndSendToAI(userService.getUserById(userId), content).getId();
-        return ResponseEntity.ok(id);
+        User user = userService.getUserById(1000);
+        assistantService.createQuestionAndSendToAI(user, content);
+        return ResponseEntity.ok(assistantService.getQuestionsAndAnswers(user));
     }
 
     @MessageMapping("/assistant/send")

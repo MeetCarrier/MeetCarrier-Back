@@ -1,5 +1,7 @@
 package com.kslj.mannam.domain.review.service;
 
+import com.kslj.mannam.domain.notification.enums.NotificationType;
+import com.kslj.mannam.domain.notification.service.NotificationService;
 import com.kslj.mannam.domain.review.dto.ReviewByReviewerIdDto;
 import com.kslj.mannam.domain.review.dto.ReviewRequestDto;
 import com.kslj.mannam.domain.review.dto.ReviewResponseDto;
@@ -21,6 +23,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserService userService;
     private final UserActionLogService userActionLogService;
+    private final NotificationService notificationService;
 
     // 리뷰 등록
     public long createReview(long userId, ReviewRequestDto requestDto, User reviewer) {
@@ -35,6 +38,7 @@ public class ReviewService {
 
         Review savedReview = reviewRepository.save(newReview);
         userActionLogService.logUserReview(targetUser, newReview);
+        notificationService.createNotification(NotificationType.Review, targetUser, savedReview.getId());
 
         return savedReview.getId();
     }

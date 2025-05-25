@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -17,4 +18,6 @@ public interface MeetingRepository extends JpaRepository<Meeting, Long> {
     List<Meeting> findAllByUserId(@Param("userId") Long userId);
 
     boolean existsByMatchId(Long matchId);
+
+    List<Meeting> findByDateBetween(LocalDateTime dateAfter, LocalDateTime dateBefore);
 }

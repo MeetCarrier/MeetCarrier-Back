@@ -4,13 +4,18 @@ import com.kslj.mannam.domain.journal.dto.JournalRequestDto;
 import com.kslj.mannam.domain.journal.dto.JournalResponseDto;
 import com.kslj.mannam.domain.journal.entity.Journal;
 import com.kslj.mannam.domain.journal.repository.JournalRepository;
+import com.kslj.mannam.domain.notification.enums.NotificationType;
+import com.kslj.mannam.domain.notification.service.NotificationService;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.enums.ActionType;
+import com.kslj.mannam.domain.user.repository.UserRepository;
 import com.kslj.mannam.domain.user.service.UserActionLogService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -23,6 +28,8 @@ public class JournalService {
 
     private final JournalRepository journalRepository;
     private final UserActionLogService userActionLogService;
+    private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     // 년, 월 기준으로 일기 검색 후 목록 제공
     @Transactional(readOnly = true)
@@ -87,5 +94,25 @@ public class JournalService {
         journalRepository.deleteById(journalId);
 
         return journalId;
+    }
+
+    // 매 20시마다 일기를 작성하지 않은 사람들에게 알림 전송
+    @Scheduled(cron = "0 0 20 * * *")
+    @Transactional
+    public void notifyDiary() {
+        // 오늘 날짜 세팅
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = LocalDate.now().atTime(23, 59, 59);
+
+        // 모든 유저 조회
+        List<User> allUsers = userRepository.findAll();
+
+        for (User user : allUsers) {
+            boolean hasJournalToday = journalRepository.existsByUserAndCreatedAtBetween(user, startOfDay, endOfDay);
+
+            if (!hasJournalToday) {
+                notificationService.createNotification(NotificationType.Journal, user, null);
+            }
+        }
     }
 }
