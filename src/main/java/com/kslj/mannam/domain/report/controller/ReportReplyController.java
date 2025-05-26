@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RequiredArgsConstructor
 @Controller
-@RequestMapping("/reply")
+@RequestMapping("/api/reply")
 @Tag(name = "신고 답변", description = "신고에 대한 답변 관리 API")
 public class ReportReplyController {
 

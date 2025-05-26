@@ -24,7 +24,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @Controller
-@RequestMapping("/blocks")
+@RequestMapping("/api/blocks")
 @Tag(name = "블락", description = "사용자 블락 관리 API")
 public class BlockController {
 

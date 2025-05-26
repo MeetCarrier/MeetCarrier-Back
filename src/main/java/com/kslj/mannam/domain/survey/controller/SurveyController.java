@@ -29,7 +29,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/survey")
+@RequestMapping("/api/survey")
 @Tag(name = "설문", description = "설문 관리 API")
 public class SurveyController {
 
@@ -152,7 +152,7 @@ public class SurveyController {
     }
 
     // WebSocket용 @MessageMapping (Swagger 문서화 제외)
-    @MessageMapping("/survey/leave")
+    @MessageMapping("/api/survey/leave")
     public void surveyLeave(SurveyLeaveDto dto) {
         User user = userService.getUserById(dto.getLeaverId());
         surveyService.leaveSession(dto.getSessionId(), user);

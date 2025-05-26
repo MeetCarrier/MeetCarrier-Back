@@ -28,7 +28,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Controller
 @Tag(name = "신고", description = "신고 관리 API")
-@RequestMapping("/reports")
+@RequestMapping("/api/reports")
 public class ReportController {
 
     private final ReportService reportService;

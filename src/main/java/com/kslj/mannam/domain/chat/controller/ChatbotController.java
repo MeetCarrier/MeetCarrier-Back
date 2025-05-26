@@ -22,7 +22,7 @@ public class ChatbotController {
     private final ChatService chatService;
     private final UserService userService;
 
-    @MessageMapping("/chatbot/send")
+    @MessageMapping("/api/chatbot/send")
     public void chatbotSend(@RequestBody ChatMessageDto dto) throws Exception {
         long roomId = dto.getRoomId();
 

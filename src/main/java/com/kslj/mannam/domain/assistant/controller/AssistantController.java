@@ -30,7 +30,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Controller
 @Tag(name = "AI 비서", description = "사용자가 AI 비서에게 보낸 질문과 답변 관리 API")
-@RequestMapping("/assistant")
+@RequestMapping("/api/assistant")
 public class AssistantController {
 
     private final AssistantService assistantService;
@@ -44,7 +44,7 @@ public class AssistantController {
         return ResponseEntity.ok(assistantService.getQuestionsAndAnswers(user));
     }
 
-    @MessageMapping("/assistant/send")
+    @MessageMapping("/api/assistant/send")
     public void sendQuestion(AssistantQuestionDto dto) {
 
         // 임시로 user 설정. UserDetailsImpl을 이용하도록 변경 예정

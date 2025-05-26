@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = "유저", description = "유저 관리 API")
-@RequestMapping("/user")
+@RequestMapping("/api/user")
 @Controller
 public class UserController {
 

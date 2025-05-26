@@ -27,7 +27,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "자가진단 테스트", description = "자가진단 테스트 관리 API")
 @Controller
-@RequestMapping("/test")
+@RequestMapping("/api/test")
 class TestController {
 
     private final TestService testService;

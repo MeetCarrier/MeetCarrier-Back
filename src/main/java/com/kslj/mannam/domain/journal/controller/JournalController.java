@@ -25,7 +25,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @Controller
-@RequestMapping("/journals")
+@RequestMapping("/api/journals")
 @Tag(name = "일기", description = "일기 관리 API")
 public class JournalController {
 

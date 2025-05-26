@@ -38,7 +38,7 @@ public class ChatController {
     private final SimpMessagingTemplate messagingTemplate;
     private final UserService userService;
 
-    @MessageMapping("/chat/send")
+    @MessageMapping("/api/chat/send")
     public void sendMessage(ChatMessageDto dto) throws Exception {
         long roomId = dto.getRoomId();
 
@@ -62,7 +62,7 @@ public class ChatController {
                 "/topic/room/" + roomId, response);
     }
 
-    @MessageMapping("/chat/leave")
+    @MessageMapping("/api/chat/leave")
     public void leaveRoom(ChatMessageDto dto) throws Exception {
         long roomId = dto.getRoomId();
 
@@ -114,7 +114,7 @@ public class ChatController {
                     )
             }
     )
-    @GetMapping("/chat/{roomId}")
+    @GetMapping("/api/chat/{roomId}")
     public ResponseEntity<?> getChatMessages(@PathVariable("roomId") long roomId) throws Exception {
         List<ChatResponseDto> chatMessages = chatService.getChatMessages(roomId);
 

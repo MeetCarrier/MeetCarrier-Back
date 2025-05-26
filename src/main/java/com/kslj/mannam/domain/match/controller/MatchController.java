@@ -38,7 +38,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @Controller
-@RequestMapping("/matches")
+@RequestMapping("/api/matches")
 @Tag(name = "매칭", description = "사용자 매칭 관리 API")
 public class MatchController {
 
@@ -156,7 +156,7 @@ public class MatchController {
     }
 
     // 매칭 요청 전송
-    @MessageMapping("/start-matching")
+    @MessageMapping("/api/start-matching")
     public void startMatching() {
         // 차후 userDetailsImpl을 이용하도록 코드 변경 필요
         UserSignUpRequestDto userSignUpRequestDto = UserSignUpRequestDto.builder()

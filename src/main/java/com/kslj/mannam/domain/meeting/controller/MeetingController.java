@@ -26,7 +26,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @Controller
-@RequestMapping("/meetings")
+@RequestMapping("/api/meetings")
 @Tag(name = "대면 약속", description = "매칭된 사용자 간 대면 약속 관리 API")
 public class MeetingController {
 
