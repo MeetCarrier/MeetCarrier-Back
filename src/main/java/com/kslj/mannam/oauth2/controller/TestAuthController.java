@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/auth/test")
+@RequestMapping("/api/auth/test")
 @RequiredArgsConstructor
 public class TestAuthController {
 

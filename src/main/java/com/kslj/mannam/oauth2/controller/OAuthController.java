@@ -9,24 +9,22 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @Controller
+@RequestMapping("/api/oauth/signup")
 @RequiredArgsConstructor
 public class OAuthController {
 
     private final UserService userService;
 
-    @GetMapping("/oauth/signup/detail")
+    @GetMapping("/detail")
     public String showSignUpForm() {
         return "redirect:/register";
     }
 
-    @PostMapping("/oauth/signup/detail")
+    @PostMapping("/detail")
     public String processSignUp(@ModelAttribute("oAuth2RegistrationDto") OAuth2RegistrationDto request,
                          HttpSession session) {
         String socialId = (String) session.getAttribute("UNREGISTERED_SOCIAL_ID");
@@ -48,7 +46,7 @@ public class OAuthController {
         return "redirect:/main";
     }
 
-    @GetMapping("/oauth/signup/nick/check")
+    @GetMapping("/nick/check")
     public ResponseEntity<?> checkNickDuplication(@RequestParam("nickname") String nickname) {
         boolean checkNickDuplication = userService.checkNickDuplication(nickname);
 
