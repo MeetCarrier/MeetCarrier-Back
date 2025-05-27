@@ -33,6 +33,17 @@ public class ReviewController {
     private final ReviewService reviewService;
     private final UserService userService;
 
+    @GetMapping
+    public ResponseEntity<List<ReviewResponseDto>> getReviews(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        List<ReviewResponseDto> reviews = reviewService.getReview(userDetails.getId());
+
+        if (reviews.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(reviews);
+    }
+
     @GetMapping("/{userId}")
     @Operation(
             summary     = "리뷰 조회",
@@ -60,7 +71,7 @@ public class ReviewController {
                     @ApiResponse(responseCode = "204", description = "리뷰가 존재하지 않음")
             }
     )
-    public ResponseEntity<?> getReviews(@PathVariable("userId") long userId) {
+    public ResponseEntity<?> getReviewsByUserId(@PathVariable("userId") long userId) {
         List<ReviewResponseDto> reviews = reviewService.getReview(userId);
 
         if (reviews.isEmpty()) {
