@@ -38,6 +38,11 @@ public class SecurityConfig {
                 })
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()   // static 파일 접근 허용
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
                         .requestMatchers("/journal/**").authenticated()     // 인증이 필요한 엔드포인트
                         .anyRequest().permitAll()
                 )
