@@ -18,6 +18,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -45,6 +46,7 @@ public class MatchQueueManager {
     private static final long TIMEOUT_SECONDS = 300;
 
     // 매칭 큐에 새로운 유저 접근
+    @Transactional
     public void addNewUser(User user) {
 
         // 유저 정보 바탕으로 MatchQueueRequestDto 생성
@@ -140,6 +142,7 @@ public class MatchQueueManager {
     }
 
     // 받은 필터링 결과로 매칭 처리
+    @Transactional
     @RabbitListener(queues = "match_response_queue")
     public void processNewUser(MatchFilterResponseDto responseDto) {
         UUID requestId = responseDto.getRequestId();
@@ -180,7 +183,8 @@ public class MatchQueueManager {
     }
 
     // 매칭 성공 처리
-    private void completeMatching(FilterResultDto matchedInfo, long userId) {
+    @Transactional
+    protected void completeMatching(FilterResultDto matchedInfo, long userId) {
         // 매칭된 유저 큐에서 삭제
         removeUser(matchedInfo.getUserId());
 

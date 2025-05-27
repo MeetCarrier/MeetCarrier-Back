@@ -38,7 +38,7 @@ public class TestService {
     }
 
     // 테스트 결과 목록
-    @Transactional
+    @Transactional(readOnly = true)
     public List<TestResponseDto> getTestByUserId(User user) {
         List<Test> tests = testRepository.findTop10ByUserOrderByCreatedAtDesc(user);
 

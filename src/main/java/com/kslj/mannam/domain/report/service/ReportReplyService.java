@@ -24,6 +24,7 @@ public class ReportReplyService {
     private final NotificationService notificationService;
 
     // 답변 저장
+    @Transactional
     public long createReportReply(long reportId, ReplyRequestDto replyRequestDto, User user) {
 
         // 넘겨온 reportId를 바탕으로 Report 조회
@@ -49,6 +50,7 @@ public class ReportReplyService {
     }
 
     // 답변 조회
+    @Transactional(readOnly = true)
     public ReportReply getReportReply(long reportId) {
         Optional<ReportReply> reportReply = replyRepository.findById(reportId);
 
@@ -60,6 +62,7 @@ public class ReportReplyService {
     }
 
     // 답변 수정
+    @Transactional
     public long updateReportReply(long reportReplyId, ReplyRequestDto replyRequestDto) {
         Optional<ReportReply> reportReplyOpt = replyRepository.findById(reportReplyId);
 

@@ -10,6 +10,7 @@ import com.kslj.mannam.domain.report.repository.ReportRepository;
 import com.kslj.mannam.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ public class ReportService {
     private final ObjectMapper objectMapper;
 
     // 신고 작성
+    @Transactional
     public long createReport(User user, ReportRequestDto reportRequestDto) {
         String imageJson;
 
@@ -51,6 +53,7 @@ public class ReportService {
     }
 
     // 신고 리스트 불러오기
+    @Transactional(readOnly = true)
     public List<ReportListDto> getReports(User user) {
         List<Report> reports = reportRepository.findAllByUser(user);
 

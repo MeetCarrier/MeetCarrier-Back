@@ -32,7 +32,7 @@ public class BlockService {
     }
 
     // 전화번호 목록 반환
-    @Transactional
+    @Transactional(readOnly = true)
     public List<BlockDto> getBlocks(User user) {
         List<Block> blockList = blockRepository.getBlockByUser(user);
 

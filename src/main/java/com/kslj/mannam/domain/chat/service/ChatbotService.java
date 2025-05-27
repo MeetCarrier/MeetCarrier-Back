@@ -15,6 +15,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +33,7 @@ public class ChatbotService {
     private final SimpMessageSendingOperations messagingTemplate;
 
     // 유저 질의 저장 및 챗봇에게 전달
+    @Transactional
     public void saveQuery(ChatMessageDto dto, long roomId, User user) {
         Room room = roomRepository.findById(roomId).orElseThrow();
 
@@ -60,6 +62,7 @@ public class ChatbotService {
     }
 
     // 챗봇 답변 저장 및 반환
+    @Transactional
     @RabbitListener(queues = "chatbot_response_queue")
     public void receiveResponse(Map<String, Object> response) {
         try {

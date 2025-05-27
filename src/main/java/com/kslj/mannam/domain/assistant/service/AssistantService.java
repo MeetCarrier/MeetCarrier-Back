@@ -13,6 +13,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ public class AssistantService {
     private final SimpMessageSendingOperations messagingTemplate;
 
     // 질문 등록 및 AI 비서로 전달
+    @Transactional
     public AssistantQuestion createQuestionAndSendToAI(User user, String questionContent) {
         // 질문 저장
         AssistantQuestion newQuestion = AssistantQuestion.builder()
@@ -50,6 +52,7 @@ public class AssistantService {
     }
 
     // AI 비서 답변 수신 및 등록
+    @Transactional
     @RabbitListener(queues = "ai_response_queue")
     public void createAnswer(Map<String, Object> response) {
         try {
@@ -80,6 +83,7 @@ public class AssistantService {
     }
 
     // 질문 삭제
+    @Transactional
     public long delete(long questionId) {
         assistantQuestionRepository.deleteById(questionId);
 
@@ -87,6 +91,7 @@ public class AssistantService {
     }
 
     // 질문, 답변 불러오기
+    @Transactional(readOnly = true)
     public AssistantResponseDto getQuestionsAndAnswers(User user) {
         List<AssistantQuestion> questions = assistantQuestionRepository.findAllWithAnswerByUserId(user.getId());
 

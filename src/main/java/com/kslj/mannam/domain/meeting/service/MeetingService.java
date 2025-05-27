@@ -32,6 +32,7 @@ public class MeetingService {
     private final NotificationService notificationService;
 
     // 새로운 대면 약속 저장
+    @Transactional
     public long createMeeting(long matchId, MeetingRequestDto requestDto) {
         Match match = matchService.getMatch(matchId);
 
@@ -53,6 +54,7 @@ public class MeetingService {
     }
 
     // 대면 약속 조회
+    @Transactional(readOnly = true)
     public List<MeetingResponseDto> getMeetings(User user) {
         List<Meeting> meetings = meetingRepository.findAllByUserId(user.getId());
 
@@ -62,6 +64,7 @@ public class MeetingService {
     }
 
     // 대면 약속 수정
+    @Transactional
     public void updateMeeting(long meetingId, MeetingRequestDto dto) {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new IllegalArgumentException("약속 정보를 찾을 수 없습니다. meetingId = " + meetingId));
@@ -72,6 +75,7 @@ public class MeetingService {
     }
 
     // 대면 약속 삭제
+    @Transactional
     public void deleteMeeting(long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new IllegalArgumentException("약속 정보를 찾을 수 없습니다. meetingId = " + meetingId));
@@ -81,7 +85,7 @@ public class MeetingService {
 
     // 대면 약속 24시간 전 알람 전송
     @Scheduled(cron = "0 * * * * *")
-    @Transactional
+    @Transactional(readOnly = true)
     public void notifyMeeting() {
         log.info("Meeting Check Started");
         LocalDateTime now = LocalDateTime.now();

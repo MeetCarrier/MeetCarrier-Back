@@ -59,7 +59,7 @@ public class SurveyService {
     }
 
     // 설문지 세션 ID 조회
-    @Transactional
+    @Transactional(readOnly = true)
     public long getSurveySessionId(long matchId) {
         SurveySession session = surveySessionRepository.findSurveySessionByMatchId(matchId);
 

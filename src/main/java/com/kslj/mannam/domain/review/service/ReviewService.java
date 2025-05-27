@@ -12,6 +12,7 @@ import com.kslj.mannam.domain.user.service.UserActionLogService;
 import com.kslj.mannam.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,7 @@ public class ReviewService {
     private final NotificationService notificationService;
 
     // 리뷰 등록
+    @Transactional
     public long createReview(long userId, ReviewRequestDto requestDto, User reviewer) {
         User targetUser = userService.getUserById(userId);
 
@@ -44,6 +46,7 @@ public class ReviewService {
     }
 
     // 리뷰 조회
+    @Transactional(readOnly = true)
     public List<ReviewResponseDto> getReview(long userId) {
         List<ReviewResponseDto> reviewDtos = new ArrayList<>();
 
@@ -67,6 +70,7 @@ public class ReviewService {
     }
 
     // 작성자 기준으로 리뷰 조회
+    @Transactional(readOnly = true)
     public List<ReviewByReviewerIdDto> getReviewByReviewerId(long userId) {
         List<ReviewByReviewerIdDto> reviewDtos = new ArrayList<>();
 
@@ -89,6 +93,7 @@ public class ReviewService {
     }
 
     // 리뷰 수정
+    @Transactional
     public long updateReview(long reviewId, ReviewRequestDto requestDto, User reviewer) {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new RuntimeException("리뷰를 찾을 수 없습니다. reviewId = " + reviewId));
 
@@ -104,6 +109,7 @@ public class ReviewService {
     }
 
     // 리뷰 삭제
+    @Transactional
     public void deleteReview(long reviewId) {
         reviewRepository.deleteById(reviewId);
     }

@@ -50,7 +50,7 @@ public class MatchService {
     }
 
     // 매칭 정보들 조회
-    @Transactional
+    @Transactional(readOnly = true)
     public List<MatchResponseDto> getMatches(User user) {
         List<Match> matches = matchRepository.findAllByUser1OrUser2(user, user);
         List<MatchResponseDto> responses = new ArrayList<>();
@@ -72,7 +72,7 @@ public class MatchService {
     }
 
     // 특정 매칭 정보 조회
-    @Transactional
+    @Transactional(readOnly = true)
     public Match getMatch(Long matchId) {
         return matchRepository.findById(matchId).orElseThrow(
                 () -> new RuntimeException("매칭 정보가 없습니다. matchId=" + matchId));

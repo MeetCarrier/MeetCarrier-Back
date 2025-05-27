@@ -38,11 +38,13 @@ public class UserService {
         return savedUser.getId();
     }
 
+    @Transactional(readOnly = true)
     public User getUserById(long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("해당 사용자가 존재하지 않습니다."));
     }
 
+    @Transactional(readOnly = true)
     public User getUserBySocialId(String socialId) {
         return userRepository.findBySocialId(socialId).orElseThrow();
     }
