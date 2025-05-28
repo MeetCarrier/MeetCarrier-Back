@@ -5,7 +5,6 @@ import com.kslj.mannam.domain.user.dto.UserResponseDto;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -45,11 +44,8 @@ public class UserController {
     )
     @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = UserResponseDto.class)))
     public ResponseEntity<?> getUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        // 테스트 용도
-        // User testUser = userService.getUserById(1);
 
         return ResponseEntity.ok(UserResponseDto.fromEntity(userDetails.getUser()));
-        // return ResponseEntity.ok(UserResponseDto.fromEntity(testUser));
     }
 
     @GetMapping("/{userId}")
@@ -83,11 +79,7 @@ public class UserController {
     )
     public ResponseEntity<?> updateUser(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                         @RequestBody UpdateUserRequestDto dto) {
-//        // 테스트 용도
-//        User testUser = userService.getUserById(1);
-//        userService.updateUser(testUser, dto);
-
-        userService.updateUser(userDetails.getUser(), dto);
+        userService.updateUser(userDetails, dto);
         return ResponseEntity.ok().build();
     }
 

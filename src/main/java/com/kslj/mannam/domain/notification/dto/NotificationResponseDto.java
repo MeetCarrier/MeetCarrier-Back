@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NotificationResponseDto {
+    private Long id;
     private NotificationType type;
     private String message;
     private boolean isRead;
@@ -21,6 +22,7 @@ public class NotificationResponseDto {
 
     public static NotificationResponseDto fromEntity(Notification notification) {
         return NotificationResponseDto.builder()
+                .id(notification.getId())
                 .type(notification.getType())
                 .message(notification.getMessage())
                 .isRead(notification.isRead())

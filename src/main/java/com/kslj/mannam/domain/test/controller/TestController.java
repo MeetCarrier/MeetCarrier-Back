@@ -3,7 +3,6 @@ package com.kslj.mannam.domain.test.controller;
 import com.kslj.mannam.domain.test.dto.TestRequestDto;
 import com.kslj.mannam.domain.test.dto.TestResponseDto;
 import com.kslj.mannam.domain.test.service.TestService;
-import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -13,7 +12,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +29,6 @@ import java.util.List;
 class TestController {
 
     private final TestService testService;
-    private final UserService userService;
 
     // 현재 유저의 테스트 결과 목록 반환
     @GetMapping
@@ -51,7 +48,7 @@ class TestController {
             }
     )
     public ResponseEntity<?> getTestList(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        List<TestResponseDto> tests = testService.getTestByUserId(userService.getUserById(1));
+        List<TestResponseDto> tests = testService.getTestByUserId(userDetails.getUser());
 
         return ResponseEntity.ok(tests);
     }
@@ -82,7 +79,7 @@ class TestController {
     )
     public ResponseEntity<?> createTest(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                         @RequestBody TestRequestDto requestDto) {
-        long savedTestId = testService.createTest(requestDto, userService.getUserById(1));
+        long savedTestId = testService.createTest(requestDto, userDetails.getUser());
 
         return ResponseEntity.ok("테스트 결과가 추가되었습니다. TestId = " + savedTestId);
     }

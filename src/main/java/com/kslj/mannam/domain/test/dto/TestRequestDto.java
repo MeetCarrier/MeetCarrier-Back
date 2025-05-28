@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TestRequestDto {
-    int depressionScore;
-    int efficacyScore;
-    int relationshipScore;
+    private Integer depressionScore;
+    private Integer efficacyScore;
+    private Integer relationshipScore;
 }

@@ -3,7 +3,6 @@ package com.kslj.mannam.domain.meeting.controller;
 import com.kslj.mannam.domain.meeting.dto.MeetingRequestDto;
 import com.kslj.mannam.domain.meeting.dto.MeetingResponseDto;
 import com.kslj.mannam.domain.meeting.service.MeetingService;
-import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -31,7 +30,6 @@ import java.util.List;
 public class MeetingController {
 
     private final MeetingService meetingService;
-    private final UserService userService;
 
     // 대면 약속 생성
     @Operation(
@@ -94,7 +92,7 @@ public class MeetingController {
     )
     @GetMapping
     public ResponseEntity<List<MeetingResponseDto>> getMeetings(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        List<MeetingResponseDto> response = meetingService.getMeetings(userService.getUserById(1));
+        List<MeetingResponseDto> response = meetingService.getMeetings(userDetails.getUser());
         return ResponseEntity.ok(response);
     }
 

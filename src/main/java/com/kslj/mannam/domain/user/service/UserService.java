@@ -4,8 +4,12 @@ import com.kslj.mannam.domain.user.dto.UpdateUserRequestDto;
 import com.kslj.mannam.domain.user.dto.UserSignUpRequestDto;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.repository.UserRepository;
+import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,7 +60,10 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUser(User user, UpdateUserRequestDto dto) {
+    public void updateUser(UserDetailsImpl userDetails, UpdateUserRequestDto dto) {
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new RuntimeException("해당 유저를 찾을 수 없습니다"));
+
         if (dto.getNickname() != null) user.updateNickname(dto.getNickname());
         if (dto.getGender() != null) user.updateGender(dto.getGender());
         if (dto.getLatitude() != null) user.updateLatitude(dto.getLatitude());
@@ -71,6 +78,13 @@ public class UserService {
         if (dto.getMaxAgeGap() != null) user.updateMaxAgeGap(dto.getMaxAgeGap());
         if (dto.getAllowOppositeGender() != null) user.updateAllowOppositeGender(dto.getAllowOppositeGender());
         if (dto.getMaxMatchingDistance() != null) user.updateMaxMatchingDistance(dto.getMaxMatchingDistance());
+
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                new UserDetailsImpl(user),  // 새로 만든 UserDetailsImpl
+                null,
+                userDetails.getAuthorities()
+        );
+        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
     @Transactional

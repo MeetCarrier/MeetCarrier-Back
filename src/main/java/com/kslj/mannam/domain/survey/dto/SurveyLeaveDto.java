@@ -11,6 +11,4 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SurveyLeaveDto {
     private Long sessionId;
-    private Long leaverId;
-    private String leaverNickname;
 }

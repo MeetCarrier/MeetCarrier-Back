@@ -1,6 +1,7 @@
 package com.kslj.mannam.domain.match.service;
 
-import com.kslj.mannam.domain.block.dto.BlockDto;
+import com.kslj.mannam.domain.block.dto.BlockRequestDto;
+import com.kslj.mannam.domain.block.dto.BlockResponseDto;
 import com.kslj.mannam.domain.block.service.BlockService;
 import com.kslj.mannam.domain.match.dto.*;
 import com.kslj.mannam.domain.review.dto.ReviewByReviewerIdDto;
@@ -86,7 +87,7 @@ public class MatchQueueManager {
         UUID requestId = UUID.randomUUID();
 
         List<String> blockedPhones = blockService.getBlocks(user).stream()
-                .map(BlockDto::getBlockedPhone)
+                .map(BlockResponseDto::getBlockedPhone)
                 .toList();
 
         // 사용자가 설정한 나이차까지만 매칭 대상에 포함되도록 설정

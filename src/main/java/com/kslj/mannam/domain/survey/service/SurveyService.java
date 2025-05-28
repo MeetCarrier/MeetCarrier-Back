@@ -203,8 +203,6 @@ public class SurveyService {
         // 상대방에게 보낼 메시지 구성
         SurveyLeaveDto leaveDto = SurveyLeaveDto.builder()
                 .sessionId(sessionId)
-                .leaverId(user.getId())
-                .leaverNickname(user.getNickname())
                 .build();
 
         log.info("leaveDto = " + leaveDto);

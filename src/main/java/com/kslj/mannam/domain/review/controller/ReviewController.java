@@ -3,7 +3,6 @@ package com.kslj.mannam.domain.review.controller;
 import com.kslj.mannam.domain.review.dto.ReviewRequestDto;
 import com.kslj.mannam.domain.review.dto.ReviewResponseDto;
 import com.kslj.mannam.domain.review.service.ReviewService;
-import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -31,7 +30,6 @@ import java.util.List;
 public class ReviewController {
 
     private final ReviewService reviewService;
-    private final UserService userService;
 
     @GetMapping
     public ResponseEntity<List<ReviewResponseDto>> getReviews(@AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -117,7 +115,7 @@ public class ReviewController {
     public ResponseEntity<?> createReview(@PathVariable("userId") long userId,
                                           @RequestBody ReviewRequestDto requestDto,
                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        long reviewId = reviewService.createReview(userId, requestDto, userService.getUserById(1));
+        long reviewId = reviewService.createReview(userId, requestDto, userDetails.getUser());
 
         return ResponseEntity.ok(reviewId);
     }
@@ -154,7 +152,7 @@ public class ReviewController {
             @PathVariable("reviewId") long reviewId,
             @RequestBody ReviewRequestDto requestDto,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        reviewService.updateReview(reviewId, requestDto, userService.getUserById(userDetails.getUser().getId()));
+        reviewService.updateReview(reviewId, requestDto, userDetails.getUser());
         return ResponseEntity.ok().build();
     }
 

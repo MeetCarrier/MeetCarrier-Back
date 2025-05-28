@@ -32,7 +32,6 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     // 알림 조회
-    // 알림 조회
     @Operation(
             summary     = "알림 조회",
             description = "로그인한 사용자의 모든 알림 목록을 조회합니다.",

@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -45,10 +46,10 @@ public class AssistantController {
     }
 
     @MessageMapping("/api/assistant/send")
-    public void sendQuestion(AssistantQuestionDto dto) {
+    public void sendQuestion(Principal principal, @AuthenticationPrincipal UserDetailsImpl userDetails, AssistantQuestionDto dto) {
+        System.out.println("principal = " + principal);
 
-        // 임시로 user 설정. UserDetailsImpl을 이용하도록 변경 예정
-        User sender = userService.getUserById(1);
+        User sender = userDetails.getUser();
 
         log.info("질문 수신: userId={}, content={}", sender.getId(), dto.getContent());
 
@@ -79,8 +80,8 @@ public class AssistantController {
                     )
             }
     )
-    public ResponseEntity<?> getAssistantQuestionsAndAnswers(@AuthenticationPrincipal UserDetailsImpl user) {
-        AssistantResponseDto questionsAndAnswers = assistantService.getQuestionsAndAnswers(userService.getUserById(1));
+    public ResponseEntity<?> getAssistantQuestionsAndAnswers(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        AssistantResponseDto questionsAndAnswers = assistantService.getQuestionsAndAnswers(userDetails.getUser());
 
         return ResponseEntity.ok(questionsAndAnswers);
     }

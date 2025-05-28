@@ -1,8 +1,8 @@
 package com.kslj.mannam.domain.block.controller;
 
-import com.kslj.mannam.domain.block.dto.BlockDto;
+import com.kslj.mannam.domain.block.dto.BlockRequestDto;
+import com.kslj.mannam.domain.block.dto.BlockResponseDto;
 import com.kslj.mannam.domain.block.service.BlockService;
-import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,7 +29,6 @@ import java.util.List;
 public class BlockController {
 
     private final BlockService blockService;
-    private final UserService userService;
 
     // 현재 유저의 블락한 연락처 목록 반환
     @Operation(
@@ -42,7 +41,7 @@ public class BlockController {
                             content      = @Content(
                                     mediaType = "application/json",
                                     array       = @ArraySchema(
-                                            schema = @Schema(implementation = BlockDto.class)
+                                            schema = @Schema(implementation = BlockResponseDto.class)
                                     )
                             )
                     )
@@ -50,7 +49,7 @@ public class BlockController {
     )
     @GetMapping
     public ResponseEntity<?> getBlocks(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        List<BlockDto> blocks = blockService.getBlocks(userService.getUserById(1));
+        List<BlockResponseDto> blocks = blockService.getBlocks(userDetails.getUser());
 
         return ResponseEntity.ok(blocks);
     }
@@ -64,7 +63,7 @@ public class BlockController {
                     required    = true,
                     content     = @Content(
                             mediaType = "application/json",
-                            schema    = @Schema(implementation = BlockDto.class)
+                            schema    = @Schema(implementation = BlockRequestDto.class)
                     )
             ),
             responses = {
@@ -80,9 +79,9 @@ public class BlockController {
     )
     @PostMapping("/register")
     public ResponseEntity<?> createBlock(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                         @RequestBody BlockDto blockDto) {
+                                         @RequestBody BlockRequestDto blockDto) {
 
-        long savedBlockId = blockService.createBlock(userService.getUserById(1), blockDto);
+        long savedBlockId = blockService.createBlock(userDetails.getUser(), blockDto);
 
         return ResponseEntity.ok("새로운 번호가 추가되었습니다. BlockId = " + savedBlockId);
     }
@@ -105,7 +104,7 @@ public class BlockController {
                     required    = true,
                     content     = @Content(
                             mediaType = "application/json",
-                            schema    = @Schema(implementation = BlockDto.class)
+                            schema    = @Schema(implementation = BlockRequestDto.class)
                     )
             ),
             responses = {
@@ -120,7 +119,7 @@ public class BlockController {
             }
     )
     @PatchMapping("/{blockId}")
-    public ResponseEntity<?> updateBlock(@RequestBody BlockDto blockDto,
+    public ResponseEntity<?> updateBlock(@RequestBody BlockRequestDto blockDto,
                                          @PathVariable("blockId") long blockId) {
         long updatedBlockId = blockService.updateBlock(blockId, blockDto);
 

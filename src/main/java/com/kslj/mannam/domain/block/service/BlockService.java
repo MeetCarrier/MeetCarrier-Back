@@ -1,6 +1,7 @@
 package com.kslj.mannam.domain.block.service;
 
-import com.kslj.mannam.domain.block.dto.BlockDto;
+import com.kslj.mannam.domain.block.dto.BlockRequestDto;
+import com.kslj.mannam.domain.block.dto.BlockResponseDto;
 import com.kslj.mannam.domain.block.entity.Block;
 import com.kslj.mannam.domain.block.repository.BlockRepository;
 import com.kslj.mannam.domain.user.entity.User;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,7 +22,7 @@ public class BlockService {
 
     // 전화번호 등록
     @Transactional
-    public long createBlock(User user, BlockDto requestDto) {
+    public long createBlock(User user, BlockRequestDto requestDto) {
         Block newBlock = Block.builder()
                 .blockedPhone(requestDto.getBlockedPhone())
                 .blockedInfo(requestDto.getBlockedInfo())
@@ -33,17 +35,21 @@ public class BlockService {
 
     // 전화번호 목록 반환
     @Transactional(readOnly = true)
-    public List<BlockDto> getBlocks(User user) {
+    public List<BlockResponseDto> getBlocks(User user) {
         List<Block> blockList = blockRepository.getBlockByUser(user);
 
-        return blockList.stream()
-                .map(BlockDto::fromEntity)
-                .collect(Collectors.toList());
+        List<BlockResponseDto> dtos = new ArrayList<>();
+
+        for (Block block : blockList) {
+            dtos.add(BlockResponseDto.fromEntity(block));
+        }
+
+        return dtos;
     }
 
     // 전화번호 정보 업데이트
     @Transactional
-    public long updateBlock(long blockId, BlockDto requestDto) {
+    public long updateBlock(long blockId, BlockRequestDto requestDto) {
         Optional<Block> targetBlock = blockRepository.findById(blockId);
 
         if (targetBlock.isEmpty()) {

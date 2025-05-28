@@ -8,14 +8,16 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class BlockDto {
+@AllArgsConstructor
+public class BlockResponseDto {
+    long id;
     String blockedPhone;
     String blockedInfo;
 
-    public static BlockDto fromEntity(Block block) {
-        return BlockDto.builder()
+    public static BlockResponseDto fromEntity(Block block) {
+        return BlockResponseDto.builder()
+                .id(block.getId())
                 .blockedPhone(block.getBlockedPhone())
                 .blockedInfo(block.getBlockedInfo())
                 .build();
