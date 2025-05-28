@@ -8,7 +8,9 @@ import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -23,10 +25,15 @@ public class ChatbotController {
     private final ChatService chatService;
 
     @MessageMapping("/api/chatbot/send")
-    public void chatbotSend(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody ChatMessageDto dto) throws Exception {
+    public void chatbotSend(SimpMessageHeaderAccessor headerAccessor, @Payload ChatMessageDto dto) throws Exception {
         long roomId = dto.getRoomId();
 
-        // 임시로 user 설정. 차후에 변경
+        Authentication authentication = (Authentication) headerAccessor.getUser();
+        if (authentication == null) {
+            throw new IllegalStateException("인증되지 않은 사용자입니다.");
+        }
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         User sender = userDetails.getUser();
 
         if(!chatService.inspectUser(roomId, sender)){

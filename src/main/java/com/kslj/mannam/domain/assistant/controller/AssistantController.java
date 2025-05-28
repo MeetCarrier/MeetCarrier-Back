@@ -16,7 +16,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,7 +27,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.security.Principal;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -46,9 +48,14 @@ public class AssistantController {
     }
 
     @MessageMapping("/api/assistant/send")
-    public void sendQuestion(Principal principal, @AuthenticationPrincipal UserDetailsImpl userDetails, AssistantQuestionDto dto) {
-        System.out.println("principal = " + principal);
+    public void sendQuestion(SimpMessageHeaderAccessor headerAccessor, @Payload AssistantQuestionDto dto) {
 
+        Authentication authentication = (Authentication) headerAccessor.getUser();
+        if (authentication == null) {
+            throw new IllegalStateException("인증되지 않은 사용자입니다.");
+        }
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         User sender = userDetails.getUser();
 
         log.info("질문 수신: userId={}, content={}", sender.getId(), dto.getContent());

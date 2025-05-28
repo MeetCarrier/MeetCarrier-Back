@@ -24,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -153,8 +155,16 @@ public class MatchController {
 
     // 매칭 요청 전송
     @MessageMapping("/api/start-matching")
-    public void startMatching(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public void startMatching(SimpMessageHeaderAccessor headerAccessor) {
+
+        Authentication authentication = (Authentication) headerAccessor.getUser();
+        if (authentication == null) {
+            throw new IllegalStateException("인증되지 않은 사용자입니다.");
+        }
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         User user = userDetails.getUser();
+
         matchQueueManager.registerUserSession(user.getId());  // 세션 등록
         matchQueueManager.addNewUser(user);    // RabbitMQ로 요청 전송
     }

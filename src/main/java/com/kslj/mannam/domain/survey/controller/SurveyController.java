@@ -19,8 +19,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -144,7 +146,14 @@ public class SurveyController {
 
     // WebSocket용 @MessageMapping (Swagger 문서화 제외)
     @MessageMapping("/api/survey/leave")
-    public void surveyLeave(@AuthenticationPrincipal UserDetailsImpl userDetails, SurveyLeaveDto dto) {
+    public void surveyLeave(SimpMessageHeaderAccessor headerAccessor, @Payload SurveyLeaveDto dto) {
+
+        Authentication authentication = (Authentication) headerAccessor.getUser();
+        if (authentication == null) {
+            throw new IllegalStateException("인증되지 않은 사용자입니다.");
+        }
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         User user = userDetails.getUser();
         surveyService.leaveSession(dto.getSessionId(), user);
     }
