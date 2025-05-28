@@ -310,6 +310,24 @@ public class MatchQueueManager {
         messagingTemplate.convertAndSend("/topic/match_result", timeoutDto);
     }
 
+    // 매칭 도충 취소
+    public boolean cancelMatching(long userId) {
+        MatchingQueueEntry removedEntry = matchingQueue.remove(userId);
+        if (removedEntry != null) {
+            for (MatchingQueueEntry entry : matchingQueue.values()) {
+                if (entry.getScoreMap() != null) {
+                    entry.getScoreMap().remove(userId);
+                }
+            }
+
+            log.info("❌ userId: {} 매칭 취소", userId);
+            return true;
+        }
+
+        log.info("❗ userId: {}가 매칭 큐에 없습니다.", userId);
+        return false;
+    }
+
     // 테스트 용 대기 유저 추가
     public void addWaitingUserDirectly(MatchQueueRequestDto userData) {
         MatchingQueueEntry entry = MatchingQueueEntry.builder()

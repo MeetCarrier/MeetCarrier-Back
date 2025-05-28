@@ -153,6 +153,25 @@ public class MatchController {
         return ResponseEntity.ok("매칭 정보가 삭제되었습니다. deletedMatchId = " + deletedMatchId);
     }
 
+    @Operation(
+            summary = "매칭 요청 취소",
+            description = "현재 매칭 큐에 들어가 있는 유저의 요청을 취소합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "취소 성공 또는 이미 매칭되지 않음")
+            }
+    )
+    @DeleteMapping("/cancel")
+    public ResponseEntity<String> cancelMatching(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        User user = userDetails.getUser();
+        boolean cancelled = matchQueueManager.cancelMatching(user.getId());
+
+        if (cancelled) {
+            return ResponseEntity.ok("매칭 요청이 취소되었습니다.");
+        } else {
+            return ResponseEntity.ok("매칭 큐에 등록된 유저가 아니거나 이미 매칭이 완료되었습니다.");
+        }
+    }
+
     // 매칭 요청 전송
     @MessageMapping("/api/start-matching")
     public void startMatching(SimpMessageHeaderAccessor headerAccessor) {
