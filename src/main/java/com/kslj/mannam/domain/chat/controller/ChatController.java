@@ -5,7 +5,7 @@ import com.kslj.mannam.domain.chat.dto.ChatResponseDto;
 import com.kslj.mannam.domain.chat.enums.MessageType;
 import com.kslj.mannam.domain.chat.service.ChatService;
 import com.kslj.mannam.domain.user.entity.User;
-import com.kslj.mannam.domain.user.service.UserService;
+import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -19,10 +19,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
@@ -36,14 +36,12 @@ public class ChatController {
 
     private final ChatService chatService;
     private final SimpMessagingTemplate messagingTemplate;
-    private final UserService userService;
 
     @MessageMapping("/api/chat/send")
-    public void sendMessage(ChatMessageDto dto) throws Exception {
+    public void sendMessage(@AuthenticationPrincipal UserDetailsImpl userDetails, ChatMessageDto dto) throws Exception {
         long roomId = dto.getRoomId();
 
-        // 임시로 user 설정. 이후, UserDetailsImpl을 이용하도록 변경 필요.
-        User sender = userService.getUserById(dto.getUserId());
+        User sender = userDetails.getUser();
 
         if(!chatService.inspectUser(roomId, sender)){
             throw new AccessDeniedException("해당 채팅방 참여자가 아닙니다.");
@@ -63,11 +61,10 @@ public class ChatController {
     }
 
     @MessageMapping("/api/chat/leave")
-    public void leaveRoom(ChatMessageDto dto) throws Exception {
+    public void leaveRoom(@AuthenticationPrincipal UserDetailsImpl userDetails, ChatMessageDto dto) throws Exception {
         long roomId = dto.getRoomId();
 
-        // 임시로 user 설정. 차후 UserDetailsImpl을 이용하도록 변경 필요
-        User sender = userService.getUserById(1);
+        User sender = userDetails.getUser();
 
         if(!chatService.inspectUser(roomId, sender)){
             throw new AccessDeniedException("해당 채팅방 참여자가 아닙니다.");

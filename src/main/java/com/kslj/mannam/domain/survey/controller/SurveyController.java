@@ -6,7 +6,6 @@ import com.kslj.mannam.domain.survey.dto.SurveyLeaveDto;
 import com.kslj.mannam.domain.survey.dto.SurveyQuestionResponseDto;
 import com.kslj.mannam.domain.survey.service.SurveyService;
 import com.kslj.mannam.domain.user.entity.User;
-import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -34,7 +33,6 @@ import java.util.List;
 public class SurveyController {
 
     private final SurveyService surveyService;
-    private final UserService userService;
 
     // 설문 질문 조회
     @Operation(
@@ -107,18 +105,11 @@ public class SurveyController {
     // 설문 답변 등록
     @Operation(
             summary     = "설문 답변 등록",
-            description = "지정된 세션(sessionId)에 대해 유저(userId)가 설문 답변을 제출합니다.",
+            description = "지정된 세션(sessionId)에 대해 유저가 설문 답변을 제출합니다.",
             parameters = {
                     @Parameter(
                             name        = "sessionId",
                             description = "제출할 설문 세션의 ID",
-                            required    = true,
-                            in          = ParameterIn.PATH,
-                            schema      = @Schema(type = "integer", format = "int64")
-                    ),
-                    @Parameter(
-                            name        = "userId",
-                            description = "답변을 제출하는 유저의 ID",
                             required    = true,
                             in          = ParameterIn.PATH,
                             schema      = @Schema(type = "integer", format = "int64")
@@ -141,20 +132,20 @@ public class SurveyController {
                     )
             }
     )
-    @PostMapping("/{sessionId}/answers/{userId}")
+    @PostMapping("/{sessionId}/{userId}/answers")
     public ResponseEntity<Void> submitSurveyAnswer(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PathVariable("sessionId") long sessionId,
-            @PathVariable("userId") long userId,
-            @RequestBody List<SurveyAnswerRequestDto> answers) {
-        User user = userService.getUserById(userId);
+            @RequestBody List<SurveyAnswerRequestDto> answers, @PathVariable String userId) {
+        User user = userDetails.getUser();
         surveyService.submitSurveyAnswer(sessionId, answers, user);
         return ResponseEntity.ok().build();
     }
 
     // WebSocket용 @MessageMapping (Swagger 문서화 제외)
     @MessageMapping("/api/survey/leave")
-    public void surveyLeave(SurveyLeaveDto dto) {
-        User user = userService.getUserById(dto.getLeaverId());
+    public void surveyLeave(@AuthenticationPrincipal UserDetailsImpl userDetails, SurveyLeaveDto dto) {
+        User user = userDetails.getUser();
         surveyService.leaveSession(dto.getSessionId(), user);
     }
 

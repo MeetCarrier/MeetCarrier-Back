@@ -1,18 +1,14 @@
 package com.kslj.mannam.domain.match.controller;
 
-import com.kslj.mannam.domain.block.dto.BlockDto;
 import com.kslj.mannam.domain.block.service.BlockService;
 import com.kslj.mannam.domain.match.dto.*;
 import com.kslj.mannam.domain.match.enums.MatchStatus;
 import com.kslj.mannam.domain.match.service.MatchQueueManager;
 import com.kslj.mannam.domain.match.service.MatchService;
 import com.kslj.mannam.domain.review.dto.ReviewQueueDto;
-import com.kslj.mannam.domain.test.dto.TestRequestDto;
 import com.kslj.mannam.domain.test.service.TestService;
-import com.kslj.mannam.domain.user.dto.UserSignUpRequestDto;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.enums.Gender;
-import com.kslj.mannam.domain.user.enums.SocialType;
 import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -157,39 +153,9 @@ public class MatchController {
 
     // 매칭 요청 전송
     @MessageMapping("/api/start-matching")
-    public void startMatching() {
-        // 차후 userDetailsImpl을 이용하도록 코드 변경 필요
-        UserSignUpRequestDto userSignUpRequestDto = UserSignUpRequestDto.builder()
-                .socialId("12341234")
-                .socialType(SocialType.Google)
-                .nickname("테스트유저1")
-                .gender(Gender.Male)
-                .age(25L)
-                .personalities("소심,느긋")
-                .interests("Soccer,Overwatch,Baseball,Dance,YouTube,Movie")
-                .build();
-
-        long userId = userService.createUser(userSignUpRequestDto);
-        User user = userService.getUserById(userId);
-        user.updatePhone("010-4321-1234");
-        user.updateLatitude(35.8722);
-        user.updateLongitude(128.6025);
-        TestRequestDto testRequestDto = TestRequestDto.builder()
-                .depressionScore(60)
-                .efficacyScore(40)
-                .relationshipScore(60)
-                .build();
-        testService.createTest(testRequestDto, user);
-
-        BlockDto blockDto = BlockDto.builder()
-                .blockedPhone("010-1234-1234")
-                .blockedInfo("친구A")
-                .build();
-
-        blockService.createBlock(user, blockDto);
-
-        // long userId = userDetails.getUser().getId();
-        matchQueueManager.registerUserSession(userId);  // 세션 등록
+    public void startMatching(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        User user = userDetails.getUser();
+        matchQueueManager.registerUserSession(user.getId());  // 세션 등록
         matchQueueManager.addNewUser(user);    // RabbitMQ로 요청 전송
     }
 
@@ -225,8 +191,8 @@ public class MatchController {
                 .efficacyScore(66)
                 .relationshipScore(56)
                 .reviews(List.of(
-                        new ReviewQueueDto(4, 1L),
-                        new ReviewQueueDto(4, 3L)
+                        new ReviewQueueDto(4, 1L, 3),
+                        new ReviewQueueDto(4, 3L, 3)
                 ))
                 .build();
 
@@ -244,7 +210,7 @@ public class MatchController {
                 .efficacyScore(53)
                 .relationshipScore(12)
                 .reviews(List.of(
-                        new ReviewQueueDto(3, 1L)
+                        new ReviewQueueDto(3, 1L, 3)
                 ))
                 .build();
 
