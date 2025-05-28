@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+<h1>WebSocket 테스트 도구</h1>
+
+<button onclick="loginAsTestUser()">🧪 테스트 유저로 로그인</button>
+<p id="loginStatus" style="color: green;"></p>
+
+<hr>
+
+<div>
+    <label>URL: </label>
+    <input type="text" id="connectUrl" placeholder="예: /ws" value="/ws">
+    <label><input type="checkbox" id="sockJsEnabled"> SockJS</label>
+    <label><input type="checkbox" id="stompEnabled" checked> STOMP</label>
+    <button onclick="connect()">Connect</button>
+</div>
+
+<hr>
+
+<div>
+    <label>STOMP subscribe destination:</label>
+    <input type="text" id="subscribePath" placeholder="/topic/assistant/1">
+    <button onclick="subscribe()">Subscribe</button>
+</div>
+
+<div>
+    <label>STOMP send destination:</label>
+    <input type="text" id="sendPath" placeholder="/app/api/assistant/send" value="/app/api/assistant/send">
+</div>
+
+<div>
+    <div>
+        <label>Message Content (JSON):</label><br>
+        <textarea id="messageContent" rows="5" cols="80" placeholder='예: {"roomId":1000,"userId":10,"type":"TEXT","message":"질문"}'></textarea>
+        <br>
+        <button onclick="sendMessage()">Send</button>
+        <button onclick="clearOutput()">Clear Output</button>
+    </div>
+</div>
+
+<div>
+    <h3>수신 메시지:</h3>
+    <pre id="messageOutput"></pre>
+</div>
+
+<script type="text/javascript">
+    let stompClient = null;
+
+    function loginAsTestUser() {
+        fetch('/api/auth/test/login', {
+            method: 'POST',
+            credentials: 'include' // JSESSIONID 쿠키 저장
+        })
+            .then(res => {
+                if (res.ok) {
+                    document.getElementById('loginStatus').textContent = '✅ 테스트 유저로 로그인 성공';
+                } else {
+                    document.getElementById('loginStatus').textContent = '❌ 로그인 실패';
+                }
+            })
+            .catch(error => {
+                console.error('로그인 오류:', error);
+                document.getElementById('loginStatus').textContent = '❌ 로그인 오류 발생';
+            });
+    }
+
+    function connect() {
+        const url = document.getElementById('connectUrl').value;
+        const useSockJs = document.getElementById('sockJsEnabled').checked;
+        const useStomp = document.getElementById('stompEnabled').checked;
+
+        let socket = useSockJs ? new SockJS(url) : new WebSocket(url);
+
+        if (useStomp) {
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function (frame) {
+                console.log("STOMP Connected: " + frame);
+                appendOutput("✅ STOMP 연결됨");
+            }, function (error) {
+                console.error("STOMP 연결 실패", error);
+                appendOutput("❌ STOMP 연결 실패: " + error);
+            });
+        } else {
+            socket.onopen = () => appendOutput("✅ WebSocket 연결됨");
+            socket.onmessage = (event) => appendOutput("📩 수신: " + event.data);
+            socket.onerror = (err) => appendOutput("❌ 오류: " + err.message);
+        }
+    }
+
+    function subscribe() {
+        const path = document.getElementById('subscribePath').value;
+        if (stompClient && stompClient.connected) {
+            stompClient.subscribe(path, function (message) {
+                const body = message.body;
+                appendOutput("📩 구독 수신: " + body);
+            });
+            appendOutput("📡 구독 시작: " + path);
+        } else {
+            alert("먼저 연결하세요.");
+        }
+    }
+
+    function sendMessage() {
+        const path = document.getElementById('sendPath').value;
+        const rawContent = document.getElementById('messageContent').value;
+
+        try {
+            const json = JSON.parse(rawContent);  // 문자열을 JSON으로 변환
+
+            if (stompClient && stompClient.connected) {
+                stompClient.send(path, {}, JSON.stringify(json));
+                appendOutput("📤 전송: " + rawContent);
+            } else {
+                alert("먼저 연결하세요.");
+            }
+        } catch (e) {
+            alert("유효한 JSON을 입력해주세요.");
+        }
+    }
+
+    function clearOutput() {
+        document.getElementById('messageOutput').textContent = '';
+    }
+
+    function appendOutput(message) {
+        const output = document.getElementById('messageOutput');
+        output.textContent += message + '\n';
+    }
+</script>
+</body>
+</html>
