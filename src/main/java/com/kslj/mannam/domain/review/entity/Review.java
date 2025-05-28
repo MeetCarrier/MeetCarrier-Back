@@ -24,6 +24,10 @@ public class Review {
     @Column(nullable = false)
     private String content;
 
+    // 리뷰 남긴 단계 (1: 설문지, 2: 채팅, 3: 만남 후)
+    @Column(nullable = false)
+    private int step;
+
     @Builder.Default
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

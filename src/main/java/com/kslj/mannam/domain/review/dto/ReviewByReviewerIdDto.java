@@ -15,6 +15,7 @@ public class ReviewByReviewerIdDto {
     long reviewId;
     int rating;
     String content;
+    int step;
     LocalDateTime createdAt;
     long userId;
     String userName;

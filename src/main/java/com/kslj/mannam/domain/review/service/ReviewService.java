@@ -34,6 +34,7 @@ public class ReviewService {
         Review newReview = Review.builder()
                 .rating(requestDto.getRating())
                 .content(requestDto.getContent())
+                .step(requestDto.getStep())
                 .user(targetUser)
                 .reviewer(reviewer)
                 .build();
@@ -58,6 +59,7 @@ public class ReviewService {
                     .reviewId(review.getId())
                     .rating(review.getRating())
                     .content(review.getContent())
+                    .step(review.getStep())
                     .createdAt(review.getCreatedAt())
                     .reviewerId(review.getReviewer().getId())
                     .reviewerName(review.getReviewer().getNickname())
@@ -81,6 +83,7 @@ public class ReviewService {
                     .reviewId(review.getId())
                     .rating(review.getRating())
                     .content(review.getContent())
+                    .step(review.getStep())
                     .createdAt(review.getCreatedAt())
                     .userId(review.getUser().getId())
                     .userName(review.getUser().getNickname())

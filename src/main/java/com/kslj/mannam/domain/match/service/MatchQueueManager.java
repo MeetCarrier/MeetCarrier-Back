@@ -56,6 +56,7 @@ public class MatchQueueManager {
             ReviewQueueDto review = ReviewQueueDto.builder()
                     .rating(reviewDto.getRating())
                     .userId(reviewDto.getUserId())
+                    .step(reviewDto.getStep())
                     .build();
 
             reviews.add(review);

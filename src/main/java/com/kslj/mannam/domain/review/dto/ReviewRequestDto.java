@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class ReviewRequestDto {
     Integer rating;
     String content;
+    Integer step;
 }

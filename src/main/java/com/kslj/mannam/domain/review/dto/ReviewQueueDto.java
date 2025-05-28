@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class ReviewQueueDto {
     int rating;     // 리뷰 점수
     long userId;    // 상대방 ID
+    int step;       // 리뷰 남긴 단계
 }

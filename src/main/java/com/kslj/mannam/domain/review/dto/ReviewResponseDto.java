@@ -1,6 +1,5 @@
 package com.kslj.mannam.domain.review.dto;
 
-import com.kslj.mannam.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +15,7 @@ public class ReviewResponseDto {
     long reviewId;
     int rating;
     String content;
+    int step;
     LocalDateTime createdAt;
     long reviewerId;
     String reviewerName;
