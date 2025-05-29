@@ -32,6 +32,9 @@ public class Report {
     @Column(name = "report_content", nullable = false)
     private String content;
 
+    @Column(name = "report_description")
+    private String description;
+
     @Column(columnDefinition = "TEXT")
     private String images;
 

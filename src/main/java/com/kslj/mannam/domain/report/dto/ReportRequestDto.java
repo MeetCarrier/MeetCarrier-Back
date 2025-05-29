@@ -15,5 +15,6 @@ import java.util.List;
 public class ReportRequestDto {
     private ReportType reportType;
     private String reportContent;
+    private String reportDescription;
     private List<String> reportImages;
 }

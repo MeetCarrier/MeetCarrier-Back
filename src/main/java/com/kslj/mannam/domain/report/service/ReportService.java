@@ -40,6 +40,7 @@ public class ReportService {
         Report newReport = Report.builder()
                 .type(reportRequestDto.getReportType())
                 .content(reportRequestDto.getReportContent())
+                .description(reportRequestDto.getReportDescription())
                 .user(user)
                 .images(imageJson)
                 .build();
@@ -87,6 +88,7 @@ public class ReportService {
                 .reportStatus(report.getStatus())
                 .reportedAt(report.getReportedAt())
                 .reportContent(report.getContent())
+                .reportDescription(report.getDescription())
                 .reporterId(report.getUser().getId())
                 .reporterNickname(report.getUser().getNickname())
                 .reportImages(images)

@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReportListDto {
+    long reportId;
     ReportType type;
     ReportStatus status;
     String content;
@@ -23,6 +24,7 @@ public class ReportListDto {
 
     public static ReportListDto fromEntity(Report report) {
         return ReportListDto.builder()
+                .reportId(report.getId())
                 .type(report.getType())
                 .status(report.getStatus())
                 .content(report.getContent())

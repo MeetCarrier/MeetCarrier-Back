@@ -55,6 +55,10 @@ public class MatchService {
         List<Match> matches = matchRepository.findAllByUser1OrUser2(user, user);
         List<MatchResponseDto> responses = new ArrayList<>();
 
+        if (matches.isEmpty()) {
+            return responses;
+        }
+
         for (Match match : matches) {
             Long sessionId = surveySessionRepository.findSurveySessionByMatchId(match.getId()).getId();
 

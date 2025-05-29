@@ -21,6 +21,7 @@ public class ReportResponseDto {
     ReportStatus reportStatus;
     LocalDateTime reportedAt;
     String reportContent;
+    String reportDescription;
     long reporterId;
     String reporterNickname;
 
