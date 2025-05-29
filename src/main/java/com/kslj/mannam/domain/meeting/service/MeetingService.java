@@ -85,7 +85,7 @@ public class MeetingService {
 
     // 대면 약속 24시간 전 알람 전송
     @Scheduled(cron = "0 * * * * *")
-    @Transactional(readOnly = true)
+    @Transactional
     public void notifyMeeting() {
         log.info("Meeting Check Started");
         LocalDateTime now = LocalDateTime.now();

@@ -31,4 +31,8 @@ public class Room {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "match_id", nullable = false)
     private Match match;
+
+    public void updateStatus(ChatStatus newStatus) {
+        this.status = newStatus;
+    }
 }

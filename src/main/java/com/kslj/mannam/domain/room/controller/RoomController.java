@@ -12,15 +12,16 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -83,5 +84,28 @@ public class RoomController {
                 sessionId, roomId, userId
         );
         return ResponseEntity.ok(message);
+    }
+
+    // 채팅방 상태 조회 -> 입력 활성화 여부 결정
+    @Operation(
+            summary = "채팅방 상태 조회",
+            description = "roomId를 통해 채팅방의 활성화 여부를 조회합니다. isActive가 true면 입력 가능 상태입니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "채팅방 상태 조회 성공"),
+            @ApiResponse(responseCode = "404", description = "해당 roomId에 대한 채팅방을 찾을 수 없음")
+    })
+    @GetMapping("/{roomId}")
+    public ResponseEntity<?> getRoomStatus(
+            @Parameter(description = "채팅방 ID", required = true, example = "123")
+            @PathVariable("roomId") long roomId
+    ) {
+        boolean isActive = roomService.getRoomStatus(roomId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("roomId", roomId);
+        response.put("isActive", isActive);
+
+        return ResponseEntity.ok(response);
     }
 }
