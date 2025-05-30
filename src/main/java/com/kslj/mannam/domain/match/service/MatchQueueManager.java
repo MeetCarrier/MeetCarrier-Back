@@ -1,6 +1,5 @@
 package com.kslj.mannam.domain.match.service;
 
-import com.kslj.mannam.domain.block.dto.BlockRequestDto;
 import com.kslj.mannam.domain.block.dto.BlockResponseDto;
 import com.kslj.mannam.domain.block.service.BlockService;
 import com.kslj.mannam.domain.match.dto.*;
@@ -237,9 +236,6 @@ public class MatchQueueManager {
                 "/topic/match-result", // 클라이언트 구독 경로
                 result
         );
-
-//        // 테스트 용도
-//        messagingTemplate.convertAndSend("/topic/match_result", result);
     }
 
     // 매칭 점수 저장
@@ -307,9 +303,6 @@ public class MatchQueueManager {
                 "/topic/match-result",
                 timeoutDto
         );
-
-//        // 테스트 용도
-//        messagingTemplate.convertAndSend("/topic/match_result", timeoutDto);
     }
 
     // 매칭 도충 취소
@@ -347,6 +340,11 @@ public class MatchQueueManager {
                         .scoreMap(new HashMap<>(entry.getScoreMap())) // 복사해서 넘겨주는 게 안전
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    // 매칭 큐에 유저 들어가있는지 검사
+    public boolean isUserInQueue(long userId) {
+        return matchingQueue.containsKey(userId);
     }
 
     // 위도, 경도로부터 거리 구하기
