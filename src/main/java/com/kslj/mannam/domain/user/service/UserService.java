@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.Random;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -26,7 +27,7 @@ public class UserService {
     public long createUser(UserSignUpRequestDto dto) {
         Optional<User> existingUser = userRepository.findBySocialId(dto.getSocialId());
 
-        if(existingUser.isPresent()) {
+        if (existingUser.isPresent()) {
             User user = existingUser.get();
             if (user.isDeleted()) {
                 user.rejoin(dto);
@@ -90,5 +91,14 @@ public class UserService {
     @Transactional
     public void withdrawUser(User user) {
         user.withdraw(); // 탈퇴 처리
+    }
+
+    public String getSmsCode() {
+        Random random = new Random();
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            builder.append(random.nextInt(10)); // 0 ~ 9
+        }
+        return builder.toString();
     }
 }

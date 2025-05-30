@@ -172,7 +172,7 @@ public class MatchQueueManager {
         System.out.println("bestMatch = " + bestMatch.toString());
 
         // 점수 비교
-        if (bestMatch.getFinalScore() >= 0.65) {
+        if (bestMatch.getFinalScore() >= 0.5) {
             // 매칭 성공
             completeMatching(bestMatch, requesterId);
         } else {
@@ -202,10 +202,10 @@ public class MatchQueueManager {
         surveyService.createSurveyQuestions(matchId, surveySessionId);
 
         // 매칭 성공 메시지 전송 (신규 유저)
-        sendMatchSuccess(matchedInfo.getUserId(), matchedInfo.getFinalScore(), surveySessionId);
+        sendMatchSuccess(userId, matchedInfo.getUserId(), matchedInfo.getFinalScore(), surveySessionId);
 
         // 매칭 성공 메시지 전송 (기존 유저)
-        sendMatchSuccess(userId, matchedInfo.getFinalScore(), surveySessionId);
+        sendMatchSuccess(matchedInfo.getUserId(), userId, matchedInfo.getFinalScore(), surveySessionId);
     }
 
     // 매칭 성공한 유저 삭제
@@ -222,22 +222,24 @@ public class MatchQueueManager {
     }
 
     // 매칭 성공 시 메시지 전달
-    private void sendMatchSuccess(long matchedId, double score, long surveySessionId) {
+    private void sendMatchSuccess(long receiverId, long matchedUserId, double score, long surveySessionId) {
         MatchResultDto result = MatchResultDto.builder()
-                .matchedUserId(matchedId)
+                .matchedUserId(matchedUserId)
                 .finalScore(score)
                 .surveySessionId(surveySessionId)
                 .build();
 
-        // 실제로 로그인하고 사용할 때 이용
-//        messagingTemplate.convertAndSendToUser(
-//                String.valueOf(requesterId), // userId 기준
-//                "/queue/match-result", // 클라이언트 구독 경로
-//                result
-//        );
+        log.info("{}에게 매칭 성공 메시지 전달(상대방 ID: {})", receiverId, matchedUserId);
 
-        // 테스트 용도
-        messagingTemplate.convertAndSend("/topic/match_result", result);
+        // 실제로 로그인하고 사용할 때 이용
+        messagingTemplate.convertAndSendToUser(
+                String.valueOf(receiverId), // userId 기준
+                "/topic/match-result", // 클라이언트 구독 경로
+                result
+        );
+
+//        // 테스트 용도
+//        messagingTemplate.convertAndSend("/topic/match_result", result);
     }
 
     // 매칭 점수 저장
@@ -300,14 +302,14 @@ public class MatchQueueManager {
                 .build();
 
         // 로그인까지 사용할 때 이용
-//        messagingTemplate.convertAndSendToUser(
-//                String.valueOf(userId),
-//                "/queue/match-result",
-//                timeoutDto
-//        );
+        messagingTemplate.convertAndSendToUser(
+                String.valueOf(userId),
+                "/topic/match-result",
+                timeoutDto
+        );
 
-        // 테스트 용도
-        messagingTemplate.convertAndSend("/topic/match_result", timeoutDto);
+//        // 테스트 용도
+//        messagingTemplate.convertAndSend("/topic/match_result", timeoutDto);
     }
 
     // 매칭 도충 취소

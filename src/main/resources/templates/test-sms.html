@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>SMS 인증 테스트</title>
+</head>
+<body>
+
+<h2>📱 휴대폰 번호 입력</h2>
+<form th:action="@{/api/send-sms}" method="post">
+    <label for="userPhone">휴대폰 번호:</label>
+    <input type="text" id="userPhone" name="userPhone" placeholder="01012345678" required>
+    <button type="submit">인증번호 요청</button>
+</form>
+
+<hr>
+
+<h2>🔐 인증번호 입력</h2>
+<form th:action="@{/api/verify-sms}" method="post">
+    <label for="smsCode">인증번호:</label>
+    <input type="text" id="smsCode" name="smsCode" required>
+    <button type="submit">인증번호 확인</button>
+</form>
+
+</body>
+</html>
