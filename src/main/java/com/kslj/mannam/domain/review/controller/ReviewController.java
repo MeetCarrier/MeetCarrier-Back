@@ -1,5 +1,6 @@
 package com.kslj.mannam.domain.review.controller;
 
+import com.kslj.mannam.domain.review.dto.ReviewByReviewerIdDto;
 import com.kslj.mannam.domain.review.dto.ReviewRequestDto;
 import com.kslj.mannam.domain.review.dto.ReviewResponseDto;
 import com.kslj.mannam.domain.review.service.ReviewService;
@@ -31,6 +32,23 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
+    @Operation(
+            summary = "내가 받은 리뷰 조회",
+            description = "로그인한 사용자가 받은 모든 리뷰 목록을 반환합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "조회 성공",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    array = @ArraySchema(
+                                            schema = @Schema(implementation = ReviewResponseDto.class)
+                                    )
+                            )
+                    ),
+                    @ApiResponse(responseCode = "204", description = "리뷰가 존재하지 않음")
+            }
+    )
     @GetMapping
     public ResponseEntity<List<ReviewResponseDto>> getReviews(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         List<ReviewResponseDto> reviews = reviewService.getReview(userDetails.getId());
@@ -40,6 +58,34 @@ public class ReviewController {
         }
 
         return ResponseEntity.ok(reviews);
+    }
+
+    @Operation(
+            summary = "내가 남긴 리뷰 조회",
+            description = "로그인한 사용자가 작성한 리뷰 목록을 반환합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "조회 성공",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    array = @ArraySchema(
+                                            schema = @Schema(implementation = ReviewByReviewerIdDto.class)
+                                    )
+                            )
+                    ),
+                    @ApiResponse(responseCode = "204", description = "작성한 리뷰 없음")
+            }
+    )
+    @GetMapping("/written")
+    public ResponseEntity<List<ReviewByReviewerIdDto>> getWrittenReviews(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        List<ReviewByReviewerIdDto> writtenReviews = reviewService.getReviewByReviewerId(userDetails.getId());
+
+        if (writtenReviews.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(writtenReviews);
     }
 
     @GetMapping("/{userId}")
