@@ -190,7 +190,7 @@ public class MatchQueueManager {
         removeUser(matchedInfo.getUserId());
 
         // 매칭 엔티티 생성
-        long matchId = matchService.createMatch(MatchRequestDto.builder()
+        long matchId = matchService.createMatch(MatchCreateDto.builder()
                 .score(matchedInfo.getFinalScore())
                 .user1Id(userId)
                 .user2Id(matchedInfo.getUserId())

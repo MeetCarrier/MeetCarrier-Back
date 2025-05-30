@@ -1,15 +1,12 @@
 package com.kslj.mannam.domain.match.controller;
 
-import com.kslj.mannam.domain.block.service.BlockService;
 import com.kslj.mannam.domain.match.dto.*;
 import com.kslj.mannam.domain.match.enums.MatchStatus;
 import com.kslj.mannam.domain.match.service.MatchQueueManager;
 import com.kslj.mannam.domain.match.service.MatchService;
 import com.kslj.mannam.domain.review.dto.ReviewQueueDto;
-import com.kslj.mannam.domain.test.service.TestService;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.enums.Gender;
-import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,10 +38,7 @@ import java.util.List;
 public class MatchController {
 
     private final MatchService matchService;
-    private final UserService userService;
     private final MatchQueueManager matchQueueManager;
-    private final TestService testService;
-    private final BlockService blockService;
 
     // 현재 유저 매칭 목록 조회
     @Operation(

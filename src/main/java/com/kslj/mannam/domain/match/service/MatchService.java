@@ -1,6 +1,6 @@
 package com.kslj.mannam.domain.match.service;
 
-import com.kslj.mannam.domain.match.dto.MatchRequestDto;
+import com.kslj.mannam.domain.match.dto.MatchCreateDto;
 import com.kslj.mannam.domain.match.dto.MatchResponseDto;
 import com.kslj.mannam.domain.match.entity.Match;
 import com.kslj.mannam.domain.match.enums.MatchStatus;
@@ -32,12 +32,12 @@ public class MatchService {
 
     // 매칭 정보 생성
     @Transactional
-    public long createMatch(MatchRequestDto matchRequestDto) {
-        User user1 = userService.getUserById(matchRequestDto.getUser1Id());
-        User user2 = userService.getUserById(matchRequestDto.getUser2Id());
+    public long createMatch(MatchCreateDto matchCreateDto) {
+        User user1 = userService.getUserById(matchCreateDto.getUser1Id());
+        User user2 = userService.getUserById(matchCreateDto.getUser2Id());
 
         Match newMatch = Match.builder()
-                .score(matchRequestDto.getScore())
+                .score(matchCreateDto.getScore())
                 .user1(user1)
                 .user2(user2)
                 .build();

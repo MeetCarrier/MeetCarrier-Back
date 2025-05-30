@@ -27,6 +27,8 @@ public class NotificationService {
             case Report -> message = "신고에 대한 답변이 도착했습니다.";
             case Journal -> message = "오늘 하루는 어떠셨나요? 하루를 되돌아보며 칭찬일기를 적어보세요!";
             case Meeting -> message = "내일 약속 있는거 기억하시죠? 준비 잘 하셔서 좋은 시간 보내시길 바래요!";
+            case Request -> message = "어떤 분이 매칭 요청을 보냈어요!";
+            case Match -> message = "매칭이 성사되었어요! 매칭 목록으로 가셔서 확인해보세요!";
         }
 
         Notification newNotification = Notification.builder()

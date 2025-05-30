@@ -5,4 +5,6 @@ public enum NotificationType {
     Report,
     Journal,
     Meeting,
+    Request,
+    Match
 }

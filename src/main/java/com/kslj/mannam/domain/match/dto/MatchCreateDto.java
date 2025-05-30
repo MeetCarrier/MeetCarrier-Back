@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 // 매칭 생성 시 저장할 데이터
-public class MatchRequestDto {
+public class MatchCreateDto {
     double score;
     long user1Id;
     long user2Id;

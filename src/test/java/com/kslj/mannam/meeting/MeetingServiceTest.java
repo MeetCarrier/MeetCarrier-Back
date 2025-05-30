@@ -1,7 +1,7 @@
 package com.kslj.mannam.meeting;
 
 import com.kslj.mannam.TestUtils;
-import com.kslj.mannam.domain.match.dto.MatchRequestDto;
+import com.kslj.mannam.domain.match.dto.MatchCreateDto;
 import com.kslj.mannam.domain.meeting.dto.MeetingRequestDto;
 import com.kslj.mannam.domain.meeting.dto.MeetingResponseDto;
 import com.kslj.mannam.domain.meeting.service.MeetingService;
@@ -43,7 +43,7 @@ public class MeetingServiceTest {
         // given
         User user1 = testUtils.createAndGetTestUser();
         User user2 = testUtils.createAndGetTestUser();
-        long matchId = matchService.createMatch(MatchRequestDto.builder()
+        long matchId = matchService.createMatch(MatchCreateDto.builder()
                 .score(90)
                 .user1Id(user1.getId())
                 .user2Id(user2.getId())
@@ -66,7 +66,7 @@ public class MeetingServiceTest {
         // given
         User user1 = testUtils.createAndGetTestUser();
         User user2 = testUtils.createAndGetTestUser();
-        long matchId = matchService.createMatch(MatchRequestDto.builder()
+        long matchId = matchService.createMatch(MatchCreateDto.builder()
                 .score(90)
                 .user1Id(user1.getId())
                 .user2Id(user2.getId())
@@ -92,7 +92,7 @@ public class MeetingServiceTest {
         // given
         User user1 = testUtils.createAndGetTestUser();
         User user2 = testUtils.createAndGetTestUser();
-        long matchId = matchService.createMatch(MatchRequestDto.builder()
+        long matchId = matchService.createMatch(MatchCreateDto.builder()
                 .score(90)
                 .user1Id(user1.getId())
                 .user2Id(user2.getId())

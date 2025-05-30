@@ -17,9 +17,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
 
 @Controller
 @RequestMapping("/api/auth/test")
@@ -42,6 +39,22 @@ public class TestAuthController {
         repo.saveContext(context, request, response);
 
         return ResponseEntity.ok("Logged in as testUser");
+    }
+
+    @PostMapping("/login2")
+    public ResponseEntity<String> loginAsTestUser2(HttpServletRequest request, HttpServletResponse response) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername("testUser2");
+
+        UsernamePasswordAuthenticationToken authentication
+                = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(authentication);
+
+        HttpSessionSecurityContextRepository repo = new HttpSessionSecurityContextRepository();
+        repo.saveContext(context, request, response);
+
+        return ResponseEntity.ok("Logged in as testUser2");
     }
 
     @GetMapping("/me")

@@ -5,7 +5,7 @@ import com.kslj.mannam.domain.chat.dto.ChatMessageDto;
 import com.kslj.mannam.domain.chat.dto.ChatResponseDto;
 import com.kslj.mannam.domain.chat.enums.MessageType;
 import com.kslj.mannam.domain.chat.service.ChatService;
-import com.kslj.mannam.domain.match.dto.MatchRequestDto;
+import com.kslj.mannam.domain.match.dto.MatchCreateDto;
 import com.kslj.mannam.domain.match.entity.Match;
 import com.kslj.mannam.domain.match.repository.MatchRepository;
 import com.kslj.mannam.domain.match.service.MatchService;
@@ -52,13 +52,13 @@ public class ChatTest {
 
     // 매칭 생성 메서드
     private long createMatch(User user1, User user2) {
-        MatchRequestDto matchRequestDto = MatchRequestDto.builder()
+        MatchCreateDto matchCreateDto = MatchCreateDto.builder()
                 .score(90)
                 .user1Id(user1.getId())
                 .user2Id(user2.getId())
                 .build();
 
-        return matchService.createMatch(matchRequestDto);
+        return matchService.createMatch(matchCreateDto);
     }
 
     // 채팅방 생성 메서드
