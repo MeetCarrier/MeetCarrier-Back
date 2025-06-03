@@ -8,6 +8,7 @@ import com.kslj.mannam.domain.report.dto.ReportResponseDto;
 import com.kslj.mannam.domain.report.entity.Report;
 import com.kslj.mannam.domain.report.repository.ReportRepository;
 import com.kslj.mannam.domain.user.entity.User;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,7 +70,7 @@ public class ReportService {
         // 넘겨준 reportId를 바탕으로 Report 조회
         Optional<Report> optionalReport = reportRepository.findById(reportId);
         if(optionalReport.isEmpty()) {
-            throw new RuntimeException("신고 내역을 찾을 수 없습니다. reportId = " + reportId);
+            throw new EntityNotFoundException("신고 내역을 찾을 수 없습니다. reportId = " + reportId);
         }
 
         // 조회한 데이터를 바탕으로 응답 데이터 생성
@@ -103,7 +104,7 @@ public class ReportService {
 
         Optional<Report> optionalReport = reportRepository.findById(reportId);
         if(optionalReport.isEmpty()) {
-            throw new RuntimeException("신고 내역을 찾을 수 없습니다. reportId = " + reportId);
+            throw new EntityNotFoundException("신고 내역을 찾을 수 없습니다. reportId = " + reportId);
         }
 
         // 삭제하기전에 S3에 올라간 이미지 삭제 코드 필요

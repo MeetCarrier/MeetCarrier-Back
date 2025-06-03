@@ -88,7 +88,7 @@ public class MatchService {
         Optional<Match> match = matchRepository.findById(matchId);
 
         if (match.isEmpty()) {
-            throw new RuntimeException("매칭 정보가 없습니다. matchId=" + matchId);
+            throw new EntityNotFoundException("매칭 정보가 없습니다. matchId=" + matchId);
         } else {
             Match targetMatch = match.get();
 
@@ -107,7 +107,7 @@ public class MatchService {
         Optional<Match> match = matchRepository.findById(matchId);
 
         if (match.isEmpty()) {
-            throw new RuntimeException("매칭 정보가 없습니다. matchId=" + matchId);
+            throw new EntityNotFoundException("매칭 정보가 없습니다. matchId=" + matchId);
         } else {
             Match targetMatch = match.get();
 

@@ -7,6 +7,7 @@ import com.kslj.mannam.domain.test.repository.TestRepository;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.enums.ActionType;
 import com.kslj.mannam.domain.user.service.UserActionLogService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +54,7 @@ public class TestService {
         Optional<Test> targetTest = testRepository.findById(testId);
 
         if (targetTest.isEmpty()) {
-            throw new RuntimeException("테스트 데이터를 찾을 수 없습니다. testId = " + testId);
+            throw new EntityNotFoundException("테스트 데이터를 찾을 수 없습니다. testId = " + testId);
         } else {
             testRepository.deleteById(testId);
             return testId;

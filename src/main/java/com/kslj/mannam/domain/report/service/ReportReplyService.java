@@ -9,6 +9,7 @@ import com.kslj.mannam.domain.report.enums.ReportStatus;
 import com.kslj.mannam.domain.report.repository.ReportReplyRepository;
 import com.kslj.mannam.domain.report.repository.ReportRepository;
 import com.kslj.mannam.domain.user.entity.User;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,7 @@ public class ReportReplyService {
         // 넘겨온 reportId를 바탕으로 Report 조회
         Optional<Report> report = reportRepository.findById(reportId);
         if(report.isEmpty()) {
-            throw new RuntimeException("신고 내역을 찾을 수 없습니다. reportId = " + reportId);
+            throw new EntityNotFoundException("신고 내역을 찾을 수 없습니다. reportId = " + reportId);
         }
 
         // ReportReply 객체 생성
@@ -55,7 +56,7 @@ public class ReportReplyService {
         Optional<ReportReply> reportReply = replyRepository.findById(reportId);
 
         if (reportReply.isEmpty()) {
-            throw new RuntimeException("답변 내역을 찾을 수 없습니다. reportId=" + reportId);
+            throw new EntityNotFoundException("답변 내역을 찾을 수 없습니다. reportId=" + reportId);
         }
 
         return reportReply.get();
@@ -67,7 +68,7 @@ public class ReportReplyService {
         Optional<ReportReply> reportReplyOpt = replyRepository.findById(reportReplyId);
 
         if (reportReplyOpt.isEmpty()) {
-            throw new RuntimeException("답변 내역을 찾을 수 없습니다. reportReplyId=" + reportReplyId);
+            throw new EntityNotFoundException("답변 내역을 찾을 수 없습니다. reportReplyId=" + reportReplyId);
         }
 
         ReportReply reportReply = reportReplyOpt.get();

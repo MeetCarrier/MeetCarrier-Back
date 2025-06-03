@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -53,7 +52,7 @@ public class BlockService {
         Optional<Block> targetBlock = blockRepository.findById(blockId);
 
         if (targetBlock.isEmpty()) {
-            throw new RuntimeException("전화번호를 찾을 수 없습니다. blockId = " + blockId);
+            throw new IllegalArgumentException("전화번호를 찾을 수 없습니다. blockId = " + blockId);
         } else {
             Block currentBlock = targetBlock.get();
             currentBlock.updateBlockedPhone(requestDto.getBlockedPhone());
@@ -69,7 +68,7 @@ public class BlockService {
         Optional<Block> targetBlock = blockRepository.findById(blockId);
 
         if (targetBlock.isEmpty()) {
-            throw new RuntimeException("전화번호를 찾을 수 없습니다. blockId = " + blockId);
+            throw new IllegalArgumentException("전화번호를 찾을 수 없습니다. blockId = " + blockId);
         } else {
             blockRepository.deleteById(blockId);
         }

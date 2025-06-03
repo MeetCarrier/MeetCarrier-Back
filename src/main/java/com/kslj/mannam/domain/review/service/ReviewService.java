@@ -105,7 +105,7 @@ public class ReviewService {
             if (requestDto.getRating() != null) review.updateRating(requestDto.getRating());
         }
         else {
-            throw new RuntimeException("작성자가 일치하지 않습니다.");
+            throw new IllegalArgumentException("작성자가 일치하지 않습니다.");
         }
 
         return reviewId;
