@@ -20,6 +20,7 @@
     <label><input type="checkbox" id="sockJsEnabled"> SockJS</label>
     <label><input type="checkbox" id="stompEnabled" checked> STOMP</label>
     <button onclick="connect()">Connect</button>
+    <button onclick="disconnect()">Disconnect</button>
 </div>
 
 <hr>
@@ -93,6 +94,17 @@
             socket.onerror = (err) => appendOutput("❌ 오류: " + err.message);
         }
     }
+
+    function disconnect() {
+        if (stompClient && stompClient.connected) {
+            stompClient.disconnect(() => {
+                appendOutput("🛑 연결 해제됨");
+            });
+        } else {
+            appendOutput("ℹ️ 연결된 세션이 없습니다");
+        }
+    }
+
 
     function subscribe() {
         const path = document.getElementById('subscribePath').value;

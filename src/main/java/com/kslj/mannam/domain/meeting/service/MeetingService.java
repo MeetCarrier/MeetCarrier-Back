@@ -10,6 +10,8 @@ import com.kslj.mannam.domain.meeting.repository.MeetingRepository;
 import com.kslj.mannam.domain.notification.enums.NotificationType;
 import com.kslj.mannam.domain.notification.repository.NotificationRepository;
 import com.kslj.mannam.domain.notification.service.NotificationService;
+import com.kslj.mannam.domain.room.entity.Room;
+import com.kslj.mannam.domain.room.repository.RoomRepository;
 import com.kslj.mannam.domain.user.entity.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,7 @@ public class MeetingService {
     private final MatchService matchService;
     private final NotificationRepository notificationRepository;
     private final NotificationService notificationService;
+    private final RoomRepository roomRepository;
 
     // 새로운 대면 약속 저장
     @Transactional
@@ -86,6 +89,10 @@ public class MeetingService {
 
         if(dto.getDate() != null && dto.getLocation() != null) {
             meeting.updateSchedule(dto.getDate(), dto.getLocation());
+
+            // 채팅방 종료 시간 갱신
+            Room room = roomRepository.getRoomByMatchId(meeting.getMatch().getId());
+            room.updateDeactivationTime(meeting.getDate().plusHours(24));
         }
         if(dto.getNote() != null) meeting.updateNote(dto.getNote());
     }
@@ -105,11 +112,17 @@ public class MeetingService {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new EntityNotFoundException("약속 정보를 찾을 수 없습니다. meetingId = " + meetingId));
 
+        Match match = meeting.getMatch();
+
         meeting.confirm();
 
         // 알림 전송
-        notificationService.createNotification(NotificationType.MeetingAccepted, meeting.getMatch().getUser1(), null);
-        notificationService.createNotification(NotificationType.MeetingAccepted, meeting.getMatch().getUser2(), null);
+        notificationService.createNotification(NotificationType.MeetingAccepted, match.getUser1(), null);
+        notificationService.createNotification(NotificationType.MeetingAccepted, match.getUser2(), null);
+
+        // 채팅방 종료 시간 갱신
+        Room room = roomRepository.getRoomByMatchId(match.getId());
+        room.updateDeactivationTime(meeting.getDate().plusHours(24));
     }
 
     // 대면 약속 신청에 거절

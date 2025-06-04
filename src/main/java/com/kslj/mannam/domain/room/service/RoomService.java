@@ -4,6 +4,7 @@ import com.kslj.mannam.domain.match.entity.Match;
 import com.kslj.mannam.domain.room.entity.Room;
 import com.kslj.mannam.domain.room.enums.ChatStatus;
 import com.kslj.mannam.domain.room.repository.RoomRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -43,30 +44,25 @@ public class RoomService {
     }
 
     @Transactional(readOnly = true)
-    public boolean getRoomStatus(long roomId) {
-        Room room = roomRepository.findById(roomId).orElseThrow(() -> new RoomNotFoundException(roomId));
-
-        return room.getStatus() == ChatStatus.Activate;
+    public Room getRoom(long roomId) {
+        return roomRepository.findById(roomId).orElseThrow(() -> new RoomNotFoundException(roomId));
     }
 
-    // 채팅방 생성된 시점으로부터 24시간 지났는지 검사. 지났으면 해당 채팅방 비활성화
+    // 채팅방 종료시간을 지났으면 해당 채팅방 비활성화
     @Scheduled(cron = "0 * * * * *")
     @Transactional
     public void checkRoomTime() {
         log.info("Room Time Check Started");
-        LocalDateTime now = LocalDateTime.now();
-
-        List<Room> rooms = roomRepository.getRoomByStatus(ChatStatus.Activate);
+        LocalDateTime threshold = LocalDateTime.now().minusHours(24);
+        List<Room> rooms = roomRepository.findAllByStatusAndDeactivationTimeBefore(ChatStatus.Activate, threshold);
 
         for (Room room : rooms) {
-            if (room.getCreatedAt().isAfter(now.plusHours(24))) {
-                room.updateStatus(ChatStatus.Deactivate);
-            }
+            room.updateStatus(ChatStatus.Deactivate);
         }
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public static class RoomNotFoundException extends RuntimeException {
+    public static class RoomNotFoundException extends EntityNotFoundException {
         public RoomNotFoundException(Long roomId) {
             super("채팅방을 찾을 수 없습니다. roomId=" + roomId);
         }

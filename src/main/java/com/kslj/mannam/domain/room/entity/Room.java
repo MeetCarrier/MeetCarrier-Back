@@ -28,11 +28,19 @@ public class Room {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Builder.Default
+    @Column(name = "deactivation_time", nullable = false)
+    private LocalDateTime deactivationTime = LocalDateTime.now().plusHours(24);
+
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "match_id", nullable = false)
     private Match match;
 
     public void updateStatus(ChatStatus newStatus) {
         this.status = newStatus;
+    }
+
+    public void updateDeactivationTime(LocalDateTime newDeactivationTime) {
+        this.deactivationTime = newDeactivationTime;
     }
 }

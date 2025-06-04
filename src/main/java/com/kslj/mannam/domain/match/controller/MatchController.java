@@ -193,9 +193,9 @@ public class MatchController {
                 .longitude(128.6025)
                 .phone("010-6666-1234")
                 .interests("축구,야구,콘솔,노래방,그림 그리기")
-                .depressionScore(65)
-                .efficacyScore(80)
-                .relationshipScore(60)
+                .depressionScore(15)
+                .efficacyScore(15)
+                .relationshipScore(10)
                 .reviews(new ArrayList<>())
                 .build();
 
@@ -205,16 +205,17 @@ public class MatchController {
                 .userId(2L)
                 .age(28L)
                 .gender(Gender.Male)
-                .latitude(36.090675)
-                .longitude(128.430899)
+                .latitude(35.8722)
+                .longitude(128.6025)
                 .phone("010-5678-5678")
                 .interests("보드게임,모바일,콘솔,축구,웹툰")
-                .depressionScore(78)
-                .efficacyScore(66)
-                .relationshipScore(56)
+                .depressionScore(10)
+                .efficacyScore(20)
+                .relationshipScore(15)
                 .reviews(List.of(
                         new ReviewQueueDto(4, 1L, 3),
-                        new ReviewQueueDto(4, 3L, 3)
+                        new ReviewQueueDto(4, 2L, 2),
+                        new ReviewQueueDto(4, 3L, 1)
                 ))
                 .build();
 
@@ -228,9 +229,9 @@ public class MatchController {
                 .longitude(127.3845)
                 .phone("010-0000-0000")
                 .interests("뮤지컬,재즈,콘서트,전시회,야구")
-                .depressionScore(44)
-                .efficacyScore(53)
-                .relationshipScore(12)
+                .depressionScore(15)
+                .efficacyScore(20)
+                .relationshipScore(20)
                 .reviews(List.of(
                         new ReviewQueueDto(3, 1L, 3)
                 ))

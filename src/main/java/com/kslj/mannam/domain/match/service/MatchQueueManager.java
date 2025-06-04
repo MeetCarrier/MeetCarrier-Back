@@ -3,6 +3,8 @@ package com.kslj.mannam.domain.match.service;
 import com.kslj.mannam.domain.block.dto.BlockResponseDto;
 import com.kslj.mannam.domain.block.service.BlockService;
 import com.kslj.mannam.domain.match.dto.*;
+import com.kslj.mannam.domain.match.entity.Match;
+import com.kslj.mannam.domain.match.repository.MatchRepository;
 import com.kslj.mannam.domain.review.dto.ReviewByReviewerIdDto;
 import com.kslj.mannam.domain.review.dto.ReviewQueueDto;
 import com.kslj.mannam.domain.review.service.ReviewService;
@@ -44,6 +46,7 @@ public class MatchQueueManager {
     private final Map<UUID, MatchingQueueEntry> requestMap = new ConcurrentHashMap<>();
     private final Map<Long, String> userSessionMap = new ConcurrentHashMap<>();
     private static final long TIMEOUT_SECONDS = 300;
+    private final MatchRepository matchRepository;
 
     // 매칭 큐에 새로운 유저 접근
     @Transactional
@@ -89,10 +92,23 @@ public class MatchQueueManager {
                 .map(BlockResponseDto::getBlockedPhone)
                 .toList();
 
+        // 매칭 기록 조회
+        List<Match> matchHistory = matchRepository.findAllByUser1OrUser2(user, user);
+        List<Long> matchIds = new ArrayList<>();
+
+        for (Match match : matchHistory) {
+            if (match.getUser1().getId().equals(user.getId())) {
+                matchIds.add(match.getUser2().getId());
+            } else {
+                matchIds.add(match.getUser1().getId());
+            }
+        }
+
         // 사용자가 설정한 나이차까지만 매칭 대상에 포함되도록 설정
         // 사용자가 이성 매칭 OFF 시 동성만 매칭 대상에 포함되도록 설정
         // 블락한 유저는 매칭 대상에서 제외하도록 설정
         // 설정한 거리 제한 이내의 유저만 포함되도록 설정
+        // 이전에 매칭된 적이 있던 유저는 제외
         int maxAgeGap = user.getMaxAgeGap();
         boolean allowOppositeGender = user.isAllowOppositeGender();
         Gender userGender = user.getGender();
@@ -117,10 +133,13 @@ public class MatchQueueManager {
                     double distance = getDistance(newUserLat, newUserLng, userData.getLatitude(), userData.getLongitude());
                     boolean distanceMatch = distance <= maxDistance;
 
+                    // 이전에 매칭된 적이 있는지 검사
+                    boolean notMatchedBefore = !matchIds.contains(userData.getUserId());
+
                     // 로그 출력
                     System.out.println("User: " + userData.getPhone() + " - Distance: " + distance + "km");
 
-                    return ageMatch && genderMatch && notBlocked && distanceMatch;
+                    return ageMatch && genderMatch && notBlocked && distanceMatch && notMatchedBefore;
                 })
                 .toList();
 
@@ -171,7 +190,7 @@ public class MatchQueueManager {
         System.out.println("bestMatch = " + bestMatch.toString());
 
         // 점수 비교
-        if (bestMatch.getFinalScore() >= 0.5) {
+        if (bestMatch.getFinalScore() >= 0.75) {
             // 매칭 성공
             completeMatching(bestMatch, requesterId);
         } else {
