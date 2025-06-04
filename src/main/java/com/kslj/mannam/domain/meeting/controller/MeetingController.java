@@ -33,8 +33,8 @@ public class MeetingController {
 
     // 대면 약속 생성
     @Operation(
-            summary     = "대면 약속 생성",
-            description = "지정된 matchId로 대면 약속을 생성합니다.",
+            summary     = "대면 약속 요청 생성",
+            description = "지정된 matchId로 대면 약속 요창을 생성합니다.",
             parameters = {
                     @Parameter(
                             name        = "matchId",
@@ -45,7 +45,7 @@ public class MeetingController {
                     )
             },
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "대면 약속 생성 요청 DTO",
+                    description = "대면 약속 요청 생성 요청 DTO",
                     required    = true,
                     content     = @Content(
                             mediaType = "application/json",
@@ -73,7 +73,7 @@ public class MeetingController {
         return ResponseEntity.ok(meetingId);
     }
 
-    // 대면 약속 조회
+    // 대면 약속 목록 조회
     @Operation(
             summary     = "대면 약속 목록 조회",
             description = "현재 로그인한 사용자가 속한 모든 대면 약속을 조회합니다.",
@@ -93,6 +93,28 @@ public class MeetingController {
     @GetMapping
     public ResponseEntity<List<MeetingResponseDto>> getMeetings(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         List<MeetingResponseDto> response = meetingService.getMeetings(userDetails.getUser());
+        return ResponseEntity.ok(response);
+    }
+
+    // 대면 약속 조회
+    @Operation(
+            summary     = "대면 약속 조회",
+            description = "전달된 matchId를 이용하여 해당 매칭의 저장된 매칭 일정을 조회합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "조회 성공",
+                            content      = @Content(
+                                    mediaType = "application/json",
+                                    schema    = @Schema(implementation = MeetingResponseDto.class)
+                            )
+                    )
+            }
+    )
+    @GetMapping("/{matchId}")
+    public ResponseEntity<MeetingResponseDto> getMeeting(@PathVariable("matchId") long matchId) {
+        MeetingResponseDto response = meetingService.getMeeting(matchId);
+
         return ResponseEntity.ok(response);
     }
 
@@ -156,6 +178,46 @@ public class MeetingController {
     @DeleteMapping("/{meetingId}")
     public ResponseEntity<Void> deleteMeeting(@PathVariable("meetingId") long meetingId) {
         meetingService.deleteMeeting(meetingId);
+        return ResponseEntity.ok().build();
+    }
+
+    // 대면 약속 요청 수락
+    @Operation(
+            summary = "대면 약속 수락",
+            description = "지정된 meetingId의 약속 제안을 수락합니다.",
+            parameters = {
+                    @Parameter(name = "meetingId", description = "수락할 대면 약속 ID", required = true, in = ParameterIn.PATH)
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "수락 성공")
+            }
+    )
+    @PatchMapping("/{meetingId}/accept")
+    public ResponseEntity<?> confirmMeeting(
+            @PathVariable("meetingId") long meetingId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        meetingService.confirmMeeting(userDetails.getUser(), meetingId);
+        return ResponseEntity.ok().build();
+    }
+
+    // 대면 약속 요청 거절
+    @Operation(
+            summary = "대면 약속 거절",
+            description = "지정된 meetingId의 약속 제안을 거절합니다.",
+            parameters = {
+                    @Parameter(name = "meetingId", description = "거절할 대면 약속 ID", required = true, in = ParameterIn.PATH)
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "거절 성공")
+            }
+    )
+    @PatchMapping("/{meetingId}/reject")
+    public ResponseEntity<?> rejectMeeting(
+            @PathVariable("meetingId") long meetingId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        meetingService.rejectMeeting(userDetails.getUser(), meetingId);
         return ResponseEntity.ok().build();
     }
 }

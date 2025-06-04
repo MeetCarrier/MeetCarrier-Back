@@ -5,11 +5,13 @@ import com.kslj.mannam.domain.match.service.MatchService;
 import com.kslj.mannam.domain.meeting.dto.MeetingRequestDto;
 import com.kslj.mannam.domain.meeting.dto.MeetingResponseDto;
 import com.kslj.mannam.domain.meeting.entity.Meeting;
+import com.kslj.mannam.domain.meeting.enums.MeetingStatus;
 import com.kslj.mannam.domain.meeting.repository.MeetingRepository;
 import com.kslj.mannam.domain.notification.enums.NotificationType;
 import com.kslj.mannam.domain.notification.repository.NotificationRepository;
 import com.kslj.mannam.domain.notification.service.NotificationService;
 import com.kslj.mannam.domain.user.entity.User;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,9 +38,9 @@ public class MeetingService {
     public long createMeeting(long matchId, MeetingRequestDto requestDto) {
         Match match = matchService.getMatch(matchId);
 
-        boolean exists = meetingRepository.existsByMatchId(matchId);
+        boolean exists = meetingRepository.existsByMatchIdAndStatus(matchId, MeetingStatus.PENDING);
         if (exists) {
-            throw new IllegalStateException("이미 약속이 존재합니다.");
+            throw new IllegalStateException("아직 이전 요청을 상대방이 확인하지 않았어요.");
         }
 
         Meeting newMeeting = Meeting.builder()
@@ -53,7 +55,7 @@ public class MeetingService {
         return savedMeeting.getId();
     }
 
-    // 대면 약속 조회
+    // 대면 약속 목록 전체 조회
     @Transactional(readOnly = true)
     public List<MeetingResponseDto> getMeetings(User user) {
         List<Meeting> meetings = meetingRepository.findAllByUserId(user.getId());
@@ -63,14 +65,28 @@ public class MeetingService {
                 .collect(Collectors.toList());
     }
 
+    // matchId로 대면 약속 일정 조회
+    @Transactional(readOnly = true)
+    public MeetingResponseDto getMeeting(long matchId) {
+        Match match = matchService.getMatch(matchId);
+        Meeting meeting = meetingRepository.findByMatch(match);
+
+        return MeetingResponseDto.fromEntity(meeting);
+    }
+
     // 대면 약속 수정
     @Transactional
     public void updateMeeting(long meetingId, MeetingRequestDto dto) {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new IllegalArgumentException("약속 정보를 찾을 수 없습니다. meetingId = " + meetingId));
 
-        if(dto.getDate() != null) meeting.updateDate(dto.getDate());
-        if(dto.getLocation() != null) meeting.updateLocation(dto.getLocation());
+        if (meeting.getStatus() != MeetingStatus.ACCEPTED) {
+            throw new IllegalStateException("확정된 약속만 수정할 수 있습니다.");
+        }
+
+        if(dto.getDate() != null && dto.getLocation() != null) {
+            meeting.updateSchedule(dto.getDate(), dto.getLocation());
+        }
         if(dto.getNote() != null) meeting.updateNote(dto.getNote());
     }
 
@@ -81,6 +97,32 @@ public class MeetingService {
                 .orElseThrow(() -> new IllegalArgumentException("약속 정보를 찾을 수 없습니다. meetingId = " + meetingId));
 
         meetingRepository.deleteById(meetingId);
+    }
+
+    // 대면 약속 신청에 동의
+    @Transactional
+    public void confirmMeeting(User currentUser, long meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new EntityNotFoundException("약속 정보를 찾을 수 없습니다. meetingId = " + meetingId));
+
+        meeting.confirm();
+
+        // 알림 전송
+        notificationService.createNotification(NotificationType.MeetingAccepted, meeting.getMatch().getUser1(), null);
+        notificationService.createNotification(NotificationType.MeetingAccepted, meeting.getMatch().getUser2(), null);
+    }
+
+    // 대면 약속 신청에 거절
+    @Transactional
+    public void rejectMeeting(User currentUser, long meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new EntityNotFoundException("약속 정보를 찾을 수 없습니다. meetingId = " + meetingId));
+
+        meeting.reject();
+
+        // 알림 전송
+        User receiver = getOtherUser(currentUser, meeting);
+        notificationService.createNotification(NotificationType.MeetingRejected, receiver, null);
     }
 
     // 대면 약속 24시간 전 알람 전송
@@ -107,6 +149,19 @@ public class MeetingService {
             if (!alreadyNotified2) {
                 notificationService.createNotification(NotificationType.Meeting, user2, meeting.getId());
             }
+        }
+    }
+
+    private User getOtherUser(User currentUser, Meeting meeting) {
+        User user1 = meeting.getMatch().getUser1();
+        User user2 = meeting.getMatch().getUser2();
+
+        if (currentUser.getId().equals(user1.getId())) {
+            return user2;
+        } else if (currentUser.getId().equals(user2.getId())) {
+            return user1;
+        } else {
+            throw new IllegalArgumentException("이 약속과 관련없는 사용자입니다.");
         }
     }
 }

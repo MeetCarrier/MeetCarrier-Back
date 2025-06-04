@@ -6,5 +6,10 @@ public enum NotificationType {
     Journal,
     Meeting,
     Request,
-    Match
+    Match,
+    InvitationRequest,
+    InvitationAccepted,
+    InvitationRejected,
+    MeetingAccepted,
+    MeetingRejected,
 }

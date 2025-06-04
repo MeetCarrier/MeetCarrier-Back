@@ -29,6 +29,11 @@ public class NotificationService {
             case Meeting -> message = "내일 약속 있는거 기억하시죠? 준비 잘 하셔서 좋은 시간 보내시길 바래요!";
             case Request -> message = "어떤 분이 매칭 요청을 보냈어요!";
             case Match -> message = "매칭이 성사되었어요! 매칭 목록으로 가셔서 확인해보세요!";
+            case InvitationRequest -> message = "만남 초대장을 전송했어요!";
+            case InvitationAccepted -> message = "상대방이 만남 초대장을 수락했어요! 만남 일정을 정해보세요!";
+            case InvitationRejected -> message = "상대방이 만남 초대장을 거절했어요...";
+            case MeetingAccepted -> message = "만남 일정이 확정되었어요!";
+            case MeetingRejected -> message = "상대방이 그 날짜에는 곤란한가봐요. 다시 일정을 정해봐요!";
         }
 
         Notification newNotification = Notification.builder()
