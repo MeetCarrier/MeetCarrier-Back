@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SurveyLeaveDto {
     private Long sessionId;
+    private String reason;
 }

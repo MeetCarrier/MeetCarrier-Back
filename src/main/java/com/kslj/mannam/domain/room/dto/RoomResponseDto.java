@@ -1,7 +1,7 @@
 package com.kslj.mannam.domain.room.dto;
 
 import com.kslj.mannam.domain.room.entity.Room;
-import com.kslj.mannam.domain.room.enums.ChatStatus;
+import com.kslj.mannam.domain.room.enums.RoomStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RoomResponseDto {
-    private ChatStatus status;
+    private RoomStatus status;
     private LocalDateTime deactivationTime;
 
     public static RoomResponseDto fromEntity(Room room) {

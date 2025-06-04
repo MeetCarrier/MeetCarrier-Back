@@ -4,6 +4,9 @@ import com.kslj.mannam.domain.chat.dto.ChatMessageDto;
 import com.kslj.mannam.domain.chat.dto.ChatResponseDto;
 import com.kslj.mannam.domain.chat.enums.MessageType;
 import com.kslj.mannam.domain.chat.service.ChatService;
+import com.kslj.mannam.domain.room.entity.Room;
+import com.kslj.mannam.domain.room.enums.RoomStatus;
+import com.kslj.mannam.domain.room.service.RoomService;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,6 +41,7 @@ public class ChatController {
 
     private final ChatService chatService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final RoomService roomService;
 
     @MessageMapping("/api/chat/send")
     public void sendMessage(SimpMessageHeaderAccessor headerAccessor, @Payload ChatMessageDto dto) throws Exception {
@@ -84,7 +88,7 @@ public class ChatController {
             throw new AccessDeniedException("해당 채팅방 참여자가 아닙니다.");
         }
 
-        chatService.leaveRoom(roomId, sender);
+        chatService.leaveRoom(roomId, sender, dto.getMessage());
 
         // 나감 알림 메시지 생성
         ChatResponseDto leaveNotice = ChatResponseDto.builder()
@@ -98,6 +102,10 @@ public class ChatController {
         messagingTemplate.convertAndSend(
                 "/topic/room/" + roomId, leaveNotice
         );
+
+        // 채팅방 비활성화
+        Room room = roomService.getRoom(roomId);
+        room.updateStatus(RoomStatus.Deactivate);
     }
 
     @Operation(

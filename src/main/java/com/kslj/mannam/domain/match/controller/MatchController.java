@@ -166,6 +166,10 @@ public class MatchController {
         }
     }
 
+    // 취소 사유 저장
+    @PostMapping("/{matchId}/cancelReason")
+
+
     // 매칭 요청 전송
     @MessageMapping("/api/start-matching")
     public void startMatching(SimpMessageHeaderAccessor headerAccessor) {

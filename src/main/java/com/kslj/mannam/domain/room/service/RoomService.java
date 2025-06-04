@@ -2,7 +2,7 @@ package com.kslj.mannam.domain.room.service;
 
 import com.kslj.mannam.domain.match.entity.Match;
 import com.kslj.mannam.domain.room.entity.Room;
-import com.kslj.mannam.domain.room.enums.ChatStatus;
+import com.kslj.mannam.domain.room.enums.RoomStatus;
 import com.kslj.mannam.domain.room.repository.RoomRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -54,10 +54,10 @@ public class RoomService {
     public void checkRoomTime() {
         log.info("Room Time Check Started");
         LocalDateTime threshold = LocalDateTime.now().minusHours(24);
-        List<Room> rooms = roomRepository.findAllByStatusAndDeactivationTimeBefore(ChatStatus.Activate, threshold);
+        List<Room> rooms = roomRepository.findAllByStatusAndDeactivationTimeBefore(RoomStatus.Activate, threshold);
 
         for (Room room : rooms) {
-            room.updateStatus(ChatStatus.Deactivate);
+            room.updateStatus(RoomStatus.Deactivate);
         }
     }
 

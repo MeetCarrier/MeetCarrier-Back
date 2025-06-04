@@ -116,6 +116,7 @@ public class MatchService {
         }
     }
 
+    // 채팅방으로 넘어갔는지 여부 저장
     @Transactional
     public void markUserEnteredChat(Long matchId, User user) {
         Match match = matchRepository.findById(matchId)

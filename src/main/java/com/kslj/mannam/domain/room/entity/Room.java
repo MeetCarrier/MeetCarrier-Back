@@ -1,7 +1,7 @@
 package com.kslj.mannam.domain.room.entity;
 
 import com.kslj.mannam.domain.match.entity.Match;
-import com.kslj.mannam.domain.room.enums.ChatStatus;
+import com.kslj.mannam.domain.room.enums.RoomStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,7 +22,7 @@ public class Room {
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ChatStatus status = ChatStatus.Activate;
+    private RoomStatus status = RoomStatus.Activate;
 
     @Builder.Default
     @Column(name = "created_at", nullable = false)
@@ -36,7 +36,7 @@ public class Room {
     @JoinColumn(name = "match_id", nullable = false)
     private Match match;
 
-    public void updateStatus(ChatStatus newStatus) {
+    public void updateStatus(RoomStatus newStatus) {
         this.status = newStatus;
     }
 

@@ -92,13 +92,13 @@ public class ChatService {
 
     // 채팅방 나가기
     @Transactional
-    public void leaveRoom(long roomId, User user) {
+    public void leaveRoom(long roomId, User user, String reason) {
         // 매치 정보 가져오기
         Room room = roomRepository.findById(roomId).orElseThrow();
         Match match = room.getMatch();
 
         // 채팅 중 중단으로 상태 변경
-        match.updateStatus(MatchStatus.Chat_Cancelled);
+        match.cancelMatch(user, MatchStatus.Chat_Cancelled, reason);
     }
 
     // 메시지 삭제

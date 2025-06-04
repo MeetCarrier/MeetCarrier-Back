@@ -155,7 +155,7 @@ public class SurveyController {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         User user = userDetails.getUser();
-        surveyService.leaveSession(dto.getSessionId(), user);
+        surveyService.leaveSession(dto.getSessionId(), user, dto.getReason());
     }
 
     @PostMapping("/{matchId}/{sessionId}/questions")

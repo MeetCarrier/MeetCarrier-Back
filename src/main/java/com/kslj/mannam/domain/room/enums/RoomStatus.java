@@ -1,6 +1,6 @@
 package com.kslj.mannam.domain.room.enums;
 
-public enum ChatStatus {
+public enum RoomStatus {
     Activate,
     Deactivate,
 }
