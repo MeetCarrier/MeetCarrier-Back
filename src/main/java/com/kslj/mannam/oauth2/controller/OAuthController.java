@@ -39,8 +39,6 @@ public class OAuthController {
                 .socialType(socialType)
                 .nickname(request.getNickname())
                 .gender(request.getGender())
-                .personalities(request.getPersonalities())
-                .interests(request.getInterests())
                 .age(request.getAge())
                 .build();
 

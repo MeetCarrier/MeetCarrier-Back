@@ -20,7 +20,6 @@ public class UserResponseDto {
     Double latitude;
     Double longitude;
     Long age;
-    String personalities;
     String interests;
     Double footprint;
     String question;
@@ -39,7 +38,6 @@ public class UserResponseDto {
                 .latitude(user.getLatitude())
                 .longitude(user.getLongitude())
                 .age(user.getAge())
-                .personalities(user.getPersonalities())
                 .interests(user.getInterests())
                 .footprint(user.getFootprint())
                 .question(user.getQuestion())

@@ -70,7 +70,6 @@ public class UserService {
         if (dto.getLatitude() != null) user.updateLatitude(dto.getLatitude());
         if (dto.getLongitude() != null) user.updateLongitude(dto.getLongitude());
         if (dto.getAge() != null) user.updateAge(dto.getAge());
-        if (dto.getPersonalities() != null) user.updatePersonalities(dto.getPersonalities());
         if (dto.getInterests() != null) user.updateInterests(dto.getInterests());
         if (dto.getQuestion() != null) user.updateQuestion(dto.getQuestion());
         if (dto.getQuestionList() != null) user.updateQuestionList(dto.getQuestionList());

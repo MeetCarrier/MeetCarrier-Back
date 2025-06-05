@@ -31,8 +31,6 @@ public class UserServiceTest {
                 .socialType(SocialType.Google)
                 .nickname("Mannam")
                 .gender(Gender.Male)
-                .personalities("스포츠")
-                .interests("롤")
                 .build();
 
         // when
@@ -52,8 +50,6 @@ public class UserServiceTest {
                 .socialType(SocialType.Google)
                 .nickname("Mannam")
                 .gender(Gender.Male)
-                .personalities("스포츠")
-                .interests("롤")
                 .build();
 
         userService.createUser(signUpRequestDto);

@@ -18,8 +18,6 @@ public class UserSignUpRequestDto {
     private String nickname;
     private Gender gender;
     private Long age;
-    private String personalities;
-    private String interests;
 
     @Builder.Default
     private float footprint = 36.5f;
@@ -31,8 +29,6 @@ public class UserSignUpRequestDto {
                 .nickname(this.nickname)
                 .gender(this.gender)
                 .age(this.age)
-                .personalities(this.personalities)
-                .interests(this.interests)
                 .footprint(this.footprint)
                 .build();
 

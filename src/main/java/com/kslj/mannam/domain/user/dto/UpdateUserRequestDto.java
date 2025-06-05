@@ -10,7 +10,6 @@ public class UpdateUserRequestDto {
     Double latitude;
     Double longitude;
     Long age;
-    String personalities;
     String interests;
     String question;
     String questionList;

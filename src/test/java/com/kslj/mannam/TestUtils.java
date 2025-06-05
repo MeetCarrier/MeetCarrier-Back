@@ -22,11 +22,12 @@ public class TestUtils {
                 .nickname("Mannam")
                 .gender(Gender.Male)
                 .age(23L)
-                .personalities("스포츠")
-                .interests("롤")
                 .build();
 
         long userId = userService.createUser(signUpRequestDto);
+        User user = userService.getUserById(userId);
+
+        user.updateInterests("롤");
         return userService.getUserById(userId);
     }
 }

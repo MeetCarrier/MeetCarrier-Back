@@ -40,10 +40,6 @@ public class User {
     private Double latitude;
     private Double longitude;
 
-    @Column(nullable = false)
-    private String personalities;
-
-    @Column(nullable = false)
     private String interests;
 
     @Builder.Default
@@ -120,10 +116,6 @@ public class User {
         this.age = age;
     }
 
-    public void updatePersonalities(String personalities) {
-        this.personalities = personalities;
-    }
-
     public void updateInterests(String interests) {
         this.interests = interests;
     }
@@ -169,8 +161,7 @@ public class User {
         this.nickname = dto.getNickname();
         this.gender = dto.getGender();
         this.age = dto.getAge();
-        this.personalities = dto.getPersonalities();
-        this.interests = dto.getInterests();
+        this.interests = null;
         this.footprint = 36.5f;
         this.maxAgeGap = 5;
         this.allowOppositeGender = false;
