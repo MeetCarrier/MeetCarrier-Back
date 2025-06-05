@@ -61,6 +61,12 @@ public class NotificationService {
         return dtos;
     }
 
+    // 안 읽은 알람 존재 여부 조회
+    @Transactional(readOnly = true)
+    public boolean hasUnreadNotifications(User user) {
+        return notificationRepository.existsByUserAndIsReadFalse(user);
+    }
+
     // 알림 삭제 (단일)
     @Transactional
     public void deleteNotification(User user, long notificationId) {

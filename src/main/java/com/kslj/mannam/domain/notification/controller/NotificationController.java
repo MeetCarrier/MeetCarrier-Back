@@ -55,6 +55,31 @@ public class NotificationController {
         return ResponseEntity.ok(notifications);
     }
 
+    // 안 읽은 알람 존재 여부 조회
+    @Operation(
+            summary     = "안 읽은 알림 존재 여부 조회",
+            description = "로그인한 사용자가 읽지 않은 알람이 있는지 여부를 true/false로 반환합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "조회 성공",
+                            content      = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = Boolean.class, type = "boolean", example = "true")
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "인증 실패 (로그인 필요)"
+                    )
+            }
+    )
+    @GetMapping("/has-unread")
+    public ResponseEntity<Boolean> hasUnread(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        boolean hasUnread = notificationService.hasUnreadNotifications(userDetails.getUser());
+        return ResponseEntity.ok(hasUnread);
+    }
+
     // 알림 삭제 (단일)
     @Operation(
             summary     = "알림 삭제 (단일)",

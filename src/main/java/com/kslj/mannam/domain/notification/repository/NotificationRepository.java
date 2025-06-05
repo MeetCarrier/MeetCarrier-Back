@@ -10,8 +10,7 @@ import java.util.List;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
     List<Notification> findNotificationByUser(User user);
-
     void removeNotificationByUser(User user);
-
     boolean existsByUserAndReferenceId(User user, Long referenceId);
+    boolean existsByUserAndIsReadFalse(User user);
 }
