@@ -38,7 +38,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
             // 새로운 회원 -> 추가 정보 입력창으로 이동
             httpSession.setAttribute("UNREGISTERED_SOCIAL_ID", socialId);
             httpSession.setAttribute("SOCIAL_TYPE", provider);
-            response.sendRedirect("/oauth/signup/detail");
+            response.sendRedirect("/api/oauth/signup/detail");
         } else {
             User user = userOpt.get();
             securityContextService.refreshUserDetails(user.getSocialId());

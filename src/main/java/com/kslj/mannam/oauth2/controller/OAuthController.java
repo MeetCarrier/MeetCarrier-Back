@@ -20,7 +20,10 @@ public class OAuthController {
     private final UserService userService;
 
     @GetMapping("/detail")
-    public String showSignUpForm() {
+    public String showSignUpForm(HttpSession session) {
+        if (session.getAttribute("UNREGISTERED_SOCIAL_ID") == null || session.getAttribute("SOCIAL_TYPE") == null) {
+            return "redirect:/Login"; // 로그인 페이지 또는 에러 페이지로
+        }
         return "redirect:/register";
     }
 
