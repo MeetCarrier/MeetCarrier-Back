@@ -1,6 +1,7 @@
 package com.kslj.mannam.sms;
 
 import com.kslj.mannam.domain.user.service.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
+@Tag(name="전화번호 인증 API", description="전화번호 인증 요청 및 검증 API")
 public class smsController {
 
     private DefaultMessageService messageService;
