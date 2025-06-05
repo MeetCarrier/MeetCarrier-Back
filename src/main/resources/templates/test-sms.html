@@ -3,11 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <title>SMS 인증 테스트</title>
+    <script>
+        function savePhoneNumber() {
+            const userPhone = document.getElementById("userPhone").value;
+            localStorage.setItem("userPhone", userPhone);
+        }
+
+        function setPhoneNumberInHiddenField() {
+            const storedPhone = localStorage.getItem("userPhone");
+            if (storedPhone) {
+                document.getElementById("hiddenUserPhone").value = storedPhone;
+            }
+        }
+    </script>
 </head>
 <body>
 
 <h2>📱 휴대폰 번호 입력</h2>
-<form th:action="@{/api/send-sms}" method="post">
+<form th:action="@{/api/send-sms}" method="post" onsubmit="savePhoneNumber()">
     <label for="userPhone">휴대폰 번호:</label>
     <input type="text" id="userPhone" name="userPhone" placeholder="01012345678" required>
     <button type="submit">인증번호 요청</button>
@@ -16,9 +29,13 @@
 <hr>
 
 <h2>🔐 인증번호 입력</h2>
-<form th:action="@{/api/verify-sms}" method="post">
+<form th:action="@{/api/verify-sms}" method="post" onsubmit="setPhoneNumberInHiddenField()">
+    <!-- 숨겨진 전화번호 필드 -->
+    <input type="hidden" id="hiddenUserPhone" name="userPhone">
+
     <label for="smsCode">인증번호:</label>
     <input type="text" id="smsCode" name="smsCode" required>
+
     <button type="submit">인증번호 확인</button>
 </form>
 
