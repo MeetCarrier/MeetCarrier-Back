@@ -6,6 +6,7 @@ import com.kslj.mannam.domain.user.entity.UserActionLog;
 import com.kslj.mannam.domain.user.enums.ActionType;
 import com.kslj.mannam.domain.user.repository.UserActionLogRepository;
 import com.kslj.mannam.domain.user.repository.UserRepository;
+import com.kslj.mannam.redis.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class UserActionLogService {
 
     private final UserActionLogRepository userActionLogRepository;
     private final UserRepository userRepository;
+    private final RedisUtils redisUtils;
 
     // 사용자 행동 기록 (하루에 1개만)
     @Transactional
@@ -68,6 +70,7 @@ public class UserActionLogService {
         for (User user : users) {
             double newFootprint = user.getFootprint() * 0.9;
             user.updateFootprint(newFootprint);
+            redisUtils.deleteData("userCache::" + user.getId());
         }
 
         LocalDate yesterday = LocalDate.now().minusDays(1);

@@ -44,8 +44,9 @@ public class UserController {
     )
     @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = UserResponseDto.class)))
     public ResponseEntity<?> getUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        User user = userService.getUserById(userDetails.getId());
 
-        return ResponseEntity.ok(UserResponseDto.fromEntity(userDetails.getUser()));
+        return ResponseEntity.ok(UserResponseDto.fromEntity(user));
     }
 
     @GetMapping("/{userId}")
