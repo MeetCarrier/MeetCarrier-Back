@@ -1,7 +1,6 @@
 package com.kslj.mannam.domain.user.entity;
 
-import com.kslj.mannam.domain.block.entity.Block;
-import com.kslj.mannam.domain.notification.entity.Notification;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kslj.mannam.domain.user.dto.UserSignUpRequestDto;
 import com.kslj.mannam.domain.user.enums.Gender;
 import com.kslj.mannam.domain.user.enums.SocialType;
@@ -9,7 +8,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Getter
@@ -61,6 +59,7 @@ public class User {
 
     @Builder.Default
     @Column(name = "is_deleted", nullable = false)
+    @JsonProperty("deleted")
     private boolean isDeleted = false;
 
     @Column(name = "deleted_at")
@@ -77,12 +76,6 @@ public class User {
     @Builder.Default
     @Column(name = "max_matching_distance", nullable = false)
     private double maxMatchingDistance = 10;
-
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    List<Block> blocks;
-
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    List<Notification> notifications;
 
     @Override
     public boolean equals(Object o) {

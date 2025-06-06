@@ -7,6 +7,9 @@ import com.kslj.mannam.domain.user.repository.UserRepository;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -43,6 +46,7 @@ public class UserService {
         return savedUser.getId();
     }
 
+    @Cacheable(value = "userCache", key = "#id", unless = "#result == null")
     @Transactional(readOnly = true)
     public User getUserById(long id) {
         return userRepository.findById(id)
@@ -60,8 +64,9 @@ public class UserService {
         return optionalUser.isPresent();
     }
 
+    @CachePut(value = "userCache", key = "#userDetails.id")
     @Transactional
-    public void updateUser(UserDetailsImpl userDetails, UpdateUserRequestDto dto) {
+    public User updateUser(UserDetailsImpl userDetails, UpdateUserRequestDto dto) {
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(() -> new RuntimeException("해당 유저를 찾을 수 없습니다"));
 
@@ -85,8 +90,11 @@ public class UserService {
                 userDetails.getAuthorities()
         );
         SecurityContextHolder.getContext().setAuthentication(auth);
+
+        return user;
     }
 
+    @CacheEvict(value = "userCache", key = "#user.id")
     @Transactional
     public void withdrawUser(User user) {
         user.withdraw(); // 탈퇴 처리

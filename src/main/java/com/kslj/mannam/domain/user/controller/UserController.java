@@ -17,13 +17,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import java.security.Principal;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -120,15 +117,5 @@ public class UserController {
         SecurityContextHolder.clearContext();
 
         return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/principal-test")
-    public ResponseEntity<?> principalTest(Principal principal) {
-        if (principal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("⛔ Principal is null");
-        }
-
-        System.out.println("🔍 Principal Class = " + principal.getClass().getName());
-        return ResponseEntity.ok("✅ Principal Name: " + principal.getName());
     }
 }
