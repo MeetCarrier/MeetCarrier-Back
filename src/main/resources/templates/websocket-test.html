@@ -11,6 +11,7 @@
 
 <button onclick="loginAsTestUser()">🧪 테스트 유저로 로그인</button>
 <p id="loginStatus" style="color: green;"></p>
+<button onclick="loginAsTestUser2()">🧪 테스트 유저2로 로그인</button>
 
 <hr>
 
@@ -62,6 +63,24 @@
             .then(res => {
                 if (res.ok) {
                     document.getElementById('loginStatus').textContent = '✅ 테스트 유저로 로그인 성공';
+                } else {
+                    document.getElementById('loginStatus').textContent = '❌ 로그인 실패';
+                }
+            })
+            .catch(error => {
+                console.error('로그인 오류:', error);
+                document.getElementById('loginStatus').textContent = '❌ 로그인 오류 발생';
+            });
+    }
+
+    function loginAsTestUser2() {
+        fetch('/api/auth/test/login2', {
+            method: 'POST',
+            credentials: 'include' // JSESSIONID 쿠키 저장
+        })
+            .then(res => {
+                if (res.ok) {
+                    document.getElementById('loginStatus').textContent = '✅ 테스트 유저2로 로그인 성공';
                 } else {
                     document.getElementById('loginStatus').textContent = '❌ 로그인 실패';
                 }

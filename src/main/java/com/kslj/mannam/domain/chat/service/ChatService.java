@@ -9,6 +9,7 @@ import com.kslj.mannam.domain.match.enums.MatchStatus;
 import com.kslj.mannam.domain.room.entity.Room;
 import com.kslj.mannam.domain.room.repository.RoomRepository;
 import com.kslj.mannam.domain.user.entity.User;
+import com.kslj.mannam.firebase.FcmTokenService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,21 +27,35 @@ public class ChatService {
 
     private final ChatRepository chatRepository;
     private final RoomRepository roomRepository;
+    private final FcmTokenService fcmTokenService;
 
     // 메시지 저장
     @Transactional
-    public long saveChatMessage(ChatMessageDto dto, long roomId, User user) {
+    public long saveChatMessage(ChatMessageDto dto, long roomId, User sender) {
         Room room = roomRepository.findById(roomId).orElseThrow();
+        Match match = room.getMatch();
+
+        User receiver;
+        if (match.getUser1().equals(sender)) {
+            receiver = match.getUser2();
+        } else {
+            receiver = match.getUser1();
+        }
 
         Chat newChat = Chat.builder()
                 .type(dto.getType())
                 .message(dto.getMessage())
                 .imageUrl(dto.getImageUrl())
                 .room(room)
-                .user(user)
+                .user(sender)
                 .build();
 
         Chat savedChat = chatRepository.save(newChat);
+
+        // 푸시 알림 전송
+        String title = sender.getNickname();
+        String body = dto.getMessage();
+        fcmTokenService.sendPushToUser(receiver, title, body, "https://www.mannamdeliveries.link/chat/" + roomId);
 
         return savedChat.getId();
     }

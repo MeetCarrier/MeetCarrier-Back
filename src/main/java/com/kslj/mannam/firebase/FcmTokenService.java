@@ -62,7 +62,7 @@ public class FcmTokenService {
                         .build();
 
                 String response = FirebaseMessaging.getInstance().send(message);
-                log.info("Sent message: " + response);
+                log.info("Sent message: " + response + " To: " + user.getId());
             } catch (Exception e) {
                 log.warn("Failed to send message: " + e.getMessage());
             }
