@@ -1,0 +1,92 @@
+<!-- src/main/resources/templates/fcm-test.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>FCM 푸시 테스트</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+</head>
+<body>
+<h2>✅ FCM 푸시 테스트 페이지</h2>
+
+<button onclick="loginAsTestUser()">🧪 테스트 유저로 로그인</button>
+<p id="loginStatus" style="color: green;"></p>
+<br><br>
+
+<button id="getTokenBtn">FCM 토큰 발급 및 서버 전송</button>
+<br><br>
+<button id="sendTestPushBtn">테스트 푸시 알림 보내기</button>
+
+<script>
+  function loginAsTestUser() {
+    fetch('/api/auth/test/login', {
+      method: 'POST',
+      credentials: 'include' // JSESSIONID 쿠키 저장
+    })
+            .then(res => {
+              if (res.ok) {
+                document.getElementById('loginStatus').textContent = '✅ 테스트 유저로 로그인 성공';
+              } else {
+                document.getElementById('loginStatus').textContent = '❌ 로그인 실패';
+              }
+            })
+            .catch(error => {
+              console.error('로그인 오류:', error);
+              document.getElementById('loginStatus').textContent = '❌ 로그인 오류 발생';
+            });
+  }
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDDKskTEH8iAfPKeXJ2E0hgYr40ORmoo7I",
+    authDomain: "mannam-d4e57.firebaseapp.com",
+    projectId: "mannam-d4e57",
+    storageBucket: "mannam-d4e57.firebasestorage.app",
+    messagingSenderId: "818635958228",
+    appId: "1:818635958228:web:b6ad2e0b61f1a9c3b49841",
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const messaging = firebase.messaging();
+
+  navigator.serviceWorker.register('/firebase-messaging-sw.js')
+          .then((registration) => {
+            console.log("✅ Service Worker 등록 완료:", registration);
+
+            document.getElementById('getTokenBtn').onclick = function () {
+              Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                  messaging.getToken({
+                    vapidKey: "BL_f_s3clxhm9ZX-jLfgujT2lFGpb1C-jw1qTZIgXtnJjVthGsrXKLDBkxGUgHEfzz4-MFAyv3QRfAfqTZqcBeY"
+                  }).then((token) => {
+                    console.log("📱 토큰 발급 완료:", token);
+                    fetch('/api/fcm/token', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify({token})
+                    }).then(() => {
+                      alert("FCM 토큰이 서버에 등록되었습니다.");
+                    });
+                  });
+                } else {
+                  alert("알림 권한이 거부되었습니다.");
+                }
+              });
+            };
+
+            document.getElementById('sendTestPushBtn').onclick = function () {
+              alert("5초 후 테스트 푸시 알림이 전송됩니다...");
+              setTimeout(() => {
+                fetch('/api/fcm/test', {
+                  method: 'POST'
+                }).then(() => alert("✅ 테스트 푸시 알림이 전송되었습니다."));
+              }, 5000);
+            };
+          })
+</script>
+
+
+</body>
+</html>
