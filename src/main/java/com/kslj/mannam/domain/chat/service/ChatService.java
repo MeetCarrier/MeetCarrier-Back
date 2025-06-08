@@ -54,7 +54,12 @@ public class ChatService {
 
         // 푸시 알림 전송
         String title = sender.getNickname();
-        String body = dto.getMessage();
+        String body;
+        if (dto.getMessage() == null) {
+            body = "사진을 전송했습니다.";
+        } else {
+            body = dto.getMessage();
+        }
         fcmTokenService.sendPushToUser(receiver, title, body, "https://www.mannamdeliveries.link/chat/" + roomId);
 
         return savedChat.getId();
