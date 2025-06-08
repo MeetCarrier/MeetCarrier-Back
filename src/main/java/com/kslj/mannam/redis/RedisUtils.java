@@ -25,4 +25,12 @@ public class RedisUtils {
     public void deleteData(String key) {
         redisTemplate.delete(key);
     }
+
+    public Long incrData(String key) {
+        return redisTemplate.opsForValue().increment(key);
+    }
+
+    public void addToSet(String key, String value) {
+        redisTemplate.opsForSet().add(key, value);
+    }
 }

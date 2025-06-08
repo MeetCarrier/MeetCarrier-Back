@@ -128,4 +128,18 @@ public class MatchService {
 
         match.markUserEntered(user);
     }
+
+    // 유저 기준으로 roomId 조회
+    @Transactional(readOnly = true)
+    public List<Long> getRoomByUserId(Long userId) {
+        User currentUser = userService.getUserById(userId);
+        List<Long> roomIds = new ArrayList<>();
+        List<MatchResponseDto> matches = getMatches(currentUser);
+        matches.forEach(match -> {
+            if (match.getStatus() == MatchStatus.Chatting)
+                roomIds.add(match.getRoomId());
+        });
+
+        return roomIds;
+    }
 }

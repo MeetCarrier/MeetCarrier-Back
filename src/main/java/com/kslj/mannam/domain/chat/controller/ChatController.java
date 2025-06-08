@@ -139,4 +139,9 @@ public class ChatController {
 
         return ResponseEntity.ok(chatMessages);
     }
+
+    @GetMapping("/api/chat/test")
+    public String test() {
+        return "chat-test";
+    }
 }
