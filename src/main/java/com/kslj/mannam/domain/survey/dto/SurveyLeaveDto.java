@@ -11,5 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SurveyLeaveDto {
     private Long sessionId;
-    private String reason;
+    private String reasonCodes;
+    private String customReason;
 }

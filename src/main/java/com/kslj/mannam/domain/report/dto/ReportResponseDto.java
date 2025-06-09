@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Builder
@@ -23,8 +22,5 @@ public class ReportResponseDto {
     String reportContent;
     String reportDescription;
     long reporterId;
-    String reporterNickname;
-
-    // 신고 이미지
-    private List<String> reportImages;
+    long targetUserId;
 }

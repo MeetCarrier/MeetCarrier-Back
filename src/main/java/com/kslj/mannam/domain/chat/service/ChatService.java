@@ -60,7 +60,7 @@ public class ChatService {
         } else {
             body = dto.getMessage();
         }
-        fcmTokenService.sendPushToUser(receiver, title, body, "https://www.mannamdeliveries.link/chat/" + roomId);
+        fcmTokenService.sendPushToUser(receiver, title, body, "https://www.mannamdeliveries.link/chat/" + roomId, String.valueOf(roomId));
 
         return savedChat.getId();
     }
@@ -112,13 +112,13 @@ public class ChatService {
 
     // 채팅방 나가기
     @Transactional
-    public void leaveRoom(long roomId, User user, String reason) {
+    public void leaveRoom(long roomId, User user, String reasonCodes, String customReason) {
         // 매치 정보 가져오기
         Room room = roomRepository.findById(roomId).orElseThrow();
         Match match = room.getMatch();
 
         // 채팅 중 중단으로 상태 변경
-        match.cancelMatch(user, MatchStatus.Chat_Cancelled, reason);
+        match.cancelMatch(user, MatchStatus.Chat_Cancelled, reasonCodes, customReason);
     }
 
     // 메시지 삭제

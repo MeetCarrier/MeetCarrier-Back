@@ -15,11 +15,19 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(function(payload) {
     console.log('[firebase-messaging-sw.js] 백그라운드 메시지:', payload);
+    const chatRoomId = payload.data.chatRoomId;
     const notificationTitle = payload.data.title;
+    // 기본 옵션 객체
     const notificationOptions = {
         body: payload.data.body,
-        data: payload.data
+        data: payload.data,
     };
+
+    // 채팅방 ID가 있을 때만 tag와 renotify 옵션 추가
+    if (chatRoomId) {
+        notificationOptions.tag = chatRoomId;
+        notificationOptions.renotify = true;
+    }
 
     self.registration.showNotification(notificationTitle, notificationOptions);
 });

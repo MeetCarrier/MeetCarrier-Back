@@ -36,7 +36,7 @@ public class NotificationService {
         self.saveNotification(NotificationType.Journal, user, null, message);
 
         try {
-            fcmTokenService.sendPushToUser(user, title, message, url);
+            fcmTokenService.sendPushToUser(user, title, message, url, null);
         } catch (Exception e) {
             log.error("Failed to send journal notification", e);
         }
@@ -103,7 +103,7 @@ public class NotificationService {
 
          notificationRepository.save(newNotification);
 
-         fcmTokenService.sendPushToUser(user, title, message, url);
+         fcmTokenService.sendPushToUser(user, title, message, url, null);
     }
 
     // 알림 조회 (조회한 알림은 자동으로 읽음 처리)

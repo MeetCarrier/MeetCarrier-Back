@@ -128,7 +128,10 @@ public class ReviewController {
     @PostMapping("/{userId}")
     @Operation(
             summary     = "리뷰 등록",
-            description = "특정 유저에 대한 리뷰를 등록합니다.",
+            description = "특정 유저에 대한 리뷰를 등록합니다. step은 1,2,3의 값을 가지며, 매칭 목록을 불러왔을 때 매칭의 status값에 따라 달라집니다.<br>" +
+                    "- Survey_Cancelled -> 1<br>" +
+                    "- Chat_Cancelled -> 2<br>" +
+                    "- Reviewing -> 3",
             parameters = {
                     @Parameter(
                             name        = "userId",

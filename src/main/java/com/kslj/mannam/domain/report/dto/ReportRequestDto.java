@@ -6,15 +6,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReportRequestDto {
     private ReportType reportType;
+    private Long targetUserId;
     private String reportContent;
     private String reportDescription;
-    private List<String> reportImages;
 }

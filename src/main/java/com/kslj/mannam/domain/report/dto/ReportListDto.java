@@ -29,7 +29,7 @@ public class ReportListDto {
                 .status(report.getStatus())
                 .content(report.getContent())
                 .reportedAt(report.getReportedAt())
-                .reporterNickname(report.getUser().getNickname())
+                .reporterNickname(report.getReporter().getNickname())
                 .build();
     }
 }

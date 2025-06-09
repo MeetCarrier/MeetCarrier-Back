@@ -1,5 +1,6 @@
 package com.kslj.mannam.domain.chat.controller;
 
+import com.kslj.mannam.domain.chat.dto.ChatLeaveMessageDto;
 import com.kslj.mannam.domain.chat.dto.ChatMessageDto;
 import com.kslj.mannam.domain.chat.dto.ChatResponseDto;
 import com.kslj.mannam.domain.chat.enums.MessageType;
@@ -73,7 +74,7 @@ public class ChatController {
     }
 
     @MessageMapping("/api/chat/leave")
-    public void leaveRoom(SimpMessageHeaderAccessor headerAccessor, @Payload ChatMessageDto dto) throws Exception {
+    public void leaveRoom(SimpMessageHeaderAccessor headerAccessor, @Payload ChatLeaveMessageDto dto) throws Exception {
         long roomId = dto.getRoomId();
 
         Authentication authentication = (Authentication) headerAccessor.getUser();
@@ -88,7 +89,7 @@ public class ChatController {
             throw new AccessDeniedException("해당 채팅방 참여자가 아닙니다.");
         }
 
-        chatService.leaveRoom(roomId, sender, dto.getMessage());
+        chatService.leaveRoom(roomId, sender, dto.getReasonCodes(), dto.getCustomReason());
 
         // 나감 알림 메시지 생성
         ChatResponseDto leaveNotice = ChatResponseDto.builder()

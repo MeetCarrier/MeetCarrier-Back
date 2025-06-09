@@ -45,7 +45,7 @@ public class ReportReplyService {
         report.get().updateStatus(ReportStatus.Processed);
 
         ReportReply savedReply = replyRepository.save(reply);
-        notificationService.createNotification(NotificationType.Report, report.get().getUser(), null);
+        notificationService.createNotification(NotificationType.Report, report.get().getReporter(), null);
 
         return savedReply.getId();
     }

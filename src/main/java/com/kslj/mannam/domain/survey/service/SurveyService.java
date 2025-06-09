@@ -192,18 +192,19 @@ public class SurveyService {
 
     // 설문지 중 나가기
     @Transactional
-    public void leaveSession(long sessionId, User user, String reason) {
+    public void leaveSession(long sessionId, User user, String reasonCodes, String customReason) {
         SurveySession session = surveySessionRepository.findById(sessionId)
                 .orElseThrow(() -> new EntityNotFoundException("SurveySession not found: " + sessionId));
 
         Match match = session.getMatch();
 
-        match.cancelMatch(user, MatchStatus.Survey_Cancelled, reason);
+        match.cancelMatch(user, MatchStatus.Survey_Cancelled, reasonCodes, customReason);
 
         // 상대방에게 보낼 메시지 구성
         SurveyLeaveDto leaveDto = SurveyLeaveDto.builder()
                 .sessionId(sessionId)
-                .reason(reason)
+                .reasonCodes(reasonCodes)
+                .customReason(customReason)
                 .build();
 
         log.info("leaveDto = " + leaveDto);

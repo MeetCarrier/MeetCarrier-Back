@@ -44,7 +44,11 @@ public class Report {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reporter_id", nullable = false)
-    private User user;
+    private User reporter;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "target_user_id")
+    private User targetUser;
 
     @Setter
     @OneToOne(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)

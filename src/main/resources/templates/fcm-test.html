@@ -49,26 +49,31 @@
   firebase.initializeApp(firebaseConfig);
   const messaging = firebase.messaging();
 
+  // ❗️ serviceWorker.register()의 .then() 안에서 모든 로직을 처리합니다.
   navigator.serviceWorker.register('/firebase-messaging-sw.js')
-          .then((registration) => {
+          .then((registration) => { // 'registration' 객체를 받습니다.
             console.log("✅ Service Worker 등록 완료:", registration);
 
             document.getElementById('getTokenBtn').onclick = function () {
               Notification.requestPermission().then(permission => {
                 if (permission === 'granted') {
+                  console.log("알림 권한이 허용되었습니다. 토큰을 발급합니다.");
+
+                  // ❗️[수정] getToken에 현재 등록 객체를 명시적으로 전달합니다.
                   messaging.getToken({
-                    vapidKey: "BL_f_s3clxhm9ZX-jLfgujT2lFGpb1C-jw1qTZIgXtnJjVthGsrXKLDBkxGUgHEfzz4-MFAyv3QRfAfqTZqcBeY"
+                    vapidKey: "BL_f_s3clxhm9ZX-jLfgujT2lFGpb1C-jw1qTZIgXtnJjVthGsrXKLDBkxGUgHEfzz4-MFAyv3QRfAfqTZqcBeY",
+                    serviceWorkerRegistration: registration // 이 부분이 핵심입니다.
                   }).then((token) => {
                     console.log("📱 토큰 발급 완료:", token);
                     fetch('/api/fcm/token', {
                       method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json'
-                      },
-                      body: JSON.stringify({token})
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ token })
                     }).then(() => {
                       alert("FCM 토큰이 서버에 등록되었습니다.");
                     });
+                  }).catch(err => {
+                    console.error('토큰 발급 중 오류 발생:', err);
                   });
                 } else {
                   alert("알림 권한이 거부되었습니다.");
@@ -85,8 +90,9 @@
               }, 5000);
             };
           })
+          .catch(err => {
+            console.error("Service Worker 등록 실패:", err);
+          });
 </script>
-
-
 </body>
 </html>

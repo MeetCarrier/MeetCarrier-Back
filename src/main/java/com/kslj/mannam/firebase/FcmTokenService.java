@@ -41,7 +41,7 @@ public class FcmTokenService {
     }
 
     @Transactional(readOnly = true)
-    public void sendPushToUser(User user, String title, String body, String url) {
+    public void sendPushToUser(User user, String title, String body, String url, String chatRoomId) {
         List<FcmToken> tokens = fcmTokenRepository.findAllByUser(user);
 
         if (tokens.isEmpty()) {
@@ -51,13 +51,18 @@ public class FcmTokenService {
         for (FcmToken tokenEntity : tokens) {
             String token = tokenEntity.getToken();
             try {
-                Message message = Message.builder()
+                Message.Builder messageBuilder = Message.builder()
                         .setToken(token)
                         .putData("title", title)
                         .putData("body", body)
-                        .putData("url", url)
-                        .build();
+                        .putData("url", url);
 
+                // 채팅 알림의 경우 채팅방 Id 데이터 추가
+                if (chatRoomId != null && !chatRoomId.isEmpty()) {
+                    messageBuilder.putData("chatRoomId", chatRoomId);
+                }
+
+                Message message = messageBuilder.build();
                 String response = FirebaseMessaging.getInstance().send(message);
                 log.info("Sent message: " + response + " To: " + user.getId());
             } catch (Exception e) {

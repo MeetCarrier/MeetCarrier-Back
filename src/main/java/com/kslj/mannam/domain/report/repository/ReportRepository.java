@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface ReportRepository extends JpaRepository<Report, Long> {
-    List<Report> findAllByUser(User user);
+    List<Report> findAllByReporter(User reporter);
 }

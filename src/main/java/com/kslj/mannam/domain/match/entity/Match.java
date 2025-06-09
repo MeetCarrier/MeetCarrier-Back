@@ -51,8 +51,11 @@ public class Match {
     @JoinColumn(name = "cancelled_by")
     private User cancelledBy;
 
-    @Column(name = "cancel_reason", columnDefinition = "TEXT")
-    private String cancelReason;
+    @Column(name = "cancel_reason_code", columnDefinition = "TEXT")
+    private String cancelReasonCode;
+
+    @Column(name = "cancel_custom_reason", columnDefinition = "TEXT")
+    private String cancelCustomReason;
 
     public void updateStatus(MatchStatus status) {
         this.status = status;
@@ -71,18 +74,19 @@ public class Match {
     }
 
     // 중단 처리 메서드
-    public void cancelMatch(User canceller, MatchStatus cancelStatus, String reason) {
+    public void cancelMatch(User canceller, MatchStatus cancelStatus, String reasonCodes, String customReason) {
         if (cancelStatus != MatchStatus.Survey_Cancelled && cancelStatus != MatchStatus.Chat_Cancelled) {
             throw new IllegalArgumentException("중단 상태는 Survey_Cancelled 또는 Chat_Cancelled만 가능합니다.");
         }
         if (!hasUser(canceller)) {
             throw new IllegalArgumentException("이 매칭의 참여자가 아닙니다.");
         }
-        if (reason == null || reason.isBlank()) {
+        if (reasonCodes == null || reasonCodes.isBlank()) {
             throw new IllegalArgumentException("중단 사유를 입력해야 합니다.");
         }
         this.status = cancelStatus;
         this.cancelledBy = canceller;
-        this.cancelReason = reason;
+        this.cancelReasonCode = reasonCodes;
+        this.cancelCustomReason = customReason;
     }
 }
