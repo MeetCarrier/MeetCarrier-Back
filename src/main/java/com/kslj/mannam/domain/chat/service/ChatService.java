@@ -3,6 +3,7 @@ package com.kslj.mannam.domain.chat.service;
 import com.kslj.mannam.domain.chat.dto.ChatMessageDto;
 import com.kslj.mannam.domain.chat.dto.ChatResponseDto;
 import com.kslj.mannam.domain.chat.entity.Chat;
+import com.kslj.mannam.domain.chat.enums.MessageType;
 import com.kslj.mannam.domain.chat.repository.ChatRepository;
 import com.kslj.mannam.domain.match.entity.Match;
 import com.kslj.mannam.domain.match.enums.MatchStatus;
@@ -13,6 +14,7 @@ import com.kslj.mannam.firebase.FcmTokenService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,7 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final RoomRepository roomRepository;
     private final FcmTokenService fcmTokenService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     // 메시지 저장
     @Transactional
@@ -63,6 +66,32 @@ public class ChatService {
         fcmTokenService.sendPushToUser(receiver, title, body, "https://www.mannamdeliveries.link/chat/" + roomId, String.valueOf(roomId));
 
         return savedChat.getId();
+    }
+
+    // 메시지 전송 (알람 x)
+    @Transactional
+    public void saveChatMessageWithoutNotification(long matchId, User sender, String message) {
+
+        Room room = roomRepository.getRoomByMatchId(matchId);
+
+        Chat newChat = Chat.builder()
+                .type(MessageType.CHATBOT)
+                .message(message)
+                .room(room)
+                .user(sender)
+                .build();
+
+        Chat savedChat = chatRepository.save(newChat);
+
+        ChatMessageDto dto = ChatMessageDto.builder()
+                .type(MessageType.CHATBOT)
+                .message(message)
+                .roomId(room.getId())
+                .userId(sender.getId())
+                .build();
+
+        messagingTemplate.convertAndSend(
+                "/topic/room/" + room.getId(), dto);
     }
 
     // 메시지 요청이 들어온 사용자가 채팅방에 참여중인 유저인지 검사

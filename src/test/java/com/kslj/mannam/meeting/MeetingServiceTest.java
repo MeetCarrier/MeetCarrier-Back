@@ -51,7 +51,7 @@ public class MeetingServiceTest {
         MeetingRequestDto requestDto = createMeetingRequestDto("강남역 카페", "서로 이야기 나눠보는 시간");
 
         // when
-        long meetingId = meetingService.createMeeting(matchId, requestDto);
+        long meetingId = meetingService.createMeeting(matchId, user1, requestDto);
         List<MeetingResponseDto> meetings = meetingService.getMeetings(user1);
 
         // then
@@ -73,7 +73,7 @@ public class MeetingServiceTest {
                 .build());
         MeetingRequestDto requestDto = createMeetingRequestDto("홍대 카페", "첫 만남");
 
-        long meetingId = meetingService.createMeeting(matchId, requestDto);
+        long meetingId = meetingService.createMeeting(matchId, user1, requestDto);
 
         // when
         MeetingRequestDto updatedDto = createMeetingRequestDto("신촌 카페", "장소 변경");
@@ -99,7 +99,7 @@ public class MeetingServiceTest {
                 .build());
         MeetingRequestDto requestDto = createMeetingRequestDto("서울역 카페", "짧은 만남");
 
-        long meetingId = meetingService.createMeeting(matchId, requestDto);
+        long meetingId = meetingService.createMeeting(matchId, user1, requestDto);
 
         // when
         meetingService.deleteMeeting(meetingId);

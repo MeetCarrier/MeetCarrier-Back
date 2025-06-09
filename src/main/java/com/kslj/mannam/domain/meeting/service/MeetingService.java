@@ -1,5 +1,6 @@
 package com.kslj.mannam.domain.meeting.service;
 
+import com.kslj.mannam.domain.chat.service.ChatService;
 import com.kslj.mannam.domain.match.entity.Match;
 import com.kslj.mannam.domain.match.service.MatchService;
 import com.kslj.mannam.domain.meeting.dto.MeetingRequestDto;
@@ -35,10 +36,11 @@ public class MeetingService {
     private final NotificationRepository notificationRepository;
     private final NotificationService notificationService;
     private final RoomRepository roomRepository;
+    private final ChatService chatService;
 
     // 새로운 대면 약속 저장
     @Transactional
-    public long createMeeting(long matchId, MeetingRequestDto requestDto) {
+    public long createMeeting(long matchId, User sender, MeetingRequestDto requestDto) {
         Match match = matchService.getMatch(matchId);
 
         boolean exists = meetingRepository.existsByMatchIdAndStatus(matchId, MeetingStatus.PENDING);
@@ -54,6 +56,8 @@ public class MeetingService {
                 .build();
 
         Meeting savedMeeting = meetingRepository.save(newMeeting);
+
+        chatService.saveChatMessageWithoutNotification(matchId, sender, "만남 약속 일정을 전송했습니다. 확인해주세요!");
 
         return savedMeeting.getId();
     }

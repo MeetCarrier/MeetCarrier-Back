@@ -67,9 +67,10 @@ public class MeetingController {
     @PostMapping("/{matchId}")
     public ResponseEntity<Long> createMeeting(
             @PathVariable("matchId") long matchId,
-            @RequestBody MeetingRequestDto requestDto
+            @RequestBody MeetingRequestDto requestDto,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        long meetingId = meetingService.createMeeting(matchId, requestDto);
+        long meetingId = meetingService.createMeeting(matchId, userDetails.getUser(), requestDto);
         return ResponseEntity.ok(meetingId);
     }
 

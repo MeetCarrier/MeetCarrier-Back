@@ -1,5 +1,6 @@
 package com.kslj.mannam.domain.invitation.service;
 
+import com.kslj.mannam.domain.chat.service.ChatService;
 import com.kslj.mannam.domain.invitation.dto.InvitationRequestDto;
 import com.kslj.mannam.domain.invitation.dto.InvitationResponseDto;
 import com.kslj.mannam.domain.invitation.dto.RespondToInvitationDto;
@@ -24,6 +25,7 @@ public class InvitationService {
     private final MatchService matchService;
     private final NotificationService notificationService;
     private final UserService userService;
+    private final ChatService chatService;
 
     // 만남 초대장 생성
     @Transactional
@@ -36,6 +38,7 @@ public class InvitationService {
                 throw new IllegalStateException("상대방이 확인하지 않은 초대장이 이미 존재합니다.");
             } else {
                 invitationRepository.delete(existing);
+                invitationRepository.flush();
             }
         }
 
@@ -51,6 +54,8 @@ public class InvitationService {
         Invitation saved = invitationRepository.save(invitation);
 
         notificationService.createNotification(NotificationType.InvitationRequest, receiver, null);
+
+        chatService.saveChatMessageWithoutNotification(match.getId(), sender, "만남초대장이 전송되었습니다. + 버튼을 눌러 확인해보세요!");
 
         return saved.getId();
     }
