@@ -20,7 +20,7 @@ public class NotificationScheduler {
     private final UserRepository userRepository;
 
     // 매일 20시마다 칭찬일기를 작성하지 않은 유저들에게 알림 전송
-    @Scheduled(cron = "0 0 11 * * *")
+    @Scheduled(cron = "0 0 20 * * *")
     public void notifyDiary() {
         // 오늘 날짜 세팅
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
