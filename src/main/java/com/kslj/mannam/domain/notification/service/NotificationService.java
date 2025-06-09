@@ -6,18 +6,53 @@ import com.kslj.mannam.domain.notification.enums.NotificationType;
 import com.kslj.mannam.domain.notification.repository.NotificationRepository;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.firebase.FcmTokenService;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@RequiredArgsConstructor
+@Slf4j
 @Service
 public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final FcmTokenService fcmTokenService;
+    private final NotificationService self;
+
+    public NotificationService(NotificationRepository notificationRepository, FcmTokenService fcmTokenService, @Lazy NotificationService self) {
+        this.notificationRepository = notificationRepository;
+        this.fcmTokenService = fcmTokenService;
+        this.self = self;
+    }
+
+    // 일기 알림 전송 메서드
+    public void sendJournalNotification(User user) {
+        String title = "칭찬일기 알림";
+        String message = "오늘 하루는 어떠셨나요? 하루를 되돌아보며 칭찬일기를 적어보세요!";
+        String url = "https://www.mannamdeliveries.link/Calendar";
+
+        self.saveNotification(NotificationType.Journal, user, null, message);
+
+        try {
+            fcmTokenService.sendPushToUser(user, title, message, url);
+        } catch (Exception e) {
+            log.error("Failed to send journal notification", e);
+        }
+    }
+
+    @Transactional
+    public void saveNotification(NotificationType type, User user, Long referenceId, String message) {
+        Notification newNotification = Notification.builder()
+                .type(type)
+                .message(message)
+                .referenceId(referenceId)
+                .user(user)
+                .build();
+        notificationRepository.save(newNotification);
+    }
+
 
     // 알림 추가
     @Transactional
