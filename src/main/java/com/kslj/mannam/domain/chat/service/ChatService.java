@@ -2,6 +2,7 @@ package com.kslj.mannam.domain.chat.service;
 
 import com.kslj.mannam.domain.chat.dto.ChatMessageDto;
 import com.kslj.mannam.domain.chat.dto.ChatResponseDto;
+import com.kslj.mannam.domain.chat.dto.LastChatDto;
 import com.kslj.mannam.domain.chat.entity.Chat;
 import com.kslj.mannam.domain.chat.enums.MessageType;
 import com.kslj.mannam.domain.chat.repository.ChatRepository;
@@ -10,7 +11,9 @@ import com.kslj.mannam.domain.match.enums.MatchStatus;
 import com.kslj.mannam.domain.room.entity.Room;
 import com.kslj.mannam.domain.room.repository.RoomRepository;
 import com.kslj.mannam.domain.user.entity.User;
+import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.firebase.FcmTokenService;
+import com.kslj.mannam.redis.RedisUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +33,9 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final RoomRepository roomRepository;
     private final FcmTokenService fcmTokenService;
+    private final RedisUtils redisUtils;
+    private final ChatPresenceService chatPresenceService;
+    private final UserService userService;
     private final SimpMessagingTemplate messagingTemplate;
 
     // 메시지 저장
@@ -45,25 +51,45 @@ public class ChatService {
             receiver = match.getUser1();
         }
 
+        // 상대방이 채팅방에 접속해있는지 확인
+        boolean isReceiverOnline = chatPresenceService.isUserActive(roomId, receiver.getId());
+
         Chat newChat = Chat.builder()
                 .type(dto.getType())
                 .message(dto.getMessage())
                 .imageUrl(dto.getImageUrl())
                 .room(room)
                 .user(sender)
+                .isRead(isReceiverOnline)
                 .build();
 
         Chat savedChat = chatRepository.save(newChat);
 
-        // 푸시 알림 전송
-        String title = sender.getNickname();
-        String body;
-        if (dto.getMessage() == null) {
-            body = "사진을 전송했습니다.";
-        } else {
-            body = dto.getMessage();
+        if (!isReceiverOnline) {
+            // Redis에 최근 채팅, 안 읽은 알람 개수 저장
+            redisUtils.setData("chat:latest:" + roomId, dto.getMessage(), 3600 * 24);
+            String unreadCountKey = "chat:unread:" + roomId + ":" + receiver.getId();
+            Long unreadCount = redisUtils.incrData(unreadCountKey);
+
+            // 푸시 알림 전송
+            String title = sender.getNickname();
+            String body;
+            if (dto.getMessage() == null) {
+                body = "사진을 전송했습니다.";
+            } else {
+                body = dto.getMessage();
+            }
+            fcmTokenService.sendPushToUser(receiver, title, body, "https://www.mannamdeliveries.link/chat/" + roomId, String.valueOf(roomId));
+
+            // 최근 채팅, 안 읽은 알람 개수 클라이언트에게 전송
+            LastChatDto lastChatInfo = LastChatDto.builder()
+                    .roomId(roomId)
+                    .lastMessage(dto.getMessage())
+                    .unreadCount(unreadCount.intValue())
+                    .build();
+
+            messagingTemplate.convertAndSend("/topic/user/" + receiver.getId() + "/chats", lastChatInfo);
         }
-        fcmTokenService.sendPushToUser(receiver, title, body, "https://www.mannamdeliveries.link/chat/" + roomId, String.valueOf(roomId));
 
         return savedChat.getId();
     }
@@ -152,4 +178,25 @@ public class ChatService {
 
     // 메시지 삭제
 
+
+    // 읽음 처리
+    @Transactional
+    public void markMessagesAsRead(Long currentUserId, Long roomId) {
+        User currentUser = userService.getUserById(currentUserId);
+
+        // 상대방이 읽지 않은 채팅 내역 가져오기
+        Room room = roomRepository.findById(roomId).orElseThrow();
+        List<Chat> unreadMessages = chatRepository.findByRoomAndUserIsNotAndIsReadFalse(room, currentUser);
+
+        // 읽음 처리
+        unreadMessages.forEach(chat -> chat.updateIsRead(true));
+        chatRepository.saveAll(unreadMessages);
+
+        // 안 읽은 알람 개수 초기화
+        String unreadCountKey = "chat:unread:" + roomId + ":" + currentUserId;
+        redisUtils.deleteData(unreadCountKey);
+
+        // 클라이언트에게 접속한 유저가 읽었음을 알림
+        messagingTemplate.convertAndSend("/topic/room/" + roomId + "/read", currentUser.getId());
+    }
 }

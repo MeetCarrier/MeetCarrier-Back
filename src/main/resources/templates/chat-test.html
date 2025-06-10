@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>채팅 구독 테스트</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <style>
+        body { font-family: sans-serif; }
+        .container { display: flex; gap: 20px; }
+        .panel { flex: 1; border: 1px solid #ccc; padding: 15px; border-radius: 8px; }
+        h1, h2, h3 { color: #333; }
+        button { padding: 8px 12px; margin: 5px 2px; border: 1px solid #666; border-radius: 4px; cursor: pointer; background-color: #f0f0f0; }
+        button:hover { background-color: #e0e0e0; }
+        button.primary { background-color: #007bff; color: white; border-color: #007bff; }
+        button.primary:hover { background-color: #0056b3; }
+        input[type="text"], textarea { width: 95%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        pre { background-color: #eee; border: 1px solid #ddd; padding: 10px; white-space: pre-wrap; word-wrap: break-word; min-height: 100px; }
+        .status { font-weight: bold; }
+        .status.connected { color: green; }
+        .status.disconnected { color: red; }
+        .output-label { font-weight: bold; margin-top: 15px; display: block; }
+    </style>
+</head>
+<body>
+
+<h1>채팅 구독 시나리오 테스트</h1>
+<p><b>사용법:</b> 이 페이지를 두 개의 브라우저 창에 열고, 각각 다른 유저로 로그인하여 테스트를 진행하세요.</p>
+
+<div class="container">
+    <div class="panel">
+        <h2>🧑🏻‍💻 사용자 1 (ID: 1000)</h2>
+        <p><b>Room ID:</b> 1008</p>
+
+        <div>
+            <button onclick="login(1)">1. 로그인</button>
+            <button class="primary" onclick="connect(1)">2. WebSocket 연결</button>
+            <button onclick="disconnect(1)">연결 해제</button>
+            <p id="status-1" class="status disconnected">연결 상태: 끊김</p>
+        </div>
+        <hr>
+        <div>
+            <h3>구독 관리</h3>
+            <button onclick="subscribeUserTopic(1)">채팅 목록 구독</button>
+            <button onclick="subscribeRoomTopic(1)">채팅방 구독</button>
+            <button onclick="unsubscribeRoomTopic(1)">채팅방 구독 해제</button>
+        </div>
+        <hr>
+        <div>
+            <h3>액션</h3>
+            <button onclick="markAsRead(1)">'읽음' 처리 (채팅방 입장)</button>
+            <textarea id="message-1" rows="4">{"type": "TEXT", "message": "안녕하세요! User 1 입니다."}</textarea>
+            <button class="primary" onclick="sendMessage(1)">메시지 전송</button>
+        </div>
+        <hr>
+        <div>
+            <label class="output-label">채팅 목록 업데이트 (/topic/user/1000/chats):</label>
+            <pre id="list-output-1"></pre>
+            <label class="output-label">채팅방 메시지 (/topic/room/1008):</label>
+            <pre id="room-output-1"></pre>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>🧑🏼‍💻 사용자 2 (ID: 1001)</h2>
+        <p><b>Room ID:</b> 1008</p>
+
+        <div>
+            <button onclick="login(2)">1. 로그인</button>
+            <button class="primary" onclick="connect(2)">2. WebSocket 연결</button>
+            <button onclick="disconnect(2)">연결 해제</button>
+            <p id="status-2" class="status disconnected">연결 상태: 끊김</p>
+        </div>
+        <hr>
+        <div>
+            <h3>구독 관리</h3>
+            <button onclick="subscribeUserTopic(2)">채팅 목록 구독</button>
+            <button onclick="subscribeRoomTopic(2)">채팅방 구독</button>
+            <button onclick="unsubscribeRoomTopic(2)">채팅방 구독 해제</button>
+        </div>
+        <hr>
+        <div>
+            <h3>액션</h3>
+            <button onclick="markAsRead(2)">'읽음' 처리 (채팅방 입장)</button>
+            <textarea id="message-2" rows="4">{"type": "TEXT", "message": "반갑습니다! User 2 입니다."}</textarea>
+            <button class="primary" onclick="sendMessage(2)">메시지 전송</button>
+        </div>
+        <hr>
+        <div>
+            <label class="output-label">채팅 목록 업데이트 (/topic/user/1001/chats):</label>
+            <pre id="list-output-2"></pre>
+            <label class="output-label">채팅방 메시지 (/topic/room/1008):</label>
+            <pre id="room-output-2"></pre>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    const stompClients = {};
+    const subscriptions = {};
+
+    const USER_IDS = { 1: 1000, 2: 1001 };
+    const ROOM_ID = 1008;
+
+    function getLoginUrl(userNum) {
+        return userNum === 1 ? '/api/auth/test/login' : '/api/auth/test/login2';
+    }
+
+    function login(userNum) {
+        fetch(getLoginUrl(userNum), {
+            method: 'POST',
+            credentials: 'include' // JSESSIONID 쿠키를 위해 필수
+        })
+            .then(res => {
+                const statusEl = document.getElementById(`status-${userNum}`);
+                if (res.ok) {
+                    statusEl.textContent = `✅ 사용자 ${userNum} 로그인 성공`;
+                    statusEl.className = 'status';
+                } else {
+                    statusEl.textContent = '❌ 로그인 실패';
+                }
+            }).catch(err => {
+            console.error(`Login error for user ${userNum}:`, err);
+            document.getElementById(`status-${userNum}`).textContent = '❌ 로그인 중 오류 발생';
+        });
+    }
+
+    function connect(userNum) {
+        if (stompClients[userNum] && stompClients[userNum].connected) {
+            alert(`사용자 ${userNum}는 이미 연결되어 있습니다.`);
+            return;
+        }
+
+        const socket = new SockJS('/api/connection'); // WebSocket Endpoint
+        const stompClient = Stomp.over(socket);
+        stompClient.connect({}, (frame) => {
+            console.log(`User ${userNum} Connected: ${frame}`);
+            const statusEl = document.getElementById(`status-${userNum}`);
+            statusEl.textContent = '연결 상태: 연결됨';
+            statusEl.className = 'status connected';
+            stompClients[userNum] = stompClient;
+        }, (error) => {
+            console.error(`STOMP connection error for user ${userNum}:`, error);
+            const statusEl = document.getElementById(`status-${userNum}`);
+            statusEl.textContent = `연결 상태: 실패 - ${error}`;
+            statusEl.className = 'status disconnected';
+        });
+    }
+
+    function disconnect(userNum) {
+        if (stompClients[userNum] && stompClients[userNum].connected) {
+            stompClients[userNum].disconnect(() => {
+                const statusEl = document.getElementById(`status-${userNum}`);
+                statusEl.textContent = '연결 상태: 끊김';
+                statusEl.className = 'status disconnected';
+                console.log(`User ${userNum} disconnected.`);
+            });
+        } else {
+            alert(`사용자 ${userNum}는 연결되어 있지 않습니다.`);
+        }
+    }
+
+    function subscribeUserTopic(userNum) {
+        const userId = USER_IDS[userNum];
+        const path = `/topic/user/${userId}/chats`;
+        const client = stompClients[userNum];
+
+        if (client && client.connected) {
+            const sub = client.subscribe(path, (message) => {
+                appendOutput(userNum, 'list', `[채팅목록] ${message.body}`);
+            });
+            subscriptions[`user-topic-${userNum}`] = sub;
+            appendOutput(userNum, 'list', `Subscribed to ${path}`);
+        } else {
+            alert('먼저 연결하세요.');
+        }
+    }
+
+    function subscribeRoomTopic(userNum) {
+        const path = `/topic/room/${ROOM_ID}`;
+        const client = stompClients[userNum];
+
+        if (client && client.connected) {
+            const sub = client.subscribe(path, (message) => {
+                appendOutput(userNum, 'room', `[채팅방] ${message.body}`);
+            });
+            subscriptions[`room-topic-${userNum}`] = sub;
+            appendOutput(userNum, 'room', `Subscribed to ${path}`);
+        } else {
+            alert('먼저 연결하세요.');
+        }
+    }
+
+    function unsubscribeRoomTopic(userNum) {
+        const sub = subscriptions[`room-topic-${userNum}`];
+        if (sub) {
+            sub.unsubscribe();
+            appendOutput(userNum, 'room', '채팅방 구독을 해제했습니다.');
+            delete subscriptions[`room-topic-${userNum}`];
+        } else {
+            alert('구독 중이 아닙니다.');
+        }
+    }
+
+    function markAsRead(userNum) {
+        // 이 API는 현재 로그인한 유저의 쿠키를 기반으로 동작해야 함
+        // 따라서, 이 버튼을 누르기 전에 반드시 해당 유저로 로그인해야 합니다.
+        fetch(`/api/chat/${ROOM_ID}/read`, {
+            method: 'POST',
+            credentials: 'include'
+        })
+            .then(res => res.text())
+            .then(text => {
+                appendOutput(userNum, 'room', `읽음 처리 API 호출: ${res.ok ? '성공' : '실패'}`);
+            }).catch(err => {
+            console.error(`Mark as read error for user ${userNum}:`, err);
+        });
+    }
+
+    function sendMessage(userNum) {
+        const sendPath = '/app/api/chat/send'; // @MessageMapping 경로
+        const client = stompClients[userNum];
+        const messageContentEl = document.getElementById(`message-${userNum}`);
+
+        if (client && client.connected) {
+            try {
+                const customContent = JSON.parse(messageContentEl.value);
+                const payload = {
+                    roomId: ROOM_ID,
+                    ...customContent
+                };
+                client.send(sendPath, {}, JSON.stringify(payload));
+                appendOutput(userNum, 'room', `[전송] ${JSON.stringify(payload)}`);
+            } catch (e) {
+                alert('유효한 JSON 형식의 메시지를 입력하세요.');
+            }
+        } else {
+            alert('먼저 연결하세요.');
+        }
+    }
+
+    function appendOutput(userNum, type, message) {
+        const outputEl = document.getElementById(`${type}-output-${userNum}`);
+        outputEl.textContent += `\n${new Date().toLocaleTimeString()} > ${message}`;
+        outputEl.scrollTop = outputEl.scrollHeight;
+    }
+</script>
+
+</body>
+</html>

@@ -1,5 +1,6 @@
 package com.kslj.mannam.domain.chat.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kslj.mannam.domain.chat.enums.MessageType;
 import com.kslj.mannam.domain.room.entity.Room;
 import com.kslj.mannam.domain.user.entity.User;
@@ -29,6 +30,11 @@ public class Chat {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Column(name = "is_read")
+    @Builder.Default
+    @JsonProperty("isRead")
+    private Boolean isRead = false;
+
     @Builder.Default
     @Column(name = "sent_at")
     private LocalDateTime sentAt = LocalDateTime.now();
@@ -40,4 +46,8 @@ public class Chat {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    public void updateIsRead(boolean read) {
+        this.isRead = read;
+    }
 }
