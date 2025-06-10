@@ -23,12 +23,20 @@ public class FcmTokenService {
 
     @Transactional
     public void saveOrUpdateToken(Long userId, String token) {
+        log.info("userId = " + userId + ", token = " + token);
         User user = userService.getUserById(userId);
+        Optional<FcmToken> existingTokenOpt = fcmTokenRepository.findByToken(token);
 
-        Optional<FcmToken> existing = fcmTokenRepository.findByToken(token);
+        if (existingTokenOpt.isPresent()) {
+            // 토큰이 이미 존재하는 경우
+            FcmToken existingToken = existingTokenOpt.get();
 
-        if (existing.isPresent()) {
-            existing.get().updateUpdatedAt();
+            // 하지만 해당 토큰이 다른 유저의 소유라면 현재 소유한 유저로 소유권 이전
+            if (!existingToken.getUser().getId().equals(userId)) {
+                existingToken.updateUser(user);
+            }
+            existingToken.updateUpdatedAt();
+
         } else {
             FcmToken newToken = FcmToken.builder()
                     .user(user)
@@ -69,5 +77,10 @@ public class FcmTokenService {
                 log.warn("Failed to send message: " + e.getMessage());
             }
         }
+    }
+
+    @Transactional
+    public void deleteToken(String token) {
+        fcmTokenRepository.deleteByToken(token);
     }
 }
