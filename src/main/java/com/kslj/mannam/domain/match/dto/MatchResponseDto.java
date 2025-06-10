@@ -1,5 +1,6 @@
 package com.kslj.mannam.domain.match.dto;
 
+import com.kslj.mannam.domain.chat.dto.LastChatDto;
 import com.kslj.mannam.domain.match.entity.Match;
 import com.kslj.mannam.domain.match.enums.MatchStatus;
 import com.kslj.mannam.domain.user.entity.User;
@@ -28,12 +29,15 @@ public class MatchResponseDto {
     long user2Id;
     String user2Nickname;
     String user2ImageUrl;
+    String lastMessage;
+    LocalDateTime lastMessageAt;
+    int unreadCount;
 
 
-    public static MatchResponseDto fromEntity(Match match, Long sessionId, Long roomId, User user) {
+    public static MatchResponseDto fromEntity(Match match, Long sessionId, Long roomId, User user, LastChatDto lastChatInfo) {
         boolean agreed = match.isEntered(user);
 
-        return MatchResponseDto.builder()
+        MatchResponseDto.MatchResponseDtoBuilder builder = MatchResponseDto.builder()
                 .id(match.getId())
                 .matchedAt(match.getMatchedAt())
                 .status(match.getStatus())
@@ -45,7 +49,14 @@ public class MatchResponseDto {
                 .user1ImageUrl(match.getUser1().getImgUrl())
                 .user2Id(match.getUser2().getId())
                 .user2Nickname(match.getUser2().getNickname())
-                .user2ImageUrl(match.getUser2().getImgUrl())
-                .build();
+                .user2ImageUrl(match.getUser2().getImgUrl());
+
+        if (lastChatInfo != null) {
+            builder.unreadCount(lastChatInfo.getUnreadCount());
+            builder.lastMessage(lastChatInfo.getLastMessage());
+            builder.lastMessageAt(lastChatInfo.getLastMessageAt());
+        }
+
+        return builder.build();
     }
 }

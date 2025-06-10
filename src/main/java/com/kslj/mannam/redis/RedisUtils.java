@@ -3,6 +3,7 @@ package com.kslj.mannam.redis;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -14,12 +15,12 @@ public class RedisUtils {
         this.redisTemplate = redisTemplate;
     }
 
-    public void setData(String key, String value, long expiredTime) {
+    public void setData(String key, Object value, long expiredTime) {
         redisTemplate.opsForValue().set(key, value, expiredTime, TimeUnit.SECONDS);
     }
 
-    public String getData(String key) {
-        return (String) redisTemplate.opsForValue().get(key);
+    public Optional<Object> getData(String key) {
+        return Optional.ofNullable(redisTemplate.opsForValue().get(key));
     }
 
     public void deleteData(String key) {

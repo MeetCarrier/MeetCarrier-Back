@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -13,4 +15,5 @@ public class LastChatDto {
     private Long roomId;
     private String lastMessage;
     private Integer unreadCount;
+    private LocalDateTime lastMessageAt;
 }

@@ -66,25 +66,41 @@ public class ChatService {
         Chat savedChat = chatRepository.save(newChat);
 
         if (!isReceiverOnline) {
-            // Redis에 최근 채팅, 안 읽은 알람 개수 저장
-            redisUtils.setData("chat:latest:" + roomId, dto.getMessage(), 3600 * 24);
+            // 캐시와 푸시에 사용될 메시지 본문 생성
+            String messageBody;
+            if (savedChat.getMessage() == null && savedChat.getImageUrl() != null) {
+                messageBody = "사진을 전송했습니다.";
+            } else {
+                messageBody = savedChat.getMessage();
+            }
+
+            // Redis에 저장할 LastChatDto 생성
+            LastChatDto lastChatForCache = LastChatDto.builder()
+                    .roomId(roomId)
+                    .lastMessage(messageBody)
+                    .lastMessageAt(savedChat.getSentAt())
+                    .build();
+
+            // 객체를 통째로 저장
+            redisUtils.setData("chat:latest:" + roomId, lastChatForCache, 3600 * 24);
+
+            // 안 읽은 메시지 개수 증가
             String unreadCountKey = "chat:unread:" + roomId + ":" + receiver.getId();
             Long unreadCount = redisUtils.incrData(unreadCountKey);
 
-            // 푸시 알림 전송
-            String title = sender.getNickname();
-            String body;
-            if (dto.getMessage() == null) {
-                body = "사진을 전송했습니다.";
-            } else {
-                body = dto.getMessage();
-            }
-            fcmTokenService.sendPushToUser(receiver, title, body, "https://www.mannamdeliveries.link/chat/" + roomId, String.valueOf(roomId));
+            // 푸시 알람 전송
+            fcmTokenService.sendPushToUser(
+                    receiver,
+                    sender.getNickname(),
+                    messageBody,
+                    "https://www.mannamdeliveries.link/chat/" + roomId,
+                    String.valueOf(roomId));
 
             // 최근 채팅, 안 읽은 알람 개수 클라이언트에게 전송
             LastChatDto lastChatInfo = LastChatDto.builder()
                     .roomId(roomId)
-                    .lastMessage(dto.getMessage())
+                    .lastMessage(messageBody)
+                    .lastMessageAt(savedChat.getSentAt())
                     .unreadCount(unreadCount.intValue())
                     .build();
 
@@ -107,7 +123,7 @@ public class ChatService {
                 .user(sender)
                 .build();
 
-        Chat savedChat = chatRepository.save(newChat);
+        chatRepository.save(newChat);
 
         ChatMessageDto dto = ChatMessageDto.builder()
                 .type(MessageType.CHATBOT)
@@ -198,5 +214,70 @@ public class ChatService {
 
         // 클라이언트에게 접속한 유저가 읽었음을 알림
         messagingTemplate.convertAndSend("/topic/room/" + roomId + "/read", currentUser.getId());
+    }
+
+    // 최신 채팅 정보 조회
+    @Transactional(readOnly = true)
+    public LastChatDto getLastChatInfo(long roomId, long userId) {
+
+        String lastChatKey = "chat:latest:" + roomId;
+        LastChatDto lastChatInfo;
+
+        // Redis에서 LastChatDto 객체 조회
+        Optional<Object> cachedData = redisUtils.getData(lastChatKey);
+
+        if (cachedData.isPresent()) {
+            // 캐시에 저장된 데이터 존재
+            lastChatInfo = (LastChatDto) cachedData.get();
+        } else {
+            // 캐시에 없으면 DB 조회
+            Optional<Chat> lastChatOpt = chatRepository.getLastChat(roomId);
+
+            if (lastChatOpt.isPresent()) {
+                Chat lastChat = lastChatOpt.get();
+                String message = lastChat.getMessage();
+                if (message == null && lastChat.getImageUrl() != null) {
+                    message = "사진을 보냈습니다.";
+                }
+
+                lastChatInfo = LastChatDto.builder()
+                        .roomId(roomId)
+                        .lastMessage(message)
+                        .lastMessageAt(lastChat.getSentAt())
+                        .build();
+
+                // Redis에 캐싱
+                redisUtils.setData(lastChatKey, lastChatInfo, 3600 * 24);
+            } else {
+                // DB에도 저장된 채팅 내역이 없으면 빈 DTO 반환
+                lastChatInfo = LastChatDto.builder()
+                        .roomId(roomId)
+                        .build();
+            }
+        }
+
+        // 사용자별 안 읽은 메시지 개수 처리
+        String unreadCountKey = "chat:unread:" + roomId + ":" + userId;
+        int unreadCount = 0;
+
+        // Redis에서 안 읽은 메시지 개수 카운트 조회
+        Optional<Object> rawUnreadCount = redisUtils.getData(unreadCountKey);
+        if (rawUnreadCount.isPresent()) {
+            unreadCount = Integer.parseInt(rawUnreadCount.get().toString());
+        } else {
+            // 없으면 DB 조회
+            unreadCount = chatRepository.countUnreadMessages(roomId, userId).intValue();
+
+            // Redis에 캐싱
+            redisUtils.setData(unreadCountKey, unreadCount, 3600 * 24);
+        }
+
+        // 최종 DTO 생성
+        return LastChatDto.builder()
+                .roomId(roomId)
+                .lastMessage(lastChatInfo.getLastMessage())
+                .lastMessageAt(lastChatInfo.getLastMessageAt())
+                .unreadCount(unreadCount) // 최종적으로 안 읽은 수 포함
+                .build();
     }
 }

@@ -1,5 +1,7 @@
 package com.kslj.mannam.domain.match.service;
 
+import com.kslj.mannam.domain.chat.dto.LastChatDto;
+import com.kslj.mannam.domain.chat.service.ChatService;
 import com.kslj.mannam.domain.match.dto.MatchCreateDto;
 import com.kslj.mannam.domain.match.dto.MatchResponseDto;
 import com.kslj.mannam.domain.match.entity.Match;
@@ -29,6 +31,7 @@ public class MatchService {
     private final UserService userService;
     private final RoomService roomService;
     private final UserActionLogService userActionLogService;
+    private final ChatService chatService;
 
     // 매칭 정보 생성
     @Transactional
@@ -54,6 +57,7 @@ public class MatchService {
     public List<MatchResponseDto> getMatches(User user) {
         List<Match> matches = matchRepository.findAllByUser1OrUser2(user, user);
         List<MatchResponseDto> responses = new ArrayList<>();
+        LastChatDto lastChatDto = null;
 
         if (matches.isEmpty()) {
             return responses;
@@ -67,9 +71,10 @@ public class MatchService {
 
             if (status != MatchStatus.Surveying && status != MatchStatus.Survey_Cancelled && status != MatchStatus.Matched) {
                 roomId = roomService.getRoomId(match.getId());
+                lastChatDto = chatService.getLastChatInfo(roomId, user.getId());
             }
 
-            responses.add(MatchResponseDto.fromEntity(match, sessionId, roomId, user));
+            responses.add(MatchResponseDto.fromEntity(match, sessionId, roomId, user, lastChatDto));
         }
 
         return responses;

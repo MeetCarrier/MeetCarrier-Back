@@ -74,7 +74,7 @@ public class WebSocketEventListener {
 
         // Redis에서 해당 구독 정보를 조회
         String redisKey = createRedisKey(sessionId, subscriptionId);
-        String roomIdStr = redisUtils.getData(redisKey);
+        String roomIdStr = (String) redisUtils.getData(redisKey).get();
 
         if (roomIdStr != null) {
             // Redis에서 키를 찾았다면, 채팅방 구독 해제로 간주
@@ -102,6 +102,7 @@ public class WebSocketEventListener {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         if (accessor.getUser() != null && accessor.getUser().getName() != null) {
             String userIdStr = accessor.getUser().getName();
+            log.info("userId={} disconnected", userIdStr);
             try {
                 long userId = Long.parseLong(userIdStr);
 

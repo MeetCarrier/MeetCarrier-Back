@@ -48,7 +48,7 @@ public class smsService {
 
     // Redis에서 인증번호 조회 및 검증
     public String verifySmsCode(String userPhone, String inputCode) {
-        String savedCode = redisUtils.getData("sms:" + userPhone);
+        String savedCode = (String) redisUtils.getData("sms:" + userPhone).get();
 
         if (savedCode == null) {
             return "NOT_REQUESTED_OR_EXPIRED";
