@@ -40,7 +40,7 @@ public class FcmTokenController {
 
     @PostMapping("/test")
     public ResponseEntity<Void> sendTestPush(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        fcmTokenService.sendPushToUser(
+        fcmTokenService.sendPushToUserAsync(
                 userDetails.getUser(),
                 "FCM 테스트 알림",
                 "푸시 알림이 정상적으로 전송되었습니다.",

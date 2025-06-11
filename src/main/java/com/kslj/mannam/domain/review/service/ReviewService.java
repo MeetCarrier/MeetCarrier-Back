@@ -116,4 +116,10 @@ public class ReviewService {
     public void deleteReview(long reviewId) {
         reviewRepository.deleteById(reviewId);
     }
+
+    // 유저 Id로 등록된 리뷰 조회
+    @Transactional(readOnly = true)
+    public boolean hasUserReview(long reviewerId, long targetUserId) {
+        return reviewRepository.existsByReviewer_IdAndUser_Id(reviewerId, targetUserId);
+    }
 }

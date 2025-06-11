@@ -9,6 +9,7 @@ import com.kslj.mannam.domain.chat.repository.ChatRepository;
 import com.kslj.mannam.domain.match.entity.Match;
 import com.kslj.mannam.domain.match.enums.MatchStatus;
 import com.kslj.mannam.domain.room.entity.Room;
+import com.kslj.mannam.domain.room.enums.RoomStatus;
 import com.kslj.mannam.domain.room.repository.RoomRepository;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.service.UserService;
@@ -97,7 +98,7 @@ public class ChatService {
             Long unreadCount = redisUtils.incrData(unreadCountKey);
 
             // 푸시 알람 전송
-            fcmTokenService.sendPushToUser(
+            fcmTokenService.sendPushToUserAsync(
                     receiver,
                     sender.getNickname(),
                     messageBody,
@@ -198,6 +199,9 @@ public class ChatService {
 
         // 채팅 중 중단으로 상태 변경
         match.cancelMatch(user, MatchStatus.Chat_Cancelled, reasonCodes, customReason);
+
+        // 채팅방 비활성화
+        room.updateStatus(RoomStatus.Deactivate);
     }
 
     // 메시지 삭제

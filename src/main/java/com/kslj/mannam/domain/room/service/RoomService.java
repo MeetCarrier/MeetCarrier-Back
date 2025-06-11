@@ -1,6 +1,7 @@
 package com.kslj.mannam.domain.room.service;
 
 import com.kslj.mannam.domain.match.entity.Match;
+import com.kslj.mannam.domain.match.enums.MatchStatus;
 import com.kslj.mannam.domain.room.entity.Room;
 import com.kslj.mannam.domain.room.enums.RoomStatus;
 import com.kslj.mannam.domain.room.repository.RoomRepository;
@@ -53,10 +54,10 @@ public class RoomService {
     @Transactional
     public void checkRoomTime() {
         log.info("Room Time Check Started");
-        LocalDateTime threshold = LocalDateTime.now().minusHours(24);
-        List<Room> rooms = roomRepository.findAllByStatusAndDeactivationTimeBefore(RoomStatus.Activate, threshold);
+        List<Room> rooms = roomRepository.findAllByStatusAndDeactivationTimeBefore(RoomStatus.Activate, LocalDateTime.now());
 
         for (Room room : rooms) {
+            room.getMatch().updateStatus(MatchStatus.Reviewing);
             room.updateStatus(RoomStatus.Deactivate);
         }
     }

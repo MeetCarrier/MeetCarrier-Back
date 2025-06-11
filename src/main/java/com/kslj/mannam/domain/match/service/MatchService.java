@@ -88,6 +88,17 @@ public class MatchService {
                 () -> new RuntimeException("매칭 정보가 없습니다. matchId=" + matchId));
     }
 
+    // 유저로 매칭 정보 검색
+    @Transactional(readOnly = true)
+    public Match findExistingMatch(Long userAId, Long userBId) {
+        User userA = userService.getUserById(userAId);
+        User userB = userService.getUserById(userBId);
+
+        return matchRepository.findMatchByUsers(userA, userB).orElseThrow(
+                () -> new RuntimeException("매칭 정보가 없습니다. userA=" + userA + " userB=" + userB)
+        );
+    }
+
     // 매칭 정보 업데이트
     @Transactional
     public void updateMatchStatus(long matchId, MatchStatus status) {

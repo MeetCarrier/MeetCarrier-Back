@@ -47,7 +47,7 @@ public class SurveyService {
     @Transactional
     public long createSurveySession(long matchId) {
         Match match = matchService.getMatch(matchId);
-        match.updateStatus(MatchStatus.Surveying);
+        matchService.updateMatchStatus(matchId, MatchStatus.Surveying);
 
         SurveySession surveySession = SurveySession.builder()
                 .match(match)
@@ -80,7 +80,7 @@ public class SurveyService {
         // 질문 랜덤하게 뽑기
         List<String> questionPool = loadQuestionsFromFile();
         Collections.shuffle(questionPool);
-        List<String> selectedQuestions = new ArrayList<>();
+        List<String> selectedQuestions;
 
         // 설정한 질문이 둘 다 없는 경우 -> 5개, 설정한 질문이 둘 중 하나만 있는 경우 -> 4개, 둘 다 질문을 설정한 경우 -> 3개
         if(user1Question == null && user2Question == null) {

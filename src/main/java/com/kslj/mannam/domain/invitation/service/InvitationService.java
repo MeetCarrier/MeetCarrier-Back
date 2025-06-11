@@ -8,6 +8,7 @@ import com.kslj.mannam.domain.invitation.entity.Invitation;
 import com.kslj.mannam.domain.invitation.enums.InvitationStatus;
 import com.kslj.mannam.domain.invitation.repository.InvitationRepository;
 import com.kslj.mannam.domain.match.entity.Match;
+import com.kslj.mannam.domain.match.enums.MatchStatus;
 import com.kslj.mannam.domain.match.service.MatchService;
 import com.kslj.mannam.domain.notification.enums.NotificationType;
 import com.kslj.mannam.domain.notification.service.NotificationService;
@@ -96,6 +97,7 @@ public class InvitationService {
         User sender = invitation.getSender();
         if (dto.isAccepted()) {
             invitation.accept();
+            matchService.updateMatchStatus(dto.getMatchId(), MatchStatus.Meeting);
             notificationService.createNotification(NotificationType.InvitationAccepted, sender, null);
         } else {
             invitation.reject();

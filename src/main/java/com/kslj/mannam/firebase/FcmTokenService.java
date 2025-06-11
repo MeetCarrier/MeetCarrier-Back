@@ -6,6 +6,7 @@ import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,39 +49,49 @@ public class FcmTokenService {
         }
     }
 
-    @Transactional(readOnly = true)
-    public void sendPushToUser(User user, String title, String body, String url, String chatRoomId) {
-        List<FcmToken> tokens = fcmTokenRepository.findAllByUser(user);
-
-        if (tokens.isEmpty()) {
-            throw new IllegalStateException("No FCM token found for user: " + user);
-        }
-
-        for (FcmToken tokenEntity : tokens) {
-            String token = tokenEntity.getToken();
-            try {
-                Message.Builder messageBuilder = Message.builder()
-                        .setToken(token)
-                        .putData("title", title)
-                        .putData("body", body)
-                        .putData("url", url);
-
-                // 채팅 알림의 경우 채팅방 Id 데이터 추가
-                if (chatRoomId != null && !chatRoomId.isEmpty()) {
-                    messageBuilder.putData("chatRoomId", chatRoomId);
-                }
-
-                Message message = messageBuilder.build();
-                String response = FirebaseMessaging.getInstance().send(message);
-                log.info("Sent message: " + response + " To: " + user.getId());
-            } catch (Exception e) {
-                log.warn("Failed to send message: " + e.getMessage());
-            }
-        }
-    }
-
     @Transactional
     public void deleteToken(String token) {
         fcmTokenRepository.deleteByToken(token);
+    }
+
+    @Async
+    @Transactional
+    public void sendPushToUserAsync(User user, String title, String body, String url, String chatRoomId) {
+        try {
+            List<FcmToken> tokens = fcmTokenRepository.findAllByUser(user);
+
+            if (tokens.isEmpty()) {
+                // 토큰이 없으면 로그만 남기고 종료
+                log.info("No FCM token found for user: {}. Skipping async push.", user.getId());
+                return; // ❗️ 예외를 던지지 않고 메소드 종료
+            }
+
+            for (FcmToken tokenEntity : tokens) {
+                String token = tokenEntity.getToken();
+                try {
+                    Message.Builder messageBuilder = Message.builder()
+                            .setToken(token)
+                            .putData("title", title)
+                            .putData("body", body)
+                            .putData("url", url);
+
+                    if (chatRoomId != null && !chatRoomId.isEmpty()) {
+                        messageBuilder.putData("chatRoomId", chatRoomId);
+                    }
+
+                    Message message = messageBuilder.build();
+                    FirebaseMessaging.getInstance().send(message);
+                    log.info("Async push sent successfully To: {} for user: {}", token, user.getId());
+
+                } catch (Exception e) {
+                    // 개별 토큰 전송 실패가 전체 로직에 영향을 주지 않도록 내부에서 처리
+                    log.warn("Failed to send message to a single token: {}. Error: {}", token, e.getMessage());
+                    fcmTokenRepository.delete(tokenEntity);
+                }
+            }
+        } catch (Exception e) {
+            // 전체 로직 수행 중 예측하지 못한 에러 발생 시 로그
+            log.error("An unexpected error occurred while sending push notifications asynchronously for user: {}", user.getId(), e);
+        }
     }
 }

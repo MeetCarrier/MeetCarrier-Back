@@ -1,5 +1,8 @@
 package com.kslj.mannam.domain.review.controller;
 
+import com.kslj.mannam.domain.match.entity.Match;
+import com.kslj.mannam.domain.match.enums.MatchStatus;
+import com.kslj.mannam.domain.match.service.MatchService;
 import com.kslj.mannam.domain.review.dto.ReviewByReviewerIdDto;
 import com.kslj.mannam.domain.review.dto.ReviewRequestDto;
 import com.kslj.mannam.domain.review.dto.ReviewResponseDto;
@@ -31,6 +34,7 @@ import java.util.List;
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final MatchService matchService;
 
     @Operation(
             summary = "내가 받은 리뷰 조회",
@@ -164,7 +168,15 @@ public class ReviewController {
     public ResponseEntity<?> createReview(@PathVariable("userId") long userId,
                                           @RequestBody ReviewRequestDto requestDto,
                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Match match = matchService.findExistingMatch(userId, userDetails.getId());
+
         long reviewId = reviewService.createReview(userId, requestDto, userDetails.getUser());
+
+        boolean hasOtherUserReviewed = reviewService.hasUserReview(userId, userDetails.getId());
+
+        if (hasOtherUserReviewed) {
+            matchService.updateMatchStatus(match.getId(), MatchStatus.Completed);
+        }
 
         return ResponseEntity.ok(reviewId);
     }
