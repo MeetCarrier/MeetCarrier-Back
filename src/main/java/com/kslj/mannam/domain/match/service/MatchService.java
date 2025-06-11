@@ -147,4 +147,23 @@ public class MatchService {
 
         return roomIds;
     }
+
+    // 매칭 가능 여부 조회 메서드
+    public boolean canRequestNewMatch(User user) {
+        // 진행 중으로 간주할 매칭 상태
+        Set<MatchStatus> activeStatus = Set.of(
+                MatchStatus.Surveying,
+                MatchStatus.Chatting,
+                MatchStatus.Meeting
+        );
+
+        // 매칭 기록 조회
+        List<Match> userMatches = matchRepository.findAllByUser1OrUser2(user, user);
+
+        // 매칭 상태 확인
+        boolean hasActiveMatch = userMatches.stream()
+                .anyMatch(match -> activeStatus.contains(match.getStatus()));
+
+        return !hasActiveMatch;
+    }
 }

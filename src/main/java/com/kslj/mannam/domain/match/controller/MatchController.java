@@ -166,6 +166,32 @@ public class MatchController {
         }
     }
 
+    @Operation(
+            summary = "새 매칭 요청 가능 여부 조회",
+            description = "현재 로그인한 사용자가 새로운 매칭을 요청할 수 있는 상태인지 확인합니다.<br>" +
+                    "진행 중인 매칭(Surveying, Chatting, Meeting 상태)이 있으면 false를, 없으면 true를 반환합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "조회 성공",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(type = "boolean", description = "새 매칭 요청 가능하면 true, 불가능하면 false")
+                            )
+                    )
+            }
+    )
+    @GetMapping("/can-request")
+    public ResponseEntity<Boolean> canRequestNewMatch(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        // 현재 로그인한 사용자 정보 가져오기
+        User currentUser = userDetails.getUser();
+
+        // 매칭 가능 여부 조회
+        boolean canRequest = matchService.canRequestNewMatch(currentUser);
+
+        return ResponseEntity.ok(canRequest);
+    }
+
     // 취소 사유 저장
     @PostMapping("/{matchId}/cancelReason")
 
