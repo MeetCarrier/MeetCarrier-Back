@@ -39,7 +39,7 @@ public class WebSocketEventListener {
         String currentUserIdStr = Objects.requireNonNull(accessor.getUser()).getName();
 
         // 채팅방 구독인 경우에만 처리
-        if (destination != null && destination.startsWith("/topic/room/")) {
+        if (destination != null && destination.matches("^/topic/room/\\d+$")) {
             try {
                 Long roomId = Long.parseLong(destination.substring("/topic/room/".length()));
                 Long userId = Long.parseLong(currentUserIdStr);
@@ -70,14 +70,17 @@ public class WebSocketEventListener {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         String sessionId = accessor.getSessionId();
         String subscriptionId = accessor.getSubscriptionId();
-        String currentUserIdStr = Objects.requireNonNull(accessor.getUser()).getName();
+        if (accessor.getUser() == null || accessor.getUser().getName() == null) {
+            return;
+        }
+        String currentUserIdStr = accessor.getUser().getName();
 
         // Redis에서 해당 구독 정보를 조회
         String redisKey = createRedisKey(sessionId, subscriptionId);
-        String roomIdStr = (String) redisUtils.getData(redisKey).get();
+        redisUtils.getData(redisKey).ifPresent(value -> {
+            // Optional이 비어있지 않을 경우에만 이 블록이 실행됨
+            String roomIdStr = String.valueOf(value); // Object를 String으로 변환
 
-        if (roomIdStr != null) {
-            // Redis에서 키를 찾았다면, 채팅방 구독 해제로 간주
             try {
                 Long roomId = Long.parseLong(roomIdStr);
                 Long userId = Long.parseLong(currentUserIdStr);
@@ -93,7 +96,7 @@ public class WebSocketEventListener {
             } catch (NumberFormatException e) {
                 log.warn("Invalid userId or roomId format. userId={}, roomId={}", currentUserIdStr, roomIdStr);
             }
-        }
+        });
     }
 
     // 연결 종료 시, 모든 정보 정리 (최후의 방어선)

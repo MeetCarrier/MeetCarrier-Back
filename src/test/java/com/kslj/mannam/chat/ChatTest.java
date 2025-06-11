@@ -77,7 +77,7 @@ public class ChatTest {
         ChatMessageDto messageDto = createChatMessageDto(roomId, MessageType.TEXT, "안녕", "");
 
         //when
-        long savedChatId = chatService.saveChatMessage(messageDto, roomId, foundUser1);
+        chatService.saveChatMessage(messageDto, roomId, foundUser1);
         List<ChatResponseDto> chatMessages = chatService.getChatMessages(messageDto.getRoomId());
 
         //then
@@ -97,9 +97,9 @@ public class ChatTest {
         ChatMessageDto messageDto2 = createChatMessageDto(roomId, MessageType.TEXT, "좋은밤", "");
         ChatMessageDto messageDto3 = createChatMessageDto(roomId, MessageType.TEXT, "잘하시네요", "");
 
-        long savedChatId1 = chatService.saveChatMessage(messageDto1, roomId, foundUser2);
-        long savedChatId2 = chatService.saveChatMessage(messageDto2, roomId, foundUser1);
-        long savedChatId3 = chatService.saveChatMessage(messageDto3, roomId, foundUser2);
+        chatService.saveChatMessage(messageDto1, roomId, foundUser2);
+        chatService.saveChatMessage(messageDto2, roomId, foundUser1);
+        chatService.saveChatMessage(messageDto3, roomId, foundUser2);
 
         User foundUser3 = testUtils.createAndGetTestUser();
         User foundUser4 = testUtils.createAndGetTestUser();
@@ -111,11 +111,11 @@ public class ChatTest {
         ChatMessageDto messageDto7 = createChatMessageDto(roomId2, MessageType.TEXT, "yeah.", "");
         ChatMessageDto messageDto8 = createChatMessageDto(roomId2, MessageType.TEXT, "how was your today", "");
 
-        long savedChatId4 = chatService.saveChatMessage(messageDto4, roomId2, foundUser3);
-        long savedChatId5 = chatService.saveChatMessage(messageDto5, roomId2, foundUser3);
-        long savedChatId6 = chatService.saveChatMessage(messageDto6, roomId2, foundUser4);
-        long savedChatId7 = chatService.saveChatMessage(messageDto7, roomId2, foundUser4);
-        long savedChatId8 = chatService.saveChatMessage(messageDto8, roomId2, foundUser3);
+        chatService.saveChatMessage(messageDto4, roomId2, foundUser3);
+        chatService.saveChatMessage(messageDto5, roomId2, foundUser3);
+        chatService.saveChatMessage(messageDto6, roomId2, foundUser4);
+        chatService.saveChatMessage(messageDto7, roomId2, foundUser4);
+        chatService.saveChatMessage(messageDto8, roomId2, foundUser3);
 
         // when
         List<ChatResponseDto> messages1 = chatService.getChatMessages(roomId);

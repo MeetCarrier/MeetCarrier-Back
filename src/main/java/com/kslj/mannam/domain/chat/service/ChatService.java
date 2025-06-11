@@ -40,7 +40,7 @@ public class ChatService {
 
     // 메시지 저장
     @Transactional
-    public long saveChatMessage(ChatMessageDto dto, long roomId, User sender) {
+    public ChatResponseDto saveChatMessage(ChatMessageDto dto, long roomId, User sender) {
         Room room = roomRepository.findById(roomId).orElseThrow();
         Match match = room.getMatch();
 
@@ -64,6 +64,14 @@ public class ChatService {
                 .build();
 
         Chat savedChat = chatRepository.save(newChat);
+
+        ChatResponseDto responseDto = ChatResponseDto.builder()
+                .type(dto.getType())
+                .message(dto.getMessage())
+                .imageUrl(dto.getImageUrl())
+                .sender(sender.getId())
+                .isRead(isReceiverOnline)
+                .build();
 
         if (!isReceiverOnline) {
             // 캐시와 푸시에 사용될 메시지 본문 생성
@@ -107,7 +115,7 @@ public class ChatService {
             messagingTemplate.convertAndSend("/topic/user/" + receiver.getId() + "/chats", lastChatInfo);
         }
 
-        return savedChat.getId();
+        return responseDto;
     }
 
     // 메시지 전송 (알람 x)
@@ -258,7 +266,7 @@ public class ChatService {
 
         // 사용자별 안 읽은 메시지 개수 처리
         String unreadCountKey = "chat:unread:" + roomId + ":" + userId;
-        int unreadCount = 0;
+        int unreadCount;
 
         // Redis에서 안 읽은 메시지 개수 카운트 조회
         Optional<Object> rawUnreadCount = redisUtils.getData(unreadCountKey);

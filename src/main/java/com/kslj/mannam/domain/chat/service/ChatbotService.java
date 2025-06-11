@@ -31,6 +31,7 @@ public class ChatbotService {
     private final RabbitTemplate rabbitTemplate;
     private final UserService userService;
     private final SimpMessageSendingOperations messagingTemplate;
+    private final ChatService chatService;
 
     // 유저 질의 저장 및 챗봇에게 전달
     @Transactional
@@ -73,24 +74,16 @@ public class ChatbotService {
 
             log.info("answer: {}", answer);
             User user = userService.getUserById(userId);
-            Room room = roomRepository.findById(roomId).orElseThrow();
 
-            Chat newChat = Chat.builder()
+            ChatMessageDto dto = ChatMessageDto.builder()
                     .type(MessageType.CHATBOT)
                     .message(answer)
-                    .user(user)
-                    .room(room)
+                    .roomId(roomId)
+                    .userId(userId)
                     .build();
 
-            chatRepository.save(newChat);
-
-            // 클라이언트에게 웹소켓으로 전달
-            ChatResponseDto chatBotResponseDto = ChatResponseDto.builder()
-                    .type(newChat.getType())
-                    .message(answer)
-                    .build();
-
-            messagingTemplate.convertAndSend("/topic/room/" + roomId, chatBotResponseDto);
+            ChatResponseDto responseDto = chatService.saveChatMessage(dto, roomId, user);
+            messagingTemplate.convertAndSend("/topic/room/" + roomId, responseDto);
         } catch (Exception e) {
             log.error("Failed to process Chatbot response", e);
         }

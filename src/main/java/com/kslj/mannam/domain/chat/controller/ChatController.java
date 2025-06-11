@@ -63,9 +63,8 @@ public class ChatController {
         log.info("채팅 수신: roomId={}, message={}", roomId, dto.getMessage());
 
         // 메시지 저장
-        chatService.saveChatMessage(dto, roomId, sender);
+        ChatResponseDto response = chatService.saveChatMessage(dto, roomId, sender);
 
-        ChatResponseDto response = dto.fromEntity(sender);
         log.info("채팅 브로드캐스트: roomId={}, response={}", roomId, response);
 
         // 채팅방 유저들에게 브로드캐스트
