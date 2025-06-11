@@ -27,24 +27,26 @@ public class MatchRequestService {
 
     @Transactional
     public void createMatchRequest(long senderId, long receiverId) {
+        User sender = userService.getUserById(senderId);
+        User receiver = userService.getUserById(receiverId);
+
         // 매칭 요청 DB에 저장
         MatchRequest matchRequest = MatchRequest.builder()
-                .senderId(senderId)
-                .receiverId(receiverId)
+                .sender(sender)
+                .receiver(receiver)
                 .status(RequestStatus.PENDING)
                 .build();
         MatchRequest savedRequest = matchRequestRepository.save(matchRequest);
 
         // 수신자의 알람 센터에 알람 추가
-        User receiver = userService.getUserById(receiverId);
-
         notificationService.createNotification(NotificationType.Request, receiver, savedRequest.getId());
     }
 
     @Transactional
     public boolean processRespond(long receiverId, long requestId, boolean isAccepted) {
         MatchRequest request = matchRequestRepository.findById(requestId).orElseThrow();
-        if (request.getReceiverId() != receiverId) {
+
+        if (request.getReceiver().getId() != receiverId) {
             throw new IllegalStateException("해당 유저에게 전달된 매칭 요청이 아닙니다.");
         }
         log.info("receiverId={}, requestId={}, isAccepted={}", receiverId, requestId, isAccepted);
@@ -62,10 +64,13 @@ public class MatchRequestService {
         // 수락 처리
         request.updateStatus(RequestStatus.ACCEPTED);
 
+        User receiver = userService.getUserById(receiverId);
+        User sender = request.getSender();
+
         // 매칭 데이터 생성
         long matchId = matchService.createMatch(MatchCreateDto.builder()
-                .user1Id(request.getReceiverId())
-                .user2Id(request.getSenderId())
+                .user1Id(receiver.getId())
+                .user2Id(sender.getId())
                 .build()
         );
 
@@ -74,8 +79,6 @@ public class MatchRequestService {
         surveyService.createSurveyQuestions(matchId, sessionId);
 
         // 알림 등록
-        User receiver = userService.getUserById(request.getReceiverId());
-        User sender = userService.getUserById(request.getSenderId());
         notificationService.createNotification(NotificationType.Match, receiver, matchId);
         notificationService.createNotification(NotificationType.Match, sender, matchId);
 

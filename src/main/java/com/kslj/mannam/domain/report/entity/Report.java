@@ -35,9 +35,6 @@ public class Report {
     @Column(name = "report_description")
     private String description;
 
-    @Column(columnDefinition = "TEXT")
-    private String images;
-
     @Builder.Default
     @Column(name = "reported_at", nullable = false)
     private LocalDateTime reportedAt = LocalDateTime.now();
