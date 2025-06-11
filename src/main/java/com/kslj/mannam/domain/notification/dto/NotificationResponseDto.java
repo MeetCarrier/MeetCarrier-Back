@@ -17,6 +17,7 @@ public class NotificationResponseDto {
     private Long id;
     private NotificationType type;
     private String message;
+    private Long referenceId;
     private boolean isRead;
     private LocalDateTime createdAt;
 
@@ -25,6 +26,7 @@ public class NotificationResponseDto {
                 .id(notification.getId())
                 .type(notification.getType())
                 .message(notification.getMessage())
+                .referenceId(notification.getReferenceId())
                 .isRead(notification.isRead())
                 .createdAt(notification.getCreatedAt())
                 .build();
