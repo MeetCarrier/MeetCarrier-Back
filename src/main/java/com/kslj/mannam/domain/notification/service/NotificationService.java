@@ -103,7 +103,7 @@ public class NotificationService {
 
          notificationRepository.save(newNotification);
 
-         fcmTokenService.sendPushToUserAsync(user, title, message, url, null);
+         fcmTokenService.sendPushToUserAsync(user, title, message, "https://www.mannamdeliveries.link", null);
     }
 
     // 알림 조회 (조회한 알림은 자동으로 읽음 처리)
