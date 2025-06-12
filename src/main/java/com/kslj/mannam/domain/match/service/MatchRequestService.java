@@ -24,6 +24,7 @@ public class MatchRequestService {
     private final UserService userService;
     private final MatchService matchService;
     private final SurveyService surveyService;
+    private final MatchQueueManager matchQueueManager;
 
     @Transactional
     public void createMatchRequest(long senderId, long receiverId) {
@@ -63,6 +64,7 @@ public class MatchRequestService {
 
         // 수락 처리
         request.updateStatus(RequestStatus.ACCEPTED);
+        matchQueueManager.cancelMatching(receiverId);
 
         User receiver = userService.getUserById(receiverId);
         User sender = request.getSender();

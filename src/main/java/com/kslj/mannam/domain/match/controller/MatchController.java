@@ -222,7 +222,7 @@ public class MatchController {
                 .latitude(35.8722)
                 .longitude(128.6025)
                 .phone("010-6666-1234")
-                .interests("축구,야구,콘솔,노래방,그림 그리기")
+                .interests(null)
                 .depressionScore(15)
                 .efficacyScore(15)
                 .relationshipScore(10)
