@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ChatbotMessageDto {
     long roomId;
-    long userId;
     String message;
     Boolean isVisible;
 }

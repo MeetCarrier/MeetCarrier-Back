@@ -44,7 +44,6 @@ public class ChatbotService {
                 .type(MessageType.CHATBOT)
                 .message(dto.getMessage())
                 .roomId(roomId)
-                .userId(user.getId())
                 .isVisible(dto.getIsVisible())
                 .build();
         ChatResponseDto queryResponse = chatService.saveChatMessage(queryMessageDto, roomId, user);
@@ -84,7 +83,6 @@ public class ChatbotService {
                     .type(MessageType.CHATBOT)
                     .message(answer)
                     .roomId(roomId)
-                    .userId(userId)
                     .isVisible(isVisible)
                     .build();
 

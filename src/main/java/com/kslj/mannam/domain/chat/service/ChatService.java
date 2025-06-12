@@ -141,7 +141,6 @@ public class ChatService {
                 .type(MessageType.CHATBOT)
                 .message(message)
                 .roomId(room.getId())
-                .userId(sender.getId())
                 .build();
 
         messagingTemplate.convertAndSend(
