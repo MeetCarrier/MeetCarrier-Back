@@ -65,12 +65,18 @@ public class Match {
     }
 
     public void markUserEntered(User user) {
-        if (user.equals(user1)) this.user1Entered = true;
-        else if (user.equals(user2)) this.user2Entered = true;
+        if (user1.equals(user)) this.user1Entered = true;
+        else if (user2.equals(user)) this.user2Entered = true;
     }
 
     public boolean isEntered(User user) {
-        return user.equals(user1) ? user1Entered : user2Entered;
+        return user1.equals(user) ? user1Entered : user2Entered;
+    }
+
+    public User getOtherUser(User user) {
+        if (user1.equals(user)) return user2;
+        else if (user2.equals(user)) return user1;
+        return user;
     }
 
     // 중단 처리 메서드

@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -80,13 +81,14 @@ public class User {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if(!(o instanceof User user)) return false;
-        return id != null && id.equals(user.id);
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id); // id 필드를 기준으로 비교
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return Objects.hash(id); // id 필드를 기준으로 해시코드 생성
     }
 
     public void updateNickname(String nickname) {

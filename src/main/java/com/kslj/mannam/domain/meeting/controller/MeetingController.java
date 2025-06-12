@@ -113,8 +113,10 @@ public class MeetingController {
             }
     )
     @GetMapping("/{matchId}")
-    public ResponseEntity<MeetingResponseDto> getMeeting(@PathVariable("matchId") long matchId) {
-        MeetingResponseDto response = meetingService.getMeeting(matchId);
+    public ResponseEntity<MeetingResponseDto> getMeeting(
+            @PathVariable("matchId") long matchId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        MeetingResponseDto response = meetingService.getMeeting(matchId, userDetails.getUser());
 
         return ResponseEntity.ok(response);
     }

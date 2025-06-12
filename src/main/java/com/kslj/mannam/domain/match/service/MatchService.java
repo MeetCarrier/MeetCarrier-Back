@@ -58,7 +58,6 @@ public class MatchService {
     public List<MatchResponseDto> getMatches(User user) {
         List<Match> matches = matchRepository.findAllByUser1OrUser2(user, user);
         List<MatchResponseDto> responses = new ArrayList<>();
-        LastChatDto lastChatDto = null;
 
         if (matches.isEmpty()) {
             return responses;
@@ -66,9 +65,9 @@ public class MatchService {
 
         for (Match match : matches) {
             Long sessionId = surveySessionRepository.findSurveySessionByMatchId(match.getId()).getId();
-
             Long roomId = null;
             MatchStatus status = match.getStatus();
+            LastChatDto lastChatDto = null;
 
             if (status != MatchStatus.Surveying && status != MatchStatus.Survey_Cancelled && status != MatchStatus.Matched) {
                 roomId = roomService.getRoomId(match.getId());

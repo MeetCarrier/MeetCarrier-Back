@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,19 +67,22 @@ public class MeetingService {
     @Transactional(readOnly = true)
     public List<MeetingResponseDto> getMeetings(User user) {
         List<Meeting> meetings = meetingRepository.findAllByUserId(user.getId());
+        List<MeetingResponseDto> dtoList = new ArrayList<>();
 
-        return meetings.stream()
-                .map(MeetingResponseDto::fromEntity)
-                .collect(Collectors.toList());
+        for(Meeting meeting : meetings) {
+            dtoList.add(MeetingResponseDto.fromEntity(meeting, user));
+        }
+
+        return dtoList;
     }
 
     // matchId로 대면 약속 일정 조회
     @Transactional(readOnly = true)
-    public MeetingResponseDto getMeeting(long matchId) {
+    public MeetingResponseDto getMeeting(long matchId, User user) {
         Match match = matchService.getMatch(matchId);
         Meeting meeting = meetingRepository.findByMatch(match);
 
-        return MeetingResponseDto.fromEntity(meeting);
+        return MeetingResponseDto.fromEntity(meeting, user);
     }
 
     // 대면 약속 수정
