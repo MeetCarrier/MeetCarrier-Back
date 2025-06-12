@@ -18,6 +18,7 @@ public class ChatResponseDto {
     private String imageUrl;
     private long sender;
     private boolean isRead;
+    private boolean isVisible;
 
     @Builder.Default
     private LocalDateTime sentAt = LocalDateTime.now();

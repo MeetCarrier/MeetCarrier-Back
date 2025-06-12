@@ -17,6 +17,7 @@ public class ChatMessageDto {
     MessageType type;
     String message;
     String imageUrl;
+    Boolean isVisible;
 
     public ChatResponseDto fromEntity(User sender) {
         return ChatResponseDto.builder()

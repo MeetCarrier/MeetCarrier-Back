@@ -1,6 +1,6 @@
 package com.kslj.mannam.domain.chat.controller;
 
-import com.kslj.mannam.domain.chat.dto.ChatMessageDto;
+import com.kslj.mannam.domain.chat.dto.ChatbotMessageDto;
 import com.kslj.mannam.domain.chat.service.ChatService;
 import com.kslj.mannam.domain.chat.service.ChatbotService;
 import com.kslj.mannam.domain.user.entity.User;
@@ -12,7 +12,6 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.nio.file.AccessDeniedException;
 
@@ -25,7 +24,7 @@ public class ChatbotController {
     private final ChatService chatService;
 
     @MessageMapping("/api/chatbot/send")
-    public void chatbotSend(SimpMessageHeaderAccessor headerAccessor, @Payload ChatMessageDto dto) throws Exception {
+    public void chatbotSend(SimpMessageHeaderAccessor headerAccessor, @Payload ChatbotMessageDto dto) throws Exception {
         long roomId = dto.getRoomId();
 
         Authentication authentication = (Authentication) headerAccessor.getUser();

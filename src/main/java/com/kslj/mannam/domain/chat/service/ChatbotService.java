@@ -2,6 +2,7 @@ package com.kslj.mannam.domain.chat.service;
 
 import com.kslj.mannam.domain.chat.dto.ChatMessageDto;
 import com.kslj.mannam.domain.chat.dto.ChatResponseDto;
+import com.kslj.mannam.domain.chat.dto.ChatbotMessageDto;
 import com.kslj.mannam.domain.chat.entity.Chat;
 import com.kslj.mannam.domain.chat.enums.MessageType;
 import com.kslj.mannam.domain.chat.repository.ChatRepository;
@@ -35,28 +36,31 @@ public class ChatbotService {
 
     // 유저 질의 저장 및 챗봇에게 전달
     @Transactional
-    public void saveQuery(ChatMessageDto dto, long roomId, User user) {
+    public void saveQuery(ChatbotMessageDto dto, long roomId, User user) {
         Room room = roomRepository.findById(roomId).orElseThrow();
 
         // 질의 저장
-        Chat newChat = Chat.builder()
-                .type(dto.getType())
+        ChatMessageDto queryMessageDto = ChatMessageDto.builder()
+                .type(MessageType.CHATBOT)
                 .message(dto.getMessage())
-                .imageUrl(dto.getImageUrl())
-                .room(room)
-                .user(user)
+                .roomId(roomId)
+                .userId(user.getId())
+                .isVisible(dto.getIsVisible())
                 .build();
-        chatRepository.save(newChat);
+        ChatResponseDto queryResponse = chatService.saveChatMessage(queryMessageDto, roomId, user);
 
-        // 메시지 구성 및 전송
+        // 채팅방에 브르드캐스트
+        messagingTemplate.convertAndSend("/topic/room/" + roomId, queryResponse);
+
+        // 메시지 구성 및 RabbitMQ 전송
         List<String> chatList = chatRepository.findChatByRoomAndType(room, MessageType.TEXT).stream().map(Chat::getMessage).toList();
-
         String chats = String.join("\n", chatList);
 
         Map<String, Object> message = new HashMap<>();
         message.put("chats", chats);
         message.put("userId", user.getId());
         message.put("roomId", roomId);
+        message.put("isVisible", dto.getIsVisible());
         message.put("question", dto.getMessage());
 
         rabbitTemplate.convertAndSend("chatbot_request_queue", message);
@@ -71,6 +75,7 @@ public class ChatbotService {
             long userId = ((Number) response.get("userId")).longValue();
             long roomId = ((Number) response.get("roomId")).longValue();
             String answer = (String) response.get("answer");
+            Boolean isVisible = (Boolean) response.get("isVisible");
 
             log.info("answer: {}", answer);
             User user = userService.getUserById(userId);
@@ -80,9 +85,13 @@ public class ChatbotService {
                     .message(answer)
                     .roomId(roomId)
                     .userId(userId)
+                    .isVisible(isVisible)
                     .build();
 
+            // 응답 내용 받아와서 DB에 저장
             ChatResponseDto responseDto = chatService.saveChatMessage(dto, roomId, user);
+
+            // 채팅방에 브로드캐스트
             messagingTemplate.convertAndSend("/topic/room/" + roomId, responseDto);
         } catch (Exception e) {
             log.error("Failed to process Chatbot response", e);

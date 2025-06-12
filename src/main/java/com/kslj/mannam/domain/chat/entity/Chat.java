@@ -35,6 +35,11 @@ public class Chat {
     @JsonProperty("isRead")
     private Boolean isRead = false;
 
+    @Column(name = "is_visible")
+    @Builder.Default
+    @JsonProperty("isVisible")
+    private Boolean isVisible = true;
+
     @Builder.Default
     @Column(name = "sent_at")
     private LocalDateTime sentAt = LocalDateTime.now();

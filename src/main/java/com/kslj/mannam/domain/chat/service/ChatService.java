@@ -55,6 +55,7 @@ public class ChatService {
         // 상대방이 채팅방에 접속해있는지 확인
         boolean isReceiverOnline = chatPresenceService.isUserActive(roomId, receiver.getId());
 
+        // Chat 엔티티 생성 및 저장
         Chat newChat = Chat.builder()
                 .type(dto.getType())
                 .message(dto.getMessage())
@@ -62,42 +63,45 @@ public class ChatService {
                 .room(room)
                 .user(sender)
                 .isRead(isReceiverOnline)
+                .isVisible(dto.getIsVisible() != null ? dto.getIsVisible() : true)
                 .build();
 
         Chat savedChat = chatRepository.save(newChat);
 
+        // 클라이언트에 보낼 응답 DTO 생성
         ChatResponseDto responseDto = ChatResponseDto.builder()
                 .type(dto.getType())
                 .message(dto.getMessage())
                 .imageUrl(dto.getImageUrl())
                 .sender(sender.getId())
                 .isRead(isReceiverOnline)
+                .isVisible(savedChat.getIsVisible())
                 .build();
 
-        if (!isReceiverOnline) {
-            // 캐시와 푸시에 사용될 메시지 본문 생성
+        if (!isReceiverOnline && savedChat.getIsVisible()) {
             String messageBody;
             if (savedChat.getMessage() == null && savedChat.getImageUrl() != null) {
                 messageBody = "사진을 전송했습니다.";
+            } else if (savedChat.getType() == MessageType.CHATBOT && savedChat.getMessage() != null) {
+                // 미리보기에 챗봇 메시지임을 표시
+                messageBody = "[챗봇] " + savedChat.getMessage();
             } else {
                 messageBody = savedChat.getMessage();
             }
 
-            // Redis에 저장할 LastChatDto 생성
+            // Redis에 최신 메시지 정보 저장
             LastChatDto lastChatForCache = LastChatDto.builder()
                     .roomId(roomId)
                     .lastMessage(messageBody)
                     .lastMessageAt(savedChat.getSentAt())
                     .build();
-
-            // 객체를 통째로 저장
             redisUtils.setData("chat:latest:" + roomId, lastChatForCache, 3600 * 24);
 
-            // 안 읽은 메시지 개수 증가
+            // Redis에 안 읽은 메시지 개수 증가
             String unreadCountKey = "chat:unread:" + roomId + ":" + receiver.getId();
             Long unreadCount = redisUtils.incrData(unreadCountKey);
 
-            // 푸시 알람 전송
+            // FCM 푸시 알람 전송
             fcmTokenService.sendPushToUserAsync(
                     receiver,
                     sender.getNickname(),
@@ -105,14 +109,13 @@ public class ChatService {
                     "https://www.mannamdeliveries.link/chat/" + roomId,
                     String.valueOf(roomId));
 
-            // 최근 채팅, 안 읽은 알람 개수 클라이언트에게 전송
+            // 안 읽은 개수를 상대방의 클라이언트에 실시간 전송
             LastChatDto lastChatInfo = LastChatDto.builder()
                     .roomId(roomId)
                     .lastMessage(messageBody)
                     .lastMessageAt(savedChat.getSentAt())
                     .unreadCount(unreadCount.intValue())
                     .build();
-
             messagingTemplate.convertAndSend("/topic/user/" + receiver.getId() + "/chats", lastChatInfo);
         }
 
@@ -184,6 +187,8 @@ public class ChatService {
                     .imageUrl(chat.getImageUrl())
                     .sender(chat.getUser().getId())
                     .sentAt(chat.getSentAt())
+                    .isVisible(chat.getIsVisible())
+                    .isRead(chat.getIsRead())
                     .build());
         }
 
