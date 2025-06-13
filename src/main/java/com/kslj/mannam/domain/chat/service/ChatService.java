@@ -68,7 +68,7 @@ public class ChatService {
 
         Chat savedChat = chatRepository.save(newChat);
 
-        // 클라이언트에 보낼 응답 DTO 생성
+        // 클라이언트에 보낼 응답 DTO 생성 (채팅방 내부)
         ChatResponseDto responseDto = ChatResponseDto.builder()
                 .type(dto.getType())
                 .message(dto.getMessage())
@@ -78,12 +78,11 @@ public class ChatService {
                 .isVisible(savedChat.getIsVisible())
                 .build();
 
-        if (!isReceiverOnline && savedChat.getIsVisible()) {
+        if (savedChat.getIsVisible()) {
             String messageBody;
             if (savedChat.getMessage() == null && savedChat.getImageUrl() != null) {
                 messageBody = "사진을 전송했습니다.";
             } else if (savedChat.getType() == MessageType.CHATBOT && savedChat.getMessage() != null) {
-                // 미리보기에 챗봇 메시지임을 표시
                 messageBody = "[챗봇] " + savedChat.getMessage();
             } else {
                 messageBody = savedChat.getMessage();
@@ -97,26 +96,46 @@ public class ChatService {
                     .build();
             redisUtils.setData("chat:latest:" + roomId, lastChatForCache, 3600 * 24);
 
-            // Redis에 안 읽은 메시지 개수 증가
-            String unreadCountKey = "chat:unread:" + roomId + ":" + receiver.getId();
-            Long unreadCount = redisUtils.incrData(unreadCountKey);
-
-            // FCM 푸시 알람 전송
-            fcmTokenService.sendPushToUserAsync(
-                    receiver,
-                    sender.getNickname(),
-                    messageBody,
-                    "https://www.mannamdeliveries.link/chat/" + roomId,
-                    String.valueOf(roomId));
-
-            // 안 읽은 개수를 상대방의 클라이언트에 실시간 전송
-            LastChatDto lastChatInfo = LastChatDto.builder()
+            // 메시지 보낸 사람의 채팅 목록도 최신 정보로 업데이트
+            LastChatDto lastChatForSender = LastChatDto.builder()
                     .roomId(roomId)
                     .lastMessage(messageBody)
                     .lastMessageAt(savedChat.getSentAt())
-                    .unreadCount(unreadCount.intValue())
+                    .unreadCount(0) // 보낸 사람은 항상 읽음 상태
                     .build();
-            messagingTemplate.convertAndSend("/topic/user/" + receiver.getId() + "/chats", lastChatInfo);
+            messagingTemplate.convertAndSend("/topic/user/" + sender.getId() + "/chats", lastChatForSender);
+
+            if (!isReceiverOnline) {
+                // Redis에 안 읽은 메시지 개수 증가
+                String unreadCountKey = "chat:unread:" + roomId + ":" + receiver.getId();
+                Long unreadCount = redisUtils.incrData(unreadCountKey);
+
+                // FCM 푸시 알람 전송
+                fcmTokenService.sendPushToUserAsync(
+                        receiver,
+                        sender.getNickname(),
+                        messageBody,
+                        "https://www.mannamdeliveries.link/chat/" + roomId,
+                        String.valueOf(roomId));
+
+                // 안 읽은 개수를 상대방의 클라이언트에 실시간 전송
+                LastChatDto lastChatInfo = LastChatDto.builder()
+                        .roomId(roomId)
+                        .lastMessage(messageBody)
+                        .lastMessageAt(savedChat.getSentAt())
+                        .unreadCount(unreadCount.intValue())
+                        .build();
+                messagingTemplate.convertAndSend("/topic/user/" + receiver.getId() + "/chats", lastChatInfo);
+            } else {
+                // 최신 메시지 정보 전송
+                LastChatDto lastChatForReceiverOnline = LastChatDto.builder()
+                        .roomId(roomId)
+                        .lastMessage(messageBody)
+                        .lastMessageAt(savedChat.getSentAt())
+                        .unreadCount(0) // 온라인 상태이므로 안 읽은 개수는 0
+                        .build();
+                messagingTemplate.convertAndSend("/topic/user/" + receiver.getId() + "/chats", lastChatForReceiverOnline);
+            }
         }
 
         return responseDto;
