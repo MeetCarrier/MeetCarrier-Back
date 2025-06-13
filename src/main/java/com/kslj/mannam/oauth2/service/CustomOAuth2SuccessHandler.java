@@ -34,7 +34,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         // 회원가입 여부 확인
         Optional<User> userOpt = userRepository.findBySocialId(socialId);
 
-        if (userOpt.isEmpty()) {
+        if (userOpt.isEmpty() || userOpt.get().isDeleted()) {
             // 새로운 회원 -> 추가 정보 입력창으로 이동
             httpSession.setAttribute("UNREGISTERED_SOCIAL_ID", socialId);
             httpSession.setAttribute("SOCIAL_TYPE", provider);

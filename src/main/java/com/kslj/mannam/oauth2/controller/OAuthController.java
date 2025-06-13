@@ -56,7 +56,7 @@ public class OAuthController {
         String provider = (String) session.getAttribute("SOCIAL_TYPE");
         SocialType socialType = SocialType.from(provider);
 
-        UserSignUpRequestDto newUser = UserSignUpRequestDto.builder()
+        UserSignUpRequestDto signUpRequest = UserSignUpRequestDto.builder()
                 .socialId(socialId)
                 .socialType(socialType)
                 .nickname(request.getNickname())
@@ -64,7 +64,11 @@ public class OAuthController {
                 .age(request.getAge())
                 .build();
 
-        userService.createUser(newUser);
+        userService.signUpOrRejoin(signUpRequest);
+
+        session.removeAttribute("UNREGISTERED_SOCIAL_ID");
+        session.removeAttribute("SOCIAL_TYPE");
+
         securityContextService.refreshUserDetails(socialId);
         return "redirect:/main";
     }

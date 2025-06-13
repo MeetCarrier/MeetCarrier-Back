@@ -27,22 +27,30 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Transactional
-    public long createUser(UserSignUpRequestDto dto) {
-        Optional<User> existingUser = userRepository.findBySocialId(dto.getSocialId());
+    public void signUpOrRejoin(UserSignUpRequestDto requestDto) {
+        Optional<User> userOpt = userRepository.findBySocialId(requestDto.getSocialId());
 
-        if (existingUser.isPresent()) {
-            User user = existingUser.get();
-            if (user.isDeleted()) {
-                user.rejoin(dto);
-                return user.getId();
+        if (userOpt.isPresent()) {
+            // ✅ DB에 유저가 존재 -> 재가입 처리
+            User existingUser = userOpt.get();
+            if (existingUser.isDeleted()) {
+                existingUser.rejoin(requestDto); // Dirty checking에 의해 업데이트됨
             } else {
-                throw new IllegalStateException("이미 가입된 회원입니다.");
+                throw new IllegalStateException("이미 가입된 활성 사용자입니다.");
             }
+        } else {
+            // ❌ DB에 유저가 없음 -> 신규 가입 처리 (단순화된 createUser 호출)
+            createUser(requestDto);
         }
+    }
 
-        // 신규 회원가입
-        User savedUser = userRepository.save(dto.toUserEntity());
-        log.info("nickname: {} 등록", dto.getNickname());
+
+    @Transactional
+    public long createUser(UserSignUpRequestDto dto) {
+        User newUser = dto.toUserEntity();
+        User savedUser = userRepository.save(newUser);
+
+        log.info("nickname: {} 신규 등록", dto.getNickname());
         return savedUser.getId();
     }
 
