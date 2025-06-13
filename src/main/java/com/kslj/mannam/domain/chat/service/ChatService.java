@@ -115,7 +115,7 @@ public class ChatService {
                         receiver,
                         sender.getNickname(),
                         messageBody,
-                        "https://www.mannamdeliveries.link/chat/" + roomId,
+                        "https://www.mannamdeliveries.link",
                         String.valueOf(roomId));
 
                 // 안 읽은 개수를 상대방의 클라이언트에 실시간 전송
