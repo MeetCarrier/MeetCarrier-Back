@@ -4,6 +4,7 @@ import com.kslj.mannam.domain.user.dto.UserSignUpRequestDto;
 import com.kslj.mannam.domain.user.enums.SocialType;
 import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.dto.OAuth2RegistrationDto;
+import com.kslj.mannam.security.SecurityContextService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 public class OAuthController {
 
     private final UserService userService;
+    private final SecurityContextService securityContextService;
 
     @GetMapping("/detail")
     public String showSignUpForm(HttpSession session) {
@@ -63,6 +65,7 @@ public class OAuthController {
                 .build();
 
         userService.createUser(newUser);
+        securityContextService.refreshUserDetails(socialId);
         return "redirect:/main";
     }
 
