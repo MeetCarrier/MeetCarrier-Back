@@ -15,9 +15,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @Slf4j
 @Controller
@@ -39,21 +42,30 @@ public class OAuthController {
 
     @Operation(
             summary = "OAuth2 회원가입 처리",
-            description = "OAuth2 로그인 사용자의 회원가입 정보를 받아 새로운 유저를 생성하고 메인 페이지로 리디렉션합니다.",
+            description = "OAuth2 로그인 사용자의 회원가입 정보를 받아 새로운 유저를 생성하고 성공 상태를 응답합니다.", // 설명 수정
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "회원가입 요청 정보",
                     required = true,
                     content = @Content(schema = @Schema(implementation = OAuth2RegistrationDto.class))
             ),
             responses = {
-                    @ApiResponse(responseCode = "302", description = "회원가입 성공 후 메인 페이지로 리디렉션")
+                    // 응답 스펙 수정
+                    @ApiResponse(responseCode = "201", description = "회원가입 성공"),
+                    @ApiResponse(responseCode = "400", description = "잘못된 요청"),
+                    @ApiResponse(responseCode = "500", description = "서버 오류")
             }
     )
     @PostMapping("/detail")
-    public String processSignUp(@RequestBody OAuth2RegistrationDto request,
-                                HttpSession session) {
+    public ResponseEntity<Map<String, String>> processSignUp(@RequestBody OAuth2RegistrationDto request,
+                                                             HttpSession session) {
         String socialId = (String) session.getAttribute("UNREGISTERED_SOCIAL_ID");
         String provider = (String) session.getAttribute("SOCIAL_TYPE");
+
+        // socialId나 provider가 세션에 없는 경우 예외 처리
+        if (socialId == null || provider == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "세션 정보가 만료되었거나 유효하지 않습니다."));
+        }
+
         SocialType socialType = SocialType.from(provider);
 
         UserSignUpRequestDto signUpRequest = UserSignUpRequestDto.builder()
@@ -70,7 +82,9 @@ public class OAuthController {
         session.removeAttribute("SOCIAL_TYPE");
 
         securityContextService.refreshUserDetails(socialId);
-        return "redirect:/main";
+
+        // 성공 응답을 JSON 형태로 반환
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "회원가입이 성공적으로 완료되었습니다."));
     }
 
     @Operation(
