@@ -48,7 +48,7 @@ public class OAuthController {
             }
     )
     @PostMapping("/detail")
-    public String processSignUp(@ModelAttribute("oAuth2RegistrationDto") OAuth2RegistrationDto request,
+    public String processSignUp(@RequestBody OAuth2RegistrationDto request,
                                 HttpSession session) {
         String socialId = (String) session.getAttribute("UNREGISTERED_SOCIAL_ID");
         String provider = (String) session.getAttribute("SOCIAL_TYPE");

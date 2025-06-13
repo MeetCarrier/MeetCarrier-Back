@@ -11,8 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OAuth2RegistrationDto {
-    private String socialId;
-    private String provider;
     private String nickname;
     private Gender gender;
     private Long age;
