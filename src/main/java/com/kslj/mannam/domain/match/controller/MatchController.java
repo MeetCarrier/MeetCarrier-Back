@@ -7,6 +7,7 @@ import com.kslj.mannam.domain.match.service.MatchService;
 import com.kslj.mannam.domain.review.dto.ReviewQueueDto;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.enums.Gender;
+import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -40,6 +41,7 @@ public class MatchController {
 
     private final MatchService matchService;
     private final MatchQueueManager matchQueueManager;
+    private final UserService userService;
 
     // 현재 유저 매칭 목록 조회
     @Operation(
@@ -69,6 +71,7 @@ public class MatchController {
     )
     @GetMapping()
     public ResponseEntity<?> getMatches(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.inspectUserDetails(userDetails);
         List<MatchResponseDto> matches = matchService.getMatches(userDetails.getUser());
 
         return ResponseEntity.ok(matches);
@@ -157,6 +160,7 @@ public class MatchController {
     )
     @DeleteMapping("/cancel")
     public ResponseEntity<String> cancelMatching(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.inspectUserDetails(userDetails);
         User user = userDetails.getUser();
         boolean cancelled = matchQueueManager.cancelMatching(user.getId());
 
@@ -184,6 +188,7 @@ public class MatchController {
     )
     @GetMapping("/can-request")
     public ResponseEntity<Boolean> canRequestNewMatch(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.inspectUserDetails(userDetails);
         // 현재 로그인한 사용자 정보 가져오기
         User currentUser = userDetails.getUser();
 
@@ -203,7 +208,7 @@ public class MatchController {
 
         Authentication authentication = (Authentication) headerAccessor.getUser();
         if (authentication == null) {
-            throw new AccessDeniedException("인증되지 않은 사용자입니다.");
+            throw new AccessDeniedException("로그인된 유저 정보가 없습니다.");
         }
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();

@@ -2,6 +2,7 @@ package com.kslj.mannam.domain.match.controller;
 
 import com.kslj.mannam.domain.match.dto.MatchRequestResponseDto;
 import com.kslj.mannam.domain.match.service.MatchRequestService;
+import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class MatchRequestController {
 
     private final MatchRequestService matchRequestService;
+    private final UserService userService;
 
     @Operation(
             summary = "매칭 요청 전송",
@@ -40,9 +42,10 @@ public class MatchRequestController {
             @Parameter(description = "매칭 요청 받을 유저 ID", required = true)
             @RequestParam("receiverId") long receiverId,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
-
+        userService.inspectUserDetails(userDetails);
         long senderId = userDetails.getUser().getId();
         matchRequestService.createMatchRequest(senderId, receiverId);
+
         return ResponseEntity.ok("매칭 요청을 전송했습니다.");
     }
 
@@ -65,7 +68,7 @@ public class MatchRequestController {
             )
             @RequestBody MatchRequestResponseDto dto,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
-
+        userService.inspectUserDetails(userDetails);
         boolean matched = matchRequestService.processRespond(userDetails.getId(), dto.getRequestId(), dto.isAccepted());
 
         if (matched) {

@@ -4,6 +4,7 @@ import com.kslj.mannam.domain.report.dto.ReportListDto;
 import com.kslj.mannam.domain.report.dto.ReportRequestDto;
 import com.kslj.mannam.domain.report.dto.ReportResponseDto;
 import com.kslj.mannam.domain.report.service.ReportService;
+import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -30,6 +31,7 @@ import java.util.List;
 public class ReportController {
 
     private final ReportService reportService;
+    private final UserService userService;
 
     // 신고 내역 조회
     @GetMapping
@@ -58,6 +60,7 @@ public class ReportController {
             }
     )
     public ResponseEntity<List<ReportListDto>> findAllReports(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.inspectUserDetails(userDetails);
         List<ReportListDto> reportList = reportService.getReports(userDetails.getUser());
 
         return ResponseEntity.ok(reportList);
@@ -120,6 +123,7 @@ public class ReportController {
     )
     public ResponseEntity<?> createReport(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                           @RequestBody ReportRequestDto requestDto) {
+        userService.inspectUserDetails(userDetails);
         long reportId = reportService.createReport(userDetails.getUser(), requestDto);
 
         return ResponseEntity.ok("신고가 등록되었습니다. reportId = " + reportId);

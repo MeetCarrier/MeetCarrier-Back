@@ -68,6 +68,7 @@ public class RoomController {
             @PathVariable("matchId") Long matchId,
             @AuthenticationPrincipal UserDetailsImpl userDetails
             ) {
+        userService.inspectUserDetails(userDetails);
         User currentUser = userDetails.getUser();
 
         // 1. 유저 입장 여부 저장

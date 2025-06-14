@@ -1,6 +1,7 @@
 package com.kslj.mannam.oauth2.controller;
 
 import com.kslj.mannam.domain.user.dto.UserResponseDto;
+import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import com.kslj.mannam.oauth2.service.UserDetailsServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class TestAuthController {
 
     private final UserDetailsServiceImpl userDetailsService;
+    private final UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<String> loginAsTestUser(HttpServletRequest request, HttpServletResponse response) {
@@ -59,7 +61,9 @@ public class TestAuthController {
 
     @GetMapping("/me")
     public ResponseEntity<UserResponseDto> getCurrentUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.inspectUserDetails(userDetails);
         UserResponseDto response = UserResponseDto.fromEntity(userDetails.getUser());
+
         return ResponseEntity.ok(response);
     }
 

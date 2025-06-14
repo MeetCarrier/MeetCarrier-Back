@@ -23,9 +23,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
@@ -41,19 +39,12 @@ public class AssistantController {
     private final UserService userService;
     private final SimpMessagingTemplate messagingTemplate;
 
-    @PostMapping("/test")
-    public ResponseEntity<?> createQuestion(@RequestParam("content") String content) {
-        User user = userService.getUserById(1000);
-        assistantService.createQuestionAndSendToAI(user, content);
-        return ResponseEntity.ok(assistantService.getQuestionsAndAnswers(user));
-    }
-
     @MessageMapping("/api/assistant/send")
     public void sendQuestion(SimpMessageHeaderAccessor headerAccessor, @Payload AssistantQuestionDto dto) throws AccessDeniedException {
 
         Authentication authentication = (Authentication) headerAccessor.getUser();
         if (authentication == null) {
-            throw new AccessDeniedException("인증되지 않은 사용자입니다.");
+            throw new AccessDeniedException("로그인된 유저 정보가 없습니다.");
         }
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -89,6 +80,7 @@ public class AssistantController {
             }
     )
     public ResponseEntity<?> getAssistantQuestionsAndAnswers(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.inspectUserDetails(userDetails);
         AssistantResponseDto questionsAndAnswers = assistantService.getQuestionsAndAnswers(userDetails.getUser());
 
         return ResponseEntity.ok(questionsAndAnswers);

@@ -3,6 +3,7 @@ package com.kslj.mannam.domain.journal.controller;
 import com.kslj.mannam.domain.journal.dto.JournalRequestDto;
 import com.kslj.mannam.domain.journal.dto.JournalResponseDto;
 import com.kslj.mannam.domain.journal.service.JournalService;
+import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,6 +30,7 @@ import java.util.List;
 public class JournalController {
 
     private final JournalService journalService;
+    private final UserService userService;
 
     @Operation(
             summary     = "일기 목록 조회",
@@ -66,6 +68,7 @@ public class JournalController {
     public ResponseEntity<List<JournalResponseDto>> JournalList(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                                 @PathVariable("year") int year,
                                                                 @PathVariable("month") int month) {
+        userService.inspectUserDetails(userDetails);
         List<JournalResponseDto> journalList = journalService.getJournalsByYearAndMonth(userDetails.getUser(), year, month);
 
         return ResponseEntity.ok(journalList);
@@ -96,6 +99,7 @@ public class JournalController {
     @PostMapping("/register")
     public ResponseEntity<?> CreateJournal(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                            @RequestBody JournalRequestDto requestDto) {
+        userService.inspectUserDetails(userDetails);
         long savedJournalId = journalService.saveJournal(requestDto, userDetails.getUser());
 
         return ResponseEntity.ok("일기가 등록되었습니다. JournalId = " + savedJournalId);

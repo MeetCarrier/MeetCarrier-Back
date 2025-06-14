@@ -3,6 +3,7 @@ package com.kslj.mannam.domain.meeting.controller;
 import com.kslj.mannam.domain.meeting.dto.MeetingRequestDto;
 import com.kslj.mannam.domain.meeting.dto.MeetingResponseDto;
 import com.kslj.mannam.domain.meeting.service.MeetingService;
+import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -30,6 +31,7 @@ import java.util.List;
 public class MeetingController {
 
     private final MeetingService meetingService;
+    private final UserService userService;
 
     // 대면 약속 생성
     @Operation(
@@ -70,7 +72,9 @@ public class MeetingController {
             @RequestBody MeetingRequestDto requestDto,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
+        userService.inspectUserDetails(userDetails);
         long meetingId = meetingService.createMeeting(matchId, userDetails.getUser(), requestDto);
+
         return ResponseEntity.ok(meetingId);
     }
 
@@ -93,7 +97,9 @@ public class MeetingController {
     )
     @GetMapping
     public ResponseEntity<List<MeetingResponseDto>> getMeetings(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.inspectUserDetails(userDetails);
         List<MeetingResponseDto> response = meetingService.getMeetings(userDetails.getUser());
+
         return ResponseEntity.ok(response);
     }
 
@@ -116,6 +122,7 @@ public class MeetingController {
     public ResponseEntity<MeetingResponseDto> getMeeting(
             @PathVariable("matchId") long matchId,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.inspectUserDetails(userDetails);
         MeetingResponseDto response = meetingService.getMeeting(matchId, userDetails.getUser());
 
         return ResponseEntity.ok(response);
@@ -155,6 +162,7 @@ public class MeetingController {
             @RequestBody MeetingRequestDto requestDto
     ) {
         meetingService.updateMeeting(meetingId, requestDto);
+
         return ResponseEntity.ok().build();
     }
 
@@ -181,6 +189,7 @@ public class MeetingController {
     @DeleteMapping("/{meetingId}")
     public ResponseEntity<Void> deleteMeeting(@PathVariable("meetingId") long meetingId) {
         meetingService.deleteMeeting(meetingId);
+
         return ResponseEntity.ok().build();
     }
 
@@ -200,7 +209,9 @@ public class MeetingController {
             @PathVariable("meetingId") long meetingId,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
+        userService.inspectUserDetails(userDetails);
         meetingService.confirmMeeting(userDetails.getUser(), meetingId);
+
         return ResponseEntity.ok().build();
     }
 
@@ -220,7 +231,9 @@ public class MeetingController {
             @PathVariable("meetingId") long meetingId,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
+        userService.inspectUserDetails(userDetails);
         meetingService.rejectMeeting(userDetails.getUser(), meetingId);
+
         return ResponseEntity.ok().build();
     }
 }

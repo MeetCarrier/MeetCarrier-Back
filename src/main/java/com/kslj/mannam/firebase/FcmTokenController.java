@@ -1,5 +1,6 @@
 package com.kslj.mannam.firebase;
 
+import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class FcmTokenController {
 
     private final FcmTokenService fcmTokenService;
+    private final UserService userService;
 
     @Operation(
             summary = "FCM 토큰 저장 또는 갱신",
@@ -28,8 +30,10 @@ public class FcmTokenController {
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @RequestBody FcmTokenRequestDto request
     ) {
+        userService.inspectUserDetails(userDetails);
         System.out.println("request = " + request);
         fcmTokenService.saveOrUpdateToken(userDetails.getId(), request.getToken());
+
         return ResponseEntity.ok().build();
     }
 
@@ -40,6 +44,7 @@ public class FcmTokenController {
 
     @PostMapping("/test")
     public ResponseEntity<Void> sendTestPush(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.inspectUserDetails(userDetails);
         fcmTokenService.sendPushToUserAsync(
                 userDetails.getUser(),
                 "FCM 테스트 알림",

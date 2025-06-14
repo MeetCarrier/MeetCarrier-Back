@@ -3,6 +3,7 @@ package com.kslj.mannam.domain.block.controller;
 import com.kslj.mannam.domain.block.dto.BlockRequestDto;
 import com.kslj.mannam.domain.block.dto.BlockResponseDto;
 import com.kslj.mannam.domain.block.service.BlockService;
+import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,6 +30,7 @@ import java.util.List;
 public class BlockController {
 
     private final BlockService blockService;
+    private final UserService userService;
 
     // 현재 유저의 블락한 연락처 목록 반환
     @Operation(
@@ -49,6 +51,7 @@ public class BlockController {
     )
     @GetMapping
     public ResponseEntity<?> getBlocks(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.inspectUserDetails(userDetails);
         List<BlockResponseDto> blocks = blockService.getBlocks(userDetails.getUser());
 
         return ResponseEntity.ok(blocks);
@@ -80,7 +83,7 @@ public class BlockController {
     @PostMapping("/register")
     public ResponseEntity<?> createBlock(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                          @RequestBody BlockRequestDto blockDto) {
-
+        userService.inspectUserDetails(userDetails);
         long savedBlockId = blockService.createBlock(userDetails.getUser(), blockDto);
 
         return ResponseEntity.ok("새로운 번호가 추가되었습니다. BlockId = " + savedBlockId);

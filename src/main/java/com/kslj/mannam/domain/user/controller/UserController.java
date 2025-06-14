@@ -44,6 +44,7 @@ public class UserController {
     )
     @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = UserResponseDto.class)))
     public ResponseEntity<?> getUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.inspectUserDetails(userDetails);
         User user = userService.getUserById(userDetails.getId());
 
         return ResponseEntity.ok(UserResponseDto.fromEntity(user));
@@ -80,7 +81,9 @@ public class UserController {
     )
     public ResponseEntity<?> updateUser(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                         @RequestBody UpdateUserRequestDto dto) {
+        userService.inspectUserDetails(userDetails);
         userService.updateUser(userDetails, dto);
+
         return ResponseEntity.ok().build();
     }
 
@@ -109,6 +112,7 @@ public class UserController {
     public ResponseEntity<?> withdrawUser(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                           HttpServletRequest request,
                                           HttpServletResponse response) {
+        userService.inspectUserDetails(userDetails);
         userService.withdrawUser(userDetails.getUser());
 
         // 세션 무효화

@@ -2,6 +2,7 @@ package com.kslj.mannam.domain.notification.controller;
 
 import com.kslj.mannam.domain.notification.dto.NotificationResponseDto;
 import com.kslj.mannam.domain.notification.service.NotificationService;
+import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -30,6 +31,7 @@ import java.util.List;
 @RequestMapping("/api/notification")
 public class NotificationController {
     private final NotificationService notificationService;
+    private final UserService userService;
 
     // 알림 조회
     @Operation(
@@ -50,6 +52,7 @@ public class NotificationController {
     )
     @GetMapping
     public ResponseEntity<List<NotificationResponseDto>> getNotifications(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.inspectUserDetails(userDetails);
         List<NotificationResponseDto> notifications = notificationService.getNotifications(userDetails.getUser());
 
         return ResponseEntity.ok(notifications);
@@ -76,6 +79,7 @@ public class NotificationController {
     )
     @GetMapping("/has-unread")
     public ResponseEntity<Boolean> hasUnread(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.inspectUserDetails(userDetails);
         boolean hasUnread = notificationService.hasUnreadNotifications(userDetails.getUser());
         return ResponseEntity.ok(hasUnread);
     }
@@ -105,6 +109,7 @@ public class NotificationController {
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PathVariable("notificationId") Long notificationId
     ) {
+        userService.inspectUserDetails(userDetails);
         notificationService.deleteNotification(userDetails.getUser(), notificationId);
 
         return ResponseEntity.noContent().build();
@@ -122,6 +127,7 @@ public class NotificationController {
     )
     @DeleteMapping
     public ResponseEntity<?> deleteAllNotifications(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.inspectUserDetails(userDetails);
         notificationService.deleteAllNotifications(userDetails.getUser());
 
         return ResponseEntity.noContent().build();

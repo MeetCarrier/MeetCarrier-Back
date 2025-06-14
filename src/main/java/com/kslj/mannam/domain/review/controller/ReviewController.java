@@ -7,6 +7,7 @@ import com.kslj.mannam.domain.review.dto.ReviewByReviewerIdDto;
 import com.kslj.mannam.domain.review.dto.ReviewRequestDto;
 import com.kslj.mannam.domain.review.dto.ReviewResponseDto;
 import com.kslj.mannam.domain.review.service.ReviewService;
+import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -35,6 +36,7 @@ public class ReviewController {
 
     private final ReviewService reviewService;
     private final MatchService matchService;
+    private final UserService userService;
 
     @Operation(
             summary = "내가 받은 리뷰 조회",
@@ -55,6 +57,7 @@ public class ReviewController {
     )
     @GetMapping
     public ResponseEntity<List<ReviewResponseDto>> getReviews(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.inspectUserDetails(userDetails);
         List<ReviewResponseDto> reviews = reviewService.getReview(userDetails.getId());
 
         if (reviews.isEmpty()) {
@@ -83,6 +86,7 @@ public class ReviewController {
     )
     @GetMapping("/written")
     public ResponseEntity<List<ReviewByReviewerIdDto>> getWrittenReviews(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.inspectUserDetails(userDetails);
         List<ReviewByReviewerIdDto> writtenReviews = reviewService.getReviewByReviewerId(userDetails.getId());
 
         if (writtenReviews.isEmpty()) {
@@ -168,6 +172,7 @@ public class ReviewController {
     public ResponseEntity<?> createReview(@PathVariable("userId") long userId,
                                           @RequestBody ReviewRequestDto requestDto,
                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.inspectUserDetails(userDetails);
         Match match = matchService.findExistingMatch(userId, userDetails.getId());
 
         long reviewId = reviewService.createReview(userId, requestDto, userDetails.getUser());
@@ -213,6 +218,7 @@ public class ReviewController {
             @PathVariable("reviewId") long reviewId,
             @RequestBody ReviewRequestDto requestDto,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.inspectUserDetails(userDetails);
         reviewService.updateReview(reviewId, requestDto, userDetails.getUser());
         return ResponseEntity.ok().build();
     }

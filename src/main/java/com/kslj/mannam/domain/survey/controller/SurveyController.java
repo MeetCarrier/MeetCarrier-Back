@@ -6,6 +6,7 @@ import com.kslj.mannam.domain.survey.dto.SurveyLeaveDto;
 import com.kslj.mannam.domain.survey.dto.SurveyQuestionResponseDto;
 import com.kslj.mannam.domain.survey.service.SurveyService;
 import com.kslj.mannam.domain.user.entity.User;
+import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -36,6 +37,7 @@ import java.util.List;
 public class SurveyController {
 
     private final SurveyService surveyService;
+    private final UserService userService;
 
     // 설문 질문 조회
     @Operation(
@@ -140,8 +142,10 @@ public class SurveyController {
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PathVariable("sessionId") long sessionId,
             @RequestBody List<SurveyAnswerRequestDto> answers, @PathVariable String userId) {
+        userService.inspectUserDetails(userDetails);
         User user = userDetails.getUser();
         surveyService.submitSurveyAnswer(sessionId, answers, user);
+
         return ResponseEntity.ok().build();
     }
 
@@ -151,7 +155,7 @@ public class SurveyController {
 
         Authentication authentication = (Authentication) headerAccessor.getUser();
         if (authentication == null) {
-            throw new AccessDeniedException("인증되지 않은 사용자입니다.");
+            throw new AccessDeniedException("로그인된 유저 정보가 없습니다.");
         }
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();

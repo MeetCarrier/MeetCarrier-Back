@@ -2,6 +2,7 @@ package com.kslj.mannam.domain.report.controller;
 
 import com.kslj.mannam.domain.report.dto.ReplyRequestDto;
 import com.kslj.mannam.domain.report.service.ReportReplyService;
+import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 public class ReportReplyController {
 
     private final ReportReplyService reportReplyService;
+    private final UserService userService;
 
     // 답변 등록
     @Operation(
@@ -64,6 +66,7 @@ public class ReportReplyController {
     public ResponseEntity<?> createReportReply(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                @PathVariable("reportId") long reportId,
                                                @RequestBody ReplyRequestDto replyRequestDto) {
+        userService.inspectUserDetails(userDetails);
         long replyId = reportReplyService.createReportReply(reportId, replyRequestDto, userDetails.getUser());
 
         return ResponseEntity.ok("답변이 등록되었습니다. replyId = " + replyId);

@@ -29,14 +29,14 @@ public class ChatbotController {
 
         Authentication authentication = (Authentication) headerAccessor.getUser();
         if (authentication == null) {
-            throw new AccessDeniedException("인증되지 않은 사용자입니다.");
+            throw new AccessDeniedException("로그인된 유저 정보가 없습니다.");
         }
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         User sender = userDetails.getUser();
 
         if(!chatService.inspectUser(roomId, sender)){
-            throw new AccessDeniedException("해당 채팅방 참여자가 아닙니다.");
+            throw new IllegalStateException("해당 채팅방 참여자가 아닙니다.");
         }
 
         chatbotService.saveQuery(dto, roomId, sender);
