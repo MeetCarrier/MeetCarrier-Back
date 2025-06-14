@@ -86,7 +86,7 @@ public class MeetingService {
 
     // 대면 약속 수정
     @Transactional
-    public void updateMeeting(long meetingId, MeetingRequestDto dto) {
+    public void updateMeeting(long meetingId, MeetingRequestDto dto, User user) {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new EntityNotFoundException("약속 정보를 찾을 수 없습니다. meetingId = " + meetingId));
 
@@ -97,9 +97,13 @@ public class MeetingService {
         if(dto.getDate() != null && dto.getLocation() != null) {
             meeting.updateSchedule(dto.getDate(), dto.getLocation());
 
+            Match match = meeting.getMatch();
+
             // 채팅방 종료 시간 갱신
             Room room = roomRepository.getRoomByMatchId(meeting.getMatch().getId());
             room.updateDeactivationTime(meeting.getDate().plusHours(24));
+
+            chatService.saveChatMessageWithoutNotification(match.getId(), user, "만남 일정이 변경되었어요! 확인해보세요!");
         }
         if(dto.getNote() != null) meeting.updateNote(dto.getNote());
     }
@@ -119,6 +123,8 @@ public class MeetingService {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new EntityNotFoundException("약속 정보를 찾을 수 없습니다. meetingId = " + meetingId));
 
+
+
         Match match = meeting.getMatch();
 
         meeting.confirm();
@@ -130,6 +136,9 @@ public class MeetingService {
         // 채팅방 종료 시간 갱신
         Room room = roomRepository.getRoomByMatchId(match.getId());
         room.updateDeactivationTime(meeting.getDate().plusHours(24));
+
+        // 채팅방에 알림
+        chatService.saveChatMessageWithoutNotification(match.getId(), currentUser, "만남 일정이 확정되었어요!");
     }
 
     // 대면 약속 신청에 거절
@@ -138,11 +147,16 @@ public class MeetingService {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new EntityNotFoundException("약속 정보를 찾을 수 없습니다. meetingId = " + meetingId));
 
+        Match match = meeting.getMatch();
+
         meeting.reject();
 
         // 알림 전송
         User receiver = getOtherUser(currentUser, meeting);
         notificationService.createNotification(NotificationType.MeetingRejected, receiver, null);
+
+        // 채팅방에 알림
+        chatService.saveChatMessageWithoutNotification(match.getId(), currentUser, "만남 일정이 거절되었어요... 다시 한 번 일정을 조율해보세요!");
     }
 
     // 대면 약속 24시간 전 알람 전송

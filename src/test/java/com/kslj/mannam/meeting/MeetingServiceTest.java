@@ -77,7 +77,7 @@ public class MeetingServiceTest {
 
         // when
         MeetingRequestDto updatedDto = createMeetingRequestDto("신촌 카페", "장소 변경");
-        meetingService.updateMeeting(meetingId, updatedDto);
+        meetingService.updateMeeting(meetingId, updatedDto, user1);
         List<MeetingResponseDto> meetings = meetingService.getMeetings(user1);
 
         // then

@@ -158,10 +158,12 @@ public class MeetingController {
     )
     @PatchMapping("/{meetingId}")
     public ResponseEntity<Void> updateMeeting(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PathVariable("meetingId") long meetingId,
             @RequestBody MeetingRequestDto requestDto
     ) {
-        meetingService.updateMeeting(meetingId, requestDto);
+        userService.inspectUserDetails(userDetails);
+        meetingService.updateMeeting(meetingId, requestDto, userDetails.getUser());
 
         return ResponseEntity.ok().build();
     }

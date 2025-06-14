@@ -212,6 +212,7 @@ public class ChatService {
                     .sentAt(chat.getSentAt())
                     .isVisible(chat.getIsVisible())
                     .isRead(chat.getIsRead())
+                    .isChatbot(chat.getIsChatbot())
                     .build());
         }
 

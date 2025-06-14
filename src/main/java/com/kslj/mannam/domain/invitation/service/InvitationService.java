@@ -100,9 +100,11 @@ public class InvitationService {
             invitation.accept();
             matchService.updateMatchStatus(dto.getMatchId(), MatchStatus.Meeting);
             notificationService.createNotification(NotificationType.InvitationAccepted, sender, null);
+            chatService.saveChatMessageWithoutNotification(match.getId(), sender, "만남 초대장이 수락되었어요! 만날 일정을 정해보세요!");
         } else {
             invitation.reject();
             notificationService.createNotification(NotificationType.InvitationRejected, sender, null);
+            chatService.saveChatMessageWithoutNotification(match.getId(), sender, "아직 만날 준비가 안 됐나 봐요! 조금 더 천천히 다가가 봐요!");
         }
     }
 }
