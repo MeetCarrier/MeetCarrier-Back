@@ -82,13 +82,13 @@ public class Match {
     // 중단 처리 메서드
     public void cancelMatch(User canceller, MatchStatus cancelStatus, String reasonCodes, String customReason) {
         if (cancelStatus != MatchStatus.Survey_Cancelled && cancelStatus != MatchStatus.Chat_Cancelled) {
-            throw new IllegalArgumentException("중단 상태는 Survey_Cancelled 또는 Chat_Cancelled만 가능합니다.");
+            throw new IllegalStateException("중단 상태는 Survey_Cancelled 또는 Chat_Cancelled만 가능합니다.");
         }
         if (!hasUser(canceller)) {
-            throw new IllegalArgumentException("이 매칭의 참여자가 아닙니다.");
+            throw new IllegalStateException("이 매칭의 참여자가 아닙니다.");
         }
         if (reasonCodes == null || reasonCodes.isBlank()) {
-            throw new IllegalArgumentException("중단 사유를 입력해야 합니다.");
+            throw new IllegalStateException("중단 사유를 입력해야 합니다.");
         }
         this.status = cancelStatus;
         this.cancelledBy = canceller;

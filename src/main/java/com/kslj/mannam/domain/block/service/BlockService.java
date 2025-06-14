@@ -5,6 +5,7 @@ import com.kslj.mannam.domain.block.dto.BlockResponseDto;
 import com.kslj.mannam.domain.block.entity.Block;
 import com.kslj.mannam.domain.block.repository.BlockRepository;
 import com.kslj.mannam.domain.user.entity.User;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +53,7 @@ public class BlockService {
         Optional<Block> targetBlock = blockRepository.findById(blockId);
 
         if (targetBlock.isEmpty()) {
-            throw new IllegalArgumentException("전화번호를 찾을 수 없습니다. blockId = " + blockId);
+            throw new EntityNotFoundException("전화번호를 찾을 수 없습니다. blockId = " + blockId);
         } else {
             Block currentBlock = targetBlock.get();
             currentBlock.updateBlockedPhone(requestDto.getBlockedPhone());
@@ -68,7 +69,7 @@ public class BlockService {
         Optional<Block> targetBlock = blockRepository.findById(blockId);
 
         if (targetBlock.isEmpty()) {
-            throw new IllegalArgumentException("전화번호를 찾을 수 없습니다. blockId = " + blockId);
+            throw new EntityNotFoundException("전화번호를 찾을 수 없습니다. blockId = " + blockId);
         } else {
             blockRepository.deleteById(blockId);
         }

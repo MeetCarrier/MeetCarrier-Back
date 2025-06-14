@@ -89,7 +89,7 @@ public class MeetingService {
     @Transactional
     public void updateMeeting(long meetingId, MeetingRequestDto dto) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new IllegalArgumentException("약속 정보를 찾을 수 없습니다. meetingId = " + meetingId));
+                .orElseThrow(() -> new EntityNotFoundException("약속 정보를 찾을 수 없습니다. meetingId = " + meetingId));
 
         if (meeting.getStatus() != MeetingStatus.ACCEPTED) {
             throw new IllegalStateException("확정된 약속만 수정할 수 있습니다.");
@@ -109,7 +109,7 @@ public class MeetingService {
     @Transactional
     public void deleteMeeting(long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new IllegalArgumentException("약속 정보를 찾을 수 없습니다. meetingId = " + meetingId));
+                .orElseThrow(() -> new EntityNotFoundException("약속 정보를 찾을 수 없습니다. meetingId = " + meetingId));
 
         meetingRepository.deleteById(meetingId);
     }
@@ -182,7 +182,7 @@ public class MeetingService {
         } else if (currentUser.getId().equals(user2.getId())) {
             return user1;
         } else {
-            throw new IllegalArgumentException("이 약속과 관련없는 사용자입니다.");
+            throw new IllegalStateException("이 약속과 관련없는 사용자입니다.");
         }
     }
 }

@@ -50,7 +50,7 @@ public class ChatController {
 
         Authentication authentication = (Authentication) headerAccessor.getUser();
         if (authentication == null) {
-            throw new IllegalStateException("인증되지 않은 사용자입니다.");
+            throw new AccessDeniedException("인증되지 않은 사용자입니다.");
         }
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -78,7 +78,7 @@ public class ChatController {
 
         Authentication authentication = (Authentication) headerAccessor.getUser();
         if (authentication == null) {
-            throw new IllegalStateException("인증되지 않은 사용자입니다.");
+            throw new AccessDeniedException("인증되지 않은 사용자입니다.");
         }
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();

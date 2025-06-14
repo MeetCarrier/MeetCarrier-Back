@@ -98,14 +98,14 @@ public class ReviewService {
     // 리뷰 수정
     @Transactional
     public long updateReview(long reviewId, ReviewRequestDto requestDto, User reviewer) {
-        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new RuntimeException("리뷰를 찾을 수 없습니다. reviewId = " + reviewId));
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new IllegalArgumentException("리뷰를 찾을 수 없습니다. reviewId = " + reviewId));
 
         if(review.getReviewer().equals(reviewer)) {
             if (requestDto.getContent() != null) review.updateContent(requestDto.getContent());
             if (requestDto.getRating() != null) review.updateRating(requestDto.getRating());
         }
         else {
-            throw new IllegalArgumentException("작성자가 일치하지 않습니다.");
+            throw new IllegalStateException("작성자가 일치하지 않습니다.");
         }
 
         return reviewId;

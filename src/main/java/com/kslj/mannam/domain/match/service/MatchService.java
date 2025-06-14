@@ -139,7 +139,7 @@ public class MatchService {
                 .orElseThrow(() -> new EntityNotFoundException("Match not found"));
 
         if (!match.hasUser(user)) {
-            throw new IllegalArgumentException("User not part of this match");
+            throw new IllegalStateException("User not part of this match");
         }
 
         match.markUserEntered(user);

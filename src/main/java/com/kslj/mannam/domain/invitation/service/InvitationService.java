@@ -83,12 +83,12 @@ public class InvitationService {
 
         Invitation invitation = invitationRepository.findByMatch(match);
         if (invitation == null) {
-            throw new IllegalArgumentException("초대장 정보가 없습니다. matchId: " + dto.getMatchId());
+            throw new EntityNotFoundException("초대장 정보가 없습니다. matchId: " + dto.getMatchId());
         }
 
         if (!invitation.getReceiver().equals(receiver))
         {
-            throw new IllegalArgumentException("수신자가 잘못 지정되었습니다.");
+            throw new IllegalStateException("수신자가 잘못 지정되었습니다.");
         }
         else if (!invitation.getStatus().equals(InvitationStatus.PENDING))
         {

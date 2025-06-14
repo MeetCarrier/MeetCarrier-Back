@@ -27,6 +27,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -198,11 +199,11 @@ public class MatchController {
 
     // 매칭 요청 전송
     @MessageMapping("/api/start-matching")
-    public void startMatching(SimpMessageHeaderAccessor headerAccessor) {
+    public void startMatching(SimpMessageHeaderAccessor headerAccessor) throws AccessDeniedException {
 
         Authentication authentication = (Authentication) headerAccessor.getUser();
         if (authentication == null) {
-            throw new IllegalStateException("인증되지 않은 사용자입니다.");
+            throw new AccessDeniedException("인증되지 않은 사용자입니다.");
         }
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();

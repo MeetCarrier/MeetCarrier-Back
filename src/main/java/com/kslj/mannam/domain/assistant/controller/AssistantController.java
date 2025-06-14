@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -48,11 +49,11 @@ public class AssistantController {
     }
 
     @MessageMapping("/api/assistant/send")
-    public void sendQuestion(SimpMessageHeaderAccessor headerAccessor, @Payload AssistantQuestionDto dto) {
+    public void sendQuestion(SimpMessageHeaderAccessor headerAccessor, @Payload AssistantQuestionDto dto) throws AccessDeniedException {
 
         Authentication authentication = (Authentication) headerAccessor.getUser();
         if (authentication == null) {
-            throw new IllegalStateException("인증되지 않은 사용자입니다.");
+            throw new AccessDeniedException("인증되지 않은 사용자입니다.");
         }
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
