@@ -41,7 +41,7 @@ public class ChatService {
 
     // 메시지 저장
     @Transactional
-    public ChatResponseDto saveChatMessage(ChatMessageDto dto, long roomId, User sender) {
+    public ChatResponseDto saveChatMessage(ChatMessageDto dto, long roomId, User sender, boolean isChatbot) {
         Room room = roomRepository.findById(roomId).orElseThrow();
         Match match = room.getMatch();
 
@@ -64,6 +64,7 @@ public class ChatService {
                 .user(sender)
                 .isRead(isReceiverOnline)
                 .isVisible(dto.getIsVisible() != null ? dto.getIsVisible() : true)
+                .isChatbot(isChatbot)
                 .build();
 
         Chat savedChat = chatRepository.save(newChat);
@@ -76,6 +77,7 @@ public class ChatService {
                 .sender(sender.getId())
                 .isRead(isReceiverOnline)
                 .isVisible(savedChat.getIsVisible())
+                .isChatbot(isChatbot)
                 .build();
 
         if (savedChat.getIsVisible()) {
@@ -152,14 +154,17 @@ public class ChatService {
                 .message(message)
                 .room(room)
                 .user(sender)
+                .isChatbot(true)
                 .build();
 
         chatRepository.save(newChat);
 
-        ChatMessageDto dto = ChatMessageDto.builder()
+        ChatResponseDto dto = ChatResponseDto.builder()
                 .type(MessageType.CHATBOT)
                 .message(message)
-                .roomId(room.getId())
+                .sender(sender.getId())
+                .isVisible(true)
+                .isChatbot(true)
                 .build();
 
         messagingTemplate.convertAndSend(

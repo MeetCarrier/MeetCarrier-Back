@@ -46,7 +46,7 @@ public class ChatbotService {
                 .roomId(roomId)
                 .isVisible(dto.getIsVisible())
                 .build();
-        ChatResponseDto queryResponse = chatService.saveChatMessage(queryMessageDto, roomId, user);
+        ChatResponseDto queryResponse = chatService.saveChatMessage(queryMessageDto, roomId, user, false);
 
         // 채팅방에 브르드캐스트
         messagingTemplate.convertAndSend("/topic/room/" + roomId, queryResponse);
@@ -87,7 +87,7 @@ public class ChatbotService {
                     .build();
 
             // 응답 내용 받아와서 DB에 저장
-            ChatResponseDto responseDto = chatService.saveChatMessage(dto, roomId, user);
+            ChatResponseDto responseDto = chatService.saveChatMessage(dto, roomId, user, true);
 
             // 채팅방에 브로드캐스트
             messagingTemplate.convertAndSend("/topic/room/" + roomId, responseDto);

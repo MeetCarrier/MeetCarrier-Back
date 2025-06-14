@@ -19,6 +19,7 @@ public class ChatResponseDto {
     private long sender;
     private boolean isRead;
     private boolean isVisible;
+    private boolean isChatbot;
 
     @Builder.Default
     private LocalDateTime sentAt = LocalDateTime.now();

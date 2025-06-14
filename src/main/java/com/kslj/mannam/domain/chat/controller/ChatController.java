@@ -63,7 +63,7 @@ public class ChatController {
         log.info("채팅 수신: roomId={}, message={}", roomId, dto.getMessage());
 
         // 메시지 저장
-        ChatResponseDto response = chatService.saveChatMessage(dto, roomId, sender);
+        ChatResponseDto response = chatService.saveChatMessage(dto, roomId, sender, false);
 
         log.info("채팅 브로드캐스트: roomId={}, response={}", roomId, response);
 

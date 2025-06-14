@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -157,6 +156,10 @@ public class MeetingService {
         List<Meeting> meetings = meetingRepository.findByDateBetween(now, next24hr);
 
         for (Meeting meeting : meetings) {
+            if (meeting.getStatus() != MeetingStatus.ACCEPTED) {
+                continue;
+            }
+
             User user1 = meeting.getMatch().getUser1();
             User user2 = meeting.getMatch().getUser2();
 

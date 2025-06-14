@@ -40,6 +40,10 @@ public class Chat {
     @JsonProperty("isVisible")
     private Boolean isVisible = true;
 
+    @Column(name = "is_chatbot")
+    @JsonProperty("isChatbot")
+    private Boolean isChatbot;
+
     @Builder.Default
     @Column(name = "sent_at")
     private LocalDateTime sentAt = LocalDateTime.now();
