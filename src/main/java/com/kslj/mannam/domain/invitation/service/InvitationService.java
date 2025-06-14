@@ -14,6 +14,7 @@ import com.kslj.mannam.domain.notification.enums.NotificationType;
 import com.kslj.mannam.domain.notification.service.NotificationService;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,7 +70,7 @@ public class InvitationService {
         Invitation invitation = invitationRepository.findByMatch(match);
 
         if (invitation == null) {
-            return null;
+            throw new EntityNotFoundException("해당 초대장을 찾을 수 없습니다. Match ID: " + matchId);
         }
 
         return InvitationResponseDto.fromEntity(invitation);
