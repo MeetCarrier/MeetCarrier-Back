@@ -4,6 +4,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -33,5 +34,9 @@ public class RedisUtils {
 
     public void addToSet(String key, String value) {
         redisTemplate.opsForSet().add(key, value);
+    }
+
+    public Set<String> getKeys(String pattern) {
+        return redisTemplate.keys(pattern);
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.web.socket.messaging.SessionUnsubscribeEvent;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -103,6 +104,8 @@ public class WebSocketEventListener {
     @EventListener
     public void handleDisconnect(SessionDisconnectEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
+        String sessionId = accessor.getSessionId(); // 세션 ID 가져오기
+
         if (accessor.getUser() != null && accessor.getUser().getName() != null) {
             String userIdStr = accessor.getUser().getName();
             log.info("userId={} disconnected", userIdStr);
@@ -124,8 +127,16 @@ public class WebSocketEventListener {
                     });
                 }
 
-                // 참고: Redis의 남은 키들은 setData 시 설정한 TTL에 의해 자동으로 소멸되므로,
-                // Disconnect 시 별도의 Redis 정리 로직은 필수가 아닙니다.
+                // 3. ✨ [수정] Redis에 남은 해당 세션의 모든 구독 정보 키 삭제
+                // "ws-session:{sessionId}:sub:*" 패턴으로 키를 찾아서 삭제합니다.
+                String pattern = "ws-session:" + sessionId + ":sub:*";
+                Set<String> keys = redisUtils.getKeys(pattern); // RedisUtils에 getKeys 메서드가 필요합니다.
+                if (keys != null && !keys.isEmpty()) {
+                    keys.forEach(key -> {
+                        redisUtils.deleteData(key);
+                        log.info("REDIS DEL (on disconnect): key={}", key);
+                    });
+                }
 
             } catch (NumberFormatException e) {
                 log.warn("잘못된 사용자 ID 형식: {}", userIdStr);
