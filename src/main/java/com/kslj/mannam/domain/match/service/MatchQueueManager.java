@@ -190,7 +190,7 @@ public class MatchQueueManager {
         System.out.println("bestMatch = " + bestMatch.toString());
 
         // 점수 비교
-        if (bestMatch.getFinalScore() >= 0.75) {
+        if (bestMatch.getFinalScore() >= 0.6) {
             // 매칭 성공
             completeMatching(bestMatch, requesterId);
         } else {
