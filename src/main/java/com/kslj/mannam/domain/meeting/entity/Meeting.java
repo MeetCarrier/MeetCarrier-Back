@@ -40,6 +40,9 @@ public class Meeting {
     @JoinColumn(name = "match_id", nullable = false)
     private Match match;
 
+    @Column(nullable = false)
+    private Long senderId;
+
     public void updateNote(String note) {
         this.note = note;
     }

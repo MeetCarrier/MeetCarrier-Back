@@ -53,6 +53,7 @@ public class MeetingService {
                 .location(requestDto.getLocation())
                 .note(requestDto.getNote())
                 .match(match)
+                .senderId(sender.getId())
                 .build();
 
         Meeting savedMeeting = meetingRepository.save(newMeeting);
@@ -123,7 +124,13 @@ public class MeetingService {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new EntityNotFoundException("약속 정보를 찾을 수 없습니다. meetingId = " + meetingId));
 
+        if (meeting.getStatus() != MeetingStatus.PENDING) {
+            throw new IllegalStateException("이미 처리된 만남 일정입니다.");
+        }
 
+        if (meeting.getSenderId().equals(currentUser.getId())) {
+            throw new IllegalStateException("상대방만 수락 혹은 거절할 수 있습니다.");
+        }
 
         Match match = meeting.getMatch();
 
@@ -146,6 +153,14 @@ public class MeetingService {
     public void rejectMeeting(User currentUser, long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new EntityNotFoundException("약속 정보를 찾을 수 없습니다. meetingId = " + meetingId));
+
+        if (meeting.getStatus() != MeetingStatus.PENDING) {
+            throw new IllegalStateException("이미 처리된 만남 일정입니다.");
+        }
+
+        if (meeting.getSenderId().equals(currentUser.getId())) {
+            throw new IllegalStateException("상대방만 수락 혹은 거절할 수 있습니다.");
+        }
 
         Match match = meeting.getMatch();
 
