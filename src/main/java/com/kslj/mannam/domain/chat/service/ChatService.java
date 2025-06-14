@@ -148,27 +148,91 @@ public class ChatService {
     public void saveChatMessageWithoutNotification(long matchId, User sender, String message) {
 
         Room room = roomRepository.getRoomByMatchId(matchId);
+        long roomId = room.getId();
+        Match match = room.getMatch();
 
+        // 1. 메시지 수신자 찾기
+        User receiver;
+        if (match.getUser1().equals(sender)) {
+            receiver = match.getUser2();
+        } else {
+            receiver = match.getUser1();
+        }
+
+        // 2. 상대방 접속 상태 확인
+        boolean isReceiverOnline = chatPresenceService.isUserActive(roomId, receiver.getId());
+
+        // 3. Chat 엔티티 생성 및 저장
         Chat newChat = Chat.builder()
                 .type(MessageType.CHATBOT)
                 .message(message)
                 .room(room)
                 .user(sender)
+                .isRead(isReceiverOnline) // 상대방 접속 상태에 따라 isRead 설정
                 .isChatbot(true)
+                .isVisible(true) // 챗봇 메시지는 항상 보이도록 설정
                 .build();
 
-        chatRepository.save(newChat);
+        Chat savedChat = chatRepository.save(newChat);
 
+        // 4. 채팅방 내부에 실시간 메시지 전송
         ChatResponseDto dto = ChatResponseDto.builder()
                 .type(MessageType.CHATBOT)
                 .message(message)
                 .sender(sender.getId())
+                .isRead(isReceiverOnline)
                 .isVisible(true)
                 .isChatbot(true)
                 .build();
 
         messagingTemplate.convertAndSend(
-                "/topic/room/" + room.getId(), dto);
+                "/topic/room/" + roomId, dto);
+
+        // 5. 채팅 목록 업데이트 로직 추가 (saveChatMessage 메소드에서 가져옴)
+        String messageBody = "[챗봇] " + savedChat.getMessage();
+
+        // Redis에 최신 메시지 정보 저장
+        LastChatDto lastChatForCache = LastChatDto.builder()
+                .roomId(roomId)
+                .lastMessage(messageBody)
+                .lastMessageAt(savedChat.getSentAt())
+                .build();
+        redisUtils.setData("chat:latest:" + roomId, lastChatForCache, 3600 * 24);
+
+        // 메시지 보낸 사람의 채팅 목록도 최신 정보로 업데이트
+        LastChatDto lastChatForSender = LastChatDto.builder()
+                .roomId(roomId)
+                .lastMessage(messageBody)
+                .lastMessageAt(savedChat.getSentAt())
+                .unreadCount(0) // 보낸 사람은 항상 읽음 상태
+                .build();
+        messagingTemplate.convertAndSend("/topic/user/" + sender.getId() + "/chats", lastChatForSender);
+
+        if (!isReceiverOnline) {
+            // Redis에 안 읽은 메시지 개수 증가
+            String unreadCountKey = "chat:unread:" + roomId + ":" + receiver.getId();
+            Long unreadCount = redisUtils.incrData(unreadCountKey);
+
+            // ※※※ FCM 푸시 알람 전송 로직은 제외 ※※※
+
+            // 안 읽은 개수를 상대방의 클라이언트에 실시간 전송
+            LastChatDto lastChatInfo = LastChatDto.builder()
+                    .roomId(roomId)
+                    .lastMessage(messageBody)
+                    .lastMessageAt(savedChat.getSentAt())
+                    .unreadCount(unreadCount.intValue())
+                    .build();
+            messagingTemplate.convertAndSend("/topic/user/" + receiver.getId() + "/chats", lastChatInfo);
+        } else {
+            // 상대방이 온라인일 경우, 최신 메시지 정보만 전송 (안 읽은 개수는 0)
+            LastChatDto lastChatForReceiverOnline = LastChatDto.builder()
+                    .roomId(roomId)
+                    .lastMessage(messageBody)
+                    .lastMessageAt(savedChat.getSentAt())
+                    .unreadCount(0)
+                    .build();
+            messagingTemplate.convertAndSend("/topic/user/" + receiver.getId() + "/chats", lastChatForReceiverOnline);
+        }
     }
 
     // 메시지 요청이 들어온 사용자가 채팅방에 참여중인 유저인지 검사
