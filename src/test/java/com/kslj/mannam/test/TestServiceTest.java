@@ -83,7 +83,7 @@ public class TestServiceTest {
         long testId3 = testService.createTest(testRequest3, testUser);
 
         // when
-        testService.deleteTestByTestId(testId3);
+        testService.deleteTestByTestId(testId3, testUser);
         List<TestResponseDto> testByUserId = testService.getTestByUserId(testUser);
 
         // then

@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -58,65 +59,56 @@ public class SurveyService {
         return savedSession.getId();
     }
 
-    // 설문지 세션 ID 조회
-    @Transactional(readOnly = true)
-    public long getSurveySessionId(long matchId) {
-        SurveySession session = surveySessionRepository.findSurveySessionByMatchId(matchId);
-
-        return session.getId();
-    }
-
     // 설문지 질문 생성
     @Transactional
     public void createSurveyQuestions(long matchId, long sessionId) {
-        SurveySession session = surveySessionRepository
-                .findById(sessionId)
+        SurveySession session = surveySessionRepository.findById(sessionId)
                 .orElseThrow(() -> new EntityNotFoundException("SurveySession not found: " + sessionId));
 
-        Match match = matchService.getMatch(matchId);
+        Match match = session.getMatch();
         String user1Question = match.getUser1().getQuestion();
         String user2Question = match.getUser2().getQuestion();
 
         // 질문 랜덤하게 뽑기
         List<String> questionPool = loadQuestionsFromFile();
         Collections.shuffle(questionPool);
-        List<String> selectedQuestions;
 
-        // 설정한 질문이 둘 다 없는 경우 -> 5개, 설정한 질문이 둘 중 하나만 있는 경우 -> 4개, 둘 다 질문을 설정한 경우 -> 3개
-        if(user1Question == null && user2Question == null) {
-            selectedQuestions = questionPool.stream().limit(5).toList();
-        }
-        else if (user1Question != null && user2Question != null) {
-            selectedQuestions = questionPool.stream().limit(3).toList();
-        }
-        else {
-            selectedQuestions = questionPool.stream().limit(4).toList();
-        }
+        // 질문 개수 로직
+        int randomQuestionCount = 5;
+        if (user1Question != null) randomQuestionCount--;
+        if (user2Question != null) randomQuestionCount--;
 
-        // 랜덤으로 뽑은 질문 저장
-        for (String content : selectedQuestions) {
-            SurveyQuestion question = SurveyQuestion.builder()
-                    .content(content)
-                    .surveySession(session)
-                    .build();
-            surveyQuestionRepository.save(question);
-        }
+        List<SurveyQuestion> questionsToSave = new ArrayList<>();
 
-        // 사용자가 설정한 질문을 줄러와 저장
+        // 랜덤 질문 추가
+        questionPool.stream()
+                .limit(randomQuestionCount)
+                .map(content -> SurveyQuestion.builder()
+                        .content(content)
+                        .surveySession(session)
+                        .build())
+                .forEach(questionsToSave::add);
+
+        // 사용자 지정 질문 저장
         if(user1Question != null) {
-            SurveyQuestion question = SurveyQuestion.builder()
-                    .content(user1Question)
-                    .surveySession(session)
-                    .build();
-            surveyQuestionRepository.save(question);
+            questionsToSave.add(
+                    SurveyQuestion.builder()
+                            .content(user1Question)
+                            .surveySession(session)
+                            .build()
+            );
         }
         if(user2Question != null) {
-            SurveyQuestion question = SurveyQuestion.builder()
-                    .content(user2Question)
-                    .surveySession(session)
-                    .build();
-            surveyQuestionRepository.save(question);
+            questionsToSave.add(
+                    SurveyQuestion.builder()
+                            .content(user2Question)
+                            .surveySession(session)
+                            .build()
+            );
         }
+
+        // 한 번에 모두 저장
+        surveyQuestionRepository.saveAll(questionsToSave);
     }
 
     // 설문지 질문 조회
@@ -143,22 +135,34 @@ public class SurveyService {
         SurveySession session = surveySessionRepository.findByIdForUpdate(sessionId)
                 .orElseThrow(() -> new EntityNotFoundException("SurveySession not found: " + sessionId));
 
-        for(SurveyAnswerRequestDto answer : answers) {
-            SurveyQuestion question = surveyQuestionRepository.getSurveyQuestionById(answer.getQuestionId());
+        // 필요한 Question들 한 번에 조회
+        List<Long> questionIds = answers.stream().map(SurveyAnswerRequestDto::getQuestionId).toList();
+        List<SurveyQuestion> questions = surveyQuestionRepository.findAllById(questionIds);
 
-            // 답변 등록
-            SurveyAnswer surveyAnswer = SurveyAnswer.builder()
-                    .content(answer.getContent())
-                    .user(user)
-                    .surveySession(session)
-                    .surveyQuestion(question)
-                    .build();
+        // 미리 불러오기
+        Map<Long, SurveyQuestion> questionMap = questions.stream()
+                        .collect(Collectors.toMap(SurveyQuestion::getId, question -> question));
 
-            surveyAnswerRepository.save(surveyAnswer);
-        }
+        // 답변 엔티티 리스트 생성
+        List<SurveyAnswer> answersToSave = answers.stream()
+                .map(answerDto -> {
+                    SurveyQuestion question = questionMap.get(answerDto.getQuestionId());
+                    if (question == null) {
+                        throw new EntityNotFoundException("SurveyQuestion not found: " + answerDto.getQuestionId());
+                    }
+                    return SurveyAnswer.builder()
+                            .content(answerDto.getContent())
+                            .user(user)
+                            .surveySession(session)
+                            .surveyQuestion(question)
+                            .build();
+                })
+                .toList();
+
+        // 한 번에 저장
+        surveyAnswerRepository.saveAll(answersToSave);
 
         session.incrementAnsweredCount();
-
         // 답변 수 체크
         if (session.getAnsweredCount() >= 2) {
             Match match = session.getMatch();

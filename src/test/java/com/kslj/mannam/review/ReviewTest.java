@@ -85,7 +85,7 @@ public class ReviewTest {
         long reviewId3 = reviewService.createReview(testUser.getId(), requestDto3, testReviewer3);
 
         // when
-        reviewService.deleteReview(reviewId1);
+        reviewService.deleteReview(reviewId1, testUser);
 
         // then
         Assertions.assertEquals(2, reviewService.getReview(testUser.getId()).size());

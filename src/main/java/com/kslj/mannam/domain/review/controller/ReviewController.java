@@ -244,8 +244,11 @@ public class ReviewController {
             }
     )
     public ResponseEntity<Void> deleteReview(
-            @PathVariable("reviewId") long reviewId) {
-        reviewService.deleteReview(reviewId);
+            @PathVariable("reviewId") long reviewId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        userService.inspectUserDetails(userDetails);
+        reviewService.deleteReview(reviewId, userDetails.getUser());
         return ResponseEntity.ok().build();
     }
 }

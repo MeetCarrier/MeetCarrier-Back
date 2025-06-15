@@ -11,10 +11,10 @@ import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.service.UserActionLogService;
 import com.kslj.mannam.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -49,55 +49,43 @@ public class ReviewService {
     // 리뷰 조회
     @Transactional(readOnly = true)
     public List<ReviewResponseDto> getReview(long userId) {
-        List<ReviewResponseDto> reviewDtos = new ArrayList<>();
-
         User user = userService.getUserById(userId);
         List<Review> reviews = reviewRepository.findReviewByUser(user);
 
-        for(Review review : reviews) {
-            ReviewResponseDto reviewDto = ReviewResponseDto.builder()
-                    .reviewId(review.getId())
-                    .rating(review.getRating())
-                    .content(review.getContent())
-                    .step(review.getStep())
-                    .createdAt(review.getCreatedAt())
-                    .reviewerId(review.getReviewer().getId())
-                    .reviewerName(review.getReviewer().getNickname())
-                    .build();
-
-            reviewDtos.add(reviewDto);
-        }
-
-        return reviewDtos;
+        return reviews.stream()
+                .map(review -> ReviewResponseDto.builder()
+                        .reviewId(review.getId())
+                        .rating(review.getRating())
+                        .content(review.getContent())
+                        .step(review.getStep())
+                        .createdAt(review.getCreatedAt())
+                        .reviewerId(review.getReviewer().getId())
+                        .reviewerName(review.getReviewer().getNickname())
+                        .build())
+                .toList();
     }
 
     // 작성자 기준으로 리뷰 조회
     @Transactional(readOnly = true)
     public List<ReviewByReviewerIdDto> getReviewByReviewerId(long userId) {
-        List<ReviewByReviewerIdDto> reviewDtos = new ArrayList<>();
-
         List<Review> reviews = reviewRepository.findReviewByReviewerId(userId);
 
-        for(Review review : reviews) {
-            ReviewByReviewerIdDto reviewDto = ReviewByReviewerIdDto.builder()
-                    .reviewId(review.getId())
-                    .rating(review.getRating())
-                    .content(review.getContent())
-                    .step(review.getStep())
-                    .createdAt(review.getCreatedAt())
-                    .userId(review.getUser().getId())
-                    .userName(review.getUser().getNickname())
-                    .build();
-
-            reviewDtos.add(reviewDto);
-        }
-
-        return reviewDtos;
+        return reviews.stream()
+                .map(review -> ReviewByReviewerIdDto.builder()
+                        .reviewId(review.getId())
+                        .rating(review.getRating())
+                        .content(review.getContent())
+                        .step(review.getStep())
+                        .createdAt(review.getCreatedAt())
+                        .userId(review.getUser().getId())
+                        .userName(review.getUser().getNickname())
+                        .build())
+                .toList();
     }
 
     // 리뷰 수정
     @Transactional
-    public long updateReview(long reviewId, ReviewRequestDto requestDto, User reviewer) {
+    public void updateReview(long reviewId, ReviewRequestDto requestDto, User reviewer) {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new IllegalArgumentException("리뷰를 찾을 수 없습니다. reviewId = " + reviewId));
 
         if(review.getReviewer().equals(reviewer)) {
@@ -107,13 +95,18 @@ public class ReviewService {
         else {
             throw new IllegalStateException("작성자가 일치하지 않습니다.");
         }
-
-        return reviewId;
     }
 
     // 리뷰 삭제
     @Transactional
-    public void deleteReview(long reviewId) {
+    public void deleteReview(long reviewId, User reviewer) {
+        Review review = reviewRepository.findById(reviewId)
+                        .orElseThrow(() -> new IllegalArgumentException("리뷰를 찾을 수 없습니다. reviewId = " + reviewId));
+
+        if (!review.getReviewer().getId().equals(reviewer.getId())) {
+            throw new AccessDeniedException("해당 리뷰를 삭제할 권한이 없습니다.");
+        }
+
         reviewRepository.deleteById(reviewId);
     }
 

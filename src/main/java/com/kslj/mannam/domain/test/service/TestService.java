@@ -9,11 +9,11 @@ import com.kslj.mannam.domain.user.enums.ActionType;
 import com.kslj.mannam.domain.user.service.UserActionLogService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -50,14 +50,14 @@ public class TestService {
 
     // 테스트 결과 삭제
     @Transactional
-    public long deleteTestByTestId(Long testId) {
-        Optional<Test> targetTest = testRepository.findById(testId);
+    public void deleteTestByTestId(Long testId, User user) {
+        Test test = testRepository.findById(testId)
+                .orElseThrow(() -> new EntityNotFoundException("테스트 데이터를 찾을 수 없습니다. testId = " + testId));
 
-        if (targetTest.isEmpty()) {
-            throw new EntityNotFoundException("테스트 데이터를 찾을 수 없습니다. testId = " + testId);
-        } else {
-            testRepository.deleteById(testId);
-            return testId;
+        if (!test.getUser().getId().equals(user.getId())) {
+            throw new AccessDeniedException("해당 테스트 결과를 삭제할 권한이 없습니다.");
         }
+
+        testRepository.delete(test);
     }
 }

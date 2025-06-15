@@ -113,9 +113,13 @@ class TestController {
                     )
             }
     )
-    public ResponseEntity<?> deleteTest(@PathVariable("testId") Long testId) {
-        long deletedTestId = testService.deleteTestByTestId(testId);
+    public ResponseEntity<?> deleteTest(
+            @PathVariable("testId") Long testId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        userService.inspectUserDetails(userDetails);
+        testService.deleteTestByTestId(testId, userDetails.getUser());
 
-        return ResponseEntity.ok("테스트 결과가 삭제되었습니다. TestId = " + deletedTestId);
+        return ResponseEntity.ok("테스트 결과가 삭제되었습니다. TestId = " + testId);
     }
 }
