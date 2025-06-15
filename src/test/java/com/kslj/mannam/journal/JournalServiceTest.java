@@ -15,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,9 +27,6 @@ public class JournalServiceTest {
 
     @Autowired
     private JournalRepository journalRepository;
-
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private TestUtils testUtils;
@@ -51,7 +47,7 @@ public class JournalServiceTest {
         JournalRequestDto journalRequestDto = createJournalRequest("오늘은 좋은 날이었다.", "좋아요");
 
         // when
-        long savedJournalId = journalService.saveJournal(journalRequestDto, foundUser);
+        journalService.saveJournal(journalRequestDto, foundUser);
         List<JournalResponseDto> foundJournal = journalService.getJournalsByYearAndMonth(foundUser, 2025, 5);
 
         // then
@@ -111,7 +107,7 @@ public class JournalServiceTest {
 
         // when
         JournalRequestDto updatedRequestDto = createJournalRequest("테스트", "슬퍼요");
-        journalService.updateJournal(journalId, updatedRequestDto);
+        journalService.updateJournal(journalId, updatedRequestDto, foundUser);
         List<JournalResponseDto> journalsByYearAndMonth = journalService.getJournalsByYearAndMonth(foundUser, 2025, 5);
 
         // then
@@ -133,7 +129,7 @@ public class JournalServiceTest {
         long journalId3 = journalService.saveJournal(journalRequestDto3, foundUser);
 
         // when
-        journalService.deleteJournal(journalId1);
+        journalService.deleteJournal(journalId1, foundUser);
         List<JournalResponseDto> journalsByYearAndMonth = journalService.getJournalsByYearAndMonth(foundUser, 2025, 5);
 
         // then

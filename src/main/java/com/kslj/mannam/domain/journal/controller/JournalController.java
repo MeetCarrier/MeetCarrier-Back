@@ -138,8 +138,10 @@ public class JournalController {
     )
     @PatchMapping("/{journalId}")
     public ResponseEntity<?> UpdateJournal(@PathVariable("journalId") long journalId,
-                                           @RequestBody JournalRequestDto requestDto) {
-        long updatedJournalId = journalService.updateJournal(journalId, requestDto);
+                                           @RequestBody JournalRequestDto requestDto,
+                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.inspectUserDetails(userDetails);
+        long updatedJournalId = journalService.updateJournal(journalId, requestDto, userDetails.getUser());
 
         return ResponseEntity.ok("일기가 업데이트되었습니다. JournalId = " + updatedJournalId);
     }
@@ -168,9 +170,13 @@ public class JournalController {
             }
     )
     @DeleteMapping("/{journalId}")
-    public ResponseEntity<?> DeleteJournal(@PathVariable("journalId") long journalId) {
-        long deletedJournalId = journalService.deleteJournal(journalId);
+    public ResponseEntity<?> DeleteJournal(
+            @PathVariable("journalId") long journalId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        userService.inspectUserDetails(userDetails);
+        journalService.deleteJournal(journalId, userDetails.getUser());
 
-        return ResponseEntity.ok("일기가 삭제되었습니다. JournalId = " + deletedJournalId);
+        return ResponseEntity.ok("일기가 삭제되었습니다. JournalId = " + journalId);
     }
 }
