@@ -14,9 +14,11 @@ import java.util.List;
 @Repository
 public interface MeetingRepository extends JpaRepository<Meeting, Long> {
 
-    @Query("""
-           SELECT me FROM Meeting me JOIN me.match m WHERE m.user1.id = :userId OR m.user2.id = :userId
-           """)
+    @Query("SELECT m FROM Meeting m " +
+            "JOIN FETCH m.match ma " +
+            "JOIN FETCH ma.user1 " +
+            "JOIN FETCH ma.user2 " +
+            "WHERE ma.user1.id = :userId OR ma.user2.id = :userId")
     List<Meeting> findAllByUserId(@Param("userId") Long userId);
 
     List<Meeting> findByDateBetween(LocalDateTime dateAfter, LocalDateTime dateBefore);

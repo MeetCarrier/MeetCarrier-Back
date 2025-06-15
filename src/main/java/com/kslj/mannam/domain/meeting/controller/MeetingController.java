@@ -21,6 +21,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @Slf4j
@@ -161,7 +162,7 @@ public class MeetingController {
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PathVariable("meetingId") long meetingId,
             @RequestBody MeetingRequestDto requestDto
-    ) {
+    ) throws AccessDeniedException {
         userService.inspectUserDetails(userDetails);
         meetingService.updateMeeting(meetingId, requestDto, userDetails.getUser());
 
@@ -189,8 +190,10 @@ public class MeetingController {
             }
     )
     @DeleteMapping("/{meetingId}")
-    public ResponseEntity<Void> deleteMeeting(@PathVariable("meetingId") long meetingId) {
-        meetingService.deleteMeeting(meetingId);
+    public ResponseEntity<Void> deleteMeeting(@PathVariable("meetingId") long meetingId,
+                                              @AuthenticationPrincipal UserDetailsImpl userDetails) throws AccessDeniedException {
+        userService.inspectUserDetails(userDetails);
+        meetingService.deleteMeeting(meetingId, userDetails.getUser());
 
         return ResponseEntity.ok().build();
     }

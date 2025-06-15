@@ -22,9 +22,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -54,6 +55,7 @@ public class MeetingService {
                 .note(requestDto.getNote())
                 .match(match)
                 .senderId(sender.getId())
+                .status(MeetingStatus.ACCEPTED)
                 .build();
 
         Meeting savedMeeting = meetingRepository.save(newMeeting);
@@ -67,13 +69,10 @@ public class MeetingService {
     @Transactional(readOnly = true)
     public List<MeetingResponseDto> getMeetings(User user) {
         List<Meeting> meetings = meetingRepository.findAllByUserId(user.getId());
-        List<MeetingResponseDto> dtoList = new ArrayList<>();
 
-        for(Meeting meeting : meetings) {
-            dtoList.add(MeetingResponseDto.fromEntity(meeting, user));
-        }
-
-        return dtoList;
+        return meetings.stream()
+                .map(meeting -> MeetingResponseDto.fromEntity(meeting, user))
+                .collect(Collectors.toList());
     }
 
     // matchId로 대면 약속 일정 조회
@@ -87,9 +86,11 @@ public class MeetingService {
 
     // 대면 약속 수정
     @Transactional
-    public void updateMeeting(long meetingId, MeetingRequestDto dto, User user) {
+    public void updateMeeting(long meetingId, MeetingRequestDto dto, User user) throws AccessDeniedException {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new EntityNotFoundException("약속 정보를 찾을 수 없습니다. meetingId = " + meetingId));
+
+        validateUserAuthorityForMeeting(user, meeting);
 
         if (meeting.getStatus() != MeetingStatus.ACCEPTED) {
             throw new IllegalStateException("확정된 약속만 수정할 수 있습니다.");
@@ -111,9 +112,11 @@ public class MeetingService {
 
     // 대면 약속 삭제
     @Transactional
-    public void deleteMeeting(long meetingId) {
+    public void deleteMeeting(long meetingId, User user) throws AccessDeniedException {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new EntityNotFoundException("약속 정보를 찾을 수 없습니다. meetingId = " + meetingId));
+
+        validateUserAuthorityForMeeting(user, meeting);
 
         meetingRepository.deleteById(meetingId);
     }
@@ -215,6 +218,16 @@ public class MeetingService {
             return user1;
         } else {
             throw new IllegalStateException("이 약속과 관련없는 사용자입니다.");
+        }
+    }
+
+    // 권한 검사를 위한 private 메서드
+    private void validateUserAuthorityForMeeting(User user, Meeting meeting) throws AccessDeniedException {
+        User user1 = meeting.getMatch().getUser1();
+        User user2 = meeting.getMatch().getUser2();
+
+        if (!user.getId().equals(user1.getId()) && !user.getId().equals(user2.getId())) {
+            throw new AccessDeniedException("이 약속을 수정하거나 삭제할 권한이 없습니다."); // 혹은 다른 적절한 예외
         }
     }
 }

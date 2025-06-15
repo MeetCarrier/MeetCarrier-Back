@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -62,7 +63,7 @@ public class MeetingServiceTest {
 
     // 대면 약속 수정 테스트
     @Test
-    public void updateMeetingTest() {
+    public void updateMeetingTest() throws AccessDeniedException {
         // given
         User user1 = testUtils.createAndGetTestUser();
         User user2 = testUtils.createAndGetTestUser();
@@ -88,7 +89,7 @@ public class MeetingServiceTest {
 
     // 대면 약속 삭제 테스트
     @Test
-    public void deleteMeetingTest() {
+    public void deleteMeetingTest() throws AccessDeniedException {
         // given
         User user1 = testUtils.createAndGetTestUser();
         User user2 = testUtils.createAndGetTestUser();
@@ -102,7 +103,7 @@ public class MeetingServiceTest {
         long meetingId = meetingService.createMeeting(matchId, user1, requestDto);
 
         // when
-        meetingService.deleteMeeting(meetingId);
+        meetingService.deleteMeeting(meetingId, user1);
 
         // then
         List<MeetingResponseDto> meetings = meetingService.getMeetings(user1);
