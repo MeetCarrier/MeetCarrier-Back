@@ -38,7 +38,10 @@ public class InvitationService {
         if (existing != null) {
             if (existing.getStatus() == InvitationStatus.PENDING) {
                 throw new IllegalStateException("상대방이 확인하지 않은 초대장이 이미 존재합니다.");
-            } else {
+            } else if(existing.getStatus() == InvitationStatus.ACCEPTED) {
+                throw new IllegalStateException("이미 수락 처리된 초대장이 있습니다.");
+            }
+            else {
                 invitationRepository.delete(existing);
                 invitationRepository.flush();
             }
