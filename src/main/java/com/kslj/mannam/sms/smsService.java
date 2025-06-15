@@ -13,6 +13,8 @@ import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class smsService {
@@ -50,13 +52,13 @@ public class smsService {
 
     // Redis에서 인증번호 조회 및 검증
     public String verifySmsCode(String userPhone, String inputCode, UserDetailsImpl userDetails) {
-        String savedCode = (String) redisUtils.getData("sms:" + userPhone).get();
+        Optional<Object> savedCode = redisUtils.getData("sms:" + userPhone);
 
-        if (savedCode == null) {
+        if (savedCode.isEmpty()) {
             return "NOT_REQUESTED_OR_EXPIRED";
         }
 
-        if (inputCode.equals(savedCode)) {
+        if (inputCode.equals(savedCode.get())) {
             redisUtils.deleteData("sms:" + userPhone);
             userService.updateUser(userDetails, UpdateUserRequestDto.builder().phone(userPhone).build());
             return "SUCCESS";
