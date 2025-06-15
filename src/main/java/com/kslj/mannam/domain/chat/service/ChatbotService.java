@@ -49,6 +49,7 @@ public class ChatbotService {
         ChatResponseDto queryResponse = chatService.saveChatMessage(queryMessageDto, roomId, user, false);
 
         // 채팅방에 브르드캐스트
+        log.info("isChatbot = {}", queryResponse.isChatbot());
         messagingTemplate.convertAndSend("/topic/room/" + roomId, queryResponse);
 
         // 메시지 구성 및 RabbitMQ 전송
