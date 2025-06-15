@@ -2,6 +2,10 @@ package com.kslj.mannam.domain.room.service;
 
 import com.kslj.mannam.domain.match.entity.Match;
 import com.kslj.mannam.domain.match.enums.MatchStatus;
+import com.kslj.mannam.domain.match.service.MatchService;
+import com.kslj.mannam.domain.meeting.enums.MeetingStatus;
+import com.kslj.mannam.domain.meeting.repository.MeetingRepository;
+import com.kslj.mannam.domain.meeting.service.MeetingService;
 import com.kslj.mannam.domain.room.entity.Room;
 import com.kslj.mannam.domain.room.enums.RoomStatus;
 import com.kslj.mannam.domain.room.repository.RoomRepository;
@@ -23,6 +27,9 @@ import java.util.List;
 public class RoomService {
 
     private final RoomRepository roomRepository;
+    private final MatchService matchService;
+    private final MeetingService meetingService;
+    private final MeetingRepository meetingRepository;
 
     // 채팅방 생성
     @Transactional
@@ -57,7 +64,14 @@ public class RoomService {
         List<Room> rooms = roomRepository.findAllByStatusAndDeactivationTimeBefore(RoomStatus.Activate, LocalDateTime.now());
 
         for (Room room : rooms) {
-            room.getMatch().updateStatus(MatchStatus.Reviewing);
+            Match match = room.getMatch();
+            if (match.getStatus() == MatchStatus.Chatting)
+                matchService.updateMatchStatus(match.getId(), MatchStatus.Chat_Cancelled);
+            else if (match.getStatus() == MatchStatus.Meeting &&
+                    !meetingRepository.findByMatch(match).getStatus().equals(MeetingStatus.ACCEPTED))
+                matchService.updateMatchStatus(match.getId(), MatchStatus.Chat_Cancelled);
+            else
+                matchService.updateMatchStatus(match.getId(), MatchStatus.Reviewing);
             room.updateStatus(RoomStatus.Deactivate);
         }
     }
