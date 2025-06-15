@@ -7,6 +7,12 @@ import com.kslj.mannam.domain.match.dto.MatchResponseDto;
 import com.kslj.mannam.domain.match.entity.Match;
 import com.kslj.mannam.domain.match.enums.MatchStatus;
 import com.kslj.mannam.domain.match.repository.MatchRepository;
+import com.kslj.mannam.domain.meeting.entity.Meeting;
+import com.kslj.mannam.domain.meeting.enums.MeetingStatus;
+import com.kslj.mannam.domain.meeting.repository.MeetingRepository;
+import com.kslj.mannam.domain.room.entity.Room;
+import com.kslj.mannam.domain.room.enums.RoomStatus;
+import com.kslj.mannam.domain.room.repository.RoomRepository;
 import com.kslj.mannam.domain.room.service.RoomService;
 import com.kslj.mannam.domain.survey.repository.SurveySessionRepository;
 import com.kslj.mannam.domain.user.entity.User;
@@ -15,14 +21,18 @@ import com.kslj.mannam.domain.user.service.UserActionLogService;
 import com.kslj.mannam.domain.user.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class MatchService {
@@ -33,6 +43,9 @@ public class MatchService {
     private final RoomService roomService;
     private final UserActionLogService userActionLogService;
     private final ChatService chatService;
+
+    private final RoomRepository roomRepository;
+    private final MeetingRepository meetingRepository;
 
     // 매칭 정보 생성
     @Transactional
@@ -70,8 +83,13 @@ public class MatchService {
             LastChatDto lastChatDto = null;
 
             if (status != MatchStatus.Surveying && status != MatchStatus.Survey_Cancelled && status != MatchStatus.Matched) {
-                roomId = roomService.getRoomId(match.getId());
-                lastChatDto = chatService.getLastChatInfo(roomId, user.getId());
+                Room room = roomRepository.findRoomByMatchId(match.getId())
+                        .orElse(null);
+
+                if (room != null) {
+                    roomId = room.getId();
+                    lastChatDto = chatService.getLastChatInfo(roomId, user.getId());
+                }
             }
 
             responses.add(MatchResponseDto.fromEntity(match, sessionId, roomId, user, lastChatDto));
@@ -106,10 +124,10 @@ public class MatchService {
         if (match.isEmpty()) {
             throw new EntityNotFoundException("매칭 정보가 없습니다. matchId=" + matchId);
         } else {
-            Match targetMatch = match.get();
 
+            Match targetMatch = match.get();
             targetMatch.updateStatus(status);
-            matchRepository.save(targetMatch);
+
             if(status == MatchStatus.Completed){
                 userActionLogService.logUserAction(match.get().getUser1(), ActionType.COMPLETE_MATCH);
                 userActionLogService.logUserAction(match.get().getUser2(), ActionType.COMPLETE_MATCH);
@@ -176,5 +194,36 @@ public class MatchService {
                 .anyMatch(match -> activeStatus.contains(match.getStatus()));
 
         return !hasActiveMatch;
+    }
+
+    @Scheduled(cron = "0 * * * * *")
+    @Transactional
+    public void checkRoomTimeAndDeactivate() {
+        log.info("Room Time Check and Match Status Update Started");
+        List<Room> rooms = roomRepository.findAllByStatusAndDeactivationTimeBefore(RoomStatus.Activate, LocalDateTime.now());
+
+        for (Room room : rooms) {
+            Match match = room.getMatch();
+
+            if (match.getStatus() == MatchStatus.Chatting) {
+                updateMatchStatus(match.getId(), MatchStatus.Chat_Cancelled);
+            } else if (match.getStatus() == MatchStatus.Meeting) {
+                // Null-safe하게 미팅 정보 조회 및 상태 확인
+                Meeting meeting = meetingRepository.findByMatch(match);
+                if (meeting.getStatus() == MeetingStatus.ACCEPTED) {
+                    updateMatchStatus(match.getId(), MatchStatus.Reviewing);
+                } else {
+                    updateMatchStatus(match.getId(), MatchStatus.Chat_Cancelled);
+                }
+            } else {
+                // 예기치 않은 상태에 대한 처리 (예: 로깅)
+                log.warn("Room deactivation schedule: Unexpected match status '{}' for matchId {}", match.getStatus(), match.getId());
+                // 필요하다면 기본 상태로 변경
+                updateMatchStatus(match.getId(), MatchStatus.Reviewing);
+            }
+
+            room.updateStatus(RoomStatus.Deactivate);
+            // roomRepository.save(room); // 더티 체킹으로 자동 반영
+        }
     }
 }
