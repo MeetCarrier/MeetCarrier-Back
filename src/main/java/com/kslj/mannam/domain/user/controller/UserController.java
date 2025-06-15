@@ -1,5 +1,6 @@
 package com.kslj.mannam.domain.user.controller;
 
+import com.kslj.mannam.domain.user.dto.MyInfoResponseDto;
 import com.kslj.mannam.domain.user.dto.UpdateUserRequestDto;
 import com.kslj.mannam.domain.user.dto.UserResponseDto;
 import com.kslj.mannam.domain.user.entity.User;
@@ -47,7 +48,7 @@ public class UserController {
         userService.inspectUserDetails(userDetails);
         User user = userService.getUserById(userDetails.getId());
 
-        return ResponseEntity.ok(UserResponseDto.fromEntity(user));
+        return ResponseEntity.ok(MyInfoResponseDto.fromEntity(user));
     }
 
     @GetMapping("/{userId}")

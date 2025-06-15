@@ -4,12 +4,12 @@ import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.enums.Gender;
 import com.kslj.mannam.domain.user.enums.SocialType;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Data
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserResponseDto {

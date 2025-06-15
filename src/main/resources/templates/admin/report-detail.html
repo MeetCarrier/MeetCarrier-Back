@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>관리자 - 신고 상세</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; max-width: 800px; }
+        .report-box, .reply-box { border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 5px; }
+        h2 { border-bottom: 2px solid #f2f2f2; padding-bottom: 10px; }
+        dt { font-weight: bold; margin-top: 10px; }
+        dd { margin-left: 0; margin-bottom: 10px; padding: 10px; background-color: #f9f9f9; border-radius: 3px; }
+        textarea { width: 95%; height: 150px; padding: 10px; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer; border-radius: 5px; }
+        button:hover { background-color: #0056b3; }
+        .back-link { display: inline-block; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+<a href="/admin/reports" class="back-link">&laquo; 목록으로 돌아가기</a>
+<h1>신고 상세 내용</h1>
+
+<div class="report-box">
+    <h2>신고 정보</h2>
+    <dl>
+        <dt>신고 ID</dt>
+        <dd th:text="${report.id}"></dd>
+        <dt>신고자 ID</dt>
+        <dd th:text="${report.reporterId}"></dd>
+        <dt>신고 대상 ID (User 신고 시)</dt>
+        <dd th:text="${report.targetUserId ?: 'N/A'}"></dd>
+        <dt>신고 유형 / 상태</dt>
+        <dd th:text="|${report.reportType} / ${report.reportStatus}|"></dd>
+        <dt>신고 내용</dt>
+        <dd style="white-space: pre-wrap;" th:text="${report.reportContent}"></dd>
+        <dt>상세 설명</dt>
+        <dd style="white-space: pre-wrap;" th:text="${report.reportDescription}"></dd>
+    </dl>
+</div>
+
+<div class="reply-box" th:if="${report.reportStatus != T(com.kslj.mannam.domain.report.enums.ReportStatus).Processed}">
+    <h2>답변 등록</h2>
+    <form id="replyForm" th:attr="data-report-id=${report.id}">
+        <textarea name="content" placeholder="답변 내용을 입력하세요..." required></textarea><br><br>
+        <button type="submit">답변 제출</button>
+    </form>
+</div>
+
+<div class="reply-box" th:if="${report.reportStatus == T(com.kslj.mannam.domain.report.enums.ReportStatus).Processed}">
+    <h2>처리 완료된 신고</h2>
+    <p>이 신고는 이미 답변이 완료되었습니다.</p>
+</div>
+
+<script>
+    document.getElementById('replyForm').addEventListener('submit', function(event) {
+        // 폼의 기본 제출 동작(페이지 새로고침)을 막습니다.
+        event.preventDefault();
+
+        const form = event.target;
+        const reportId = form.getAttribute('data-report-id');
+        const content = form.querySelector('textarea[name="content"]').value;
+
+        if (!content.trim()) {
+            alert('답변 내용을 입력해주세요.');
+            return;
+        }
+
+        const data = {
+            content: content
+        };
+
+        // Fetch API를 사용하여 서버에 POST 요청을 보냅니다.
+        fetch(`/api/reply/${reportId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.text(); // 성공 시 응답 텍스트를 받습니다.
+                }
+                throw new Error('답변 등록에 실패했습니다.');
+            })
+            .then(data => {
+                alert('답변이 성공적으로 등록되었습니다.');
+                // 성공하면 신고 목록 페이지로 리다이렉트합니다.
+                window.location.href = '/admin/reports';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.message);
+            });
+    });
+</script>
+</body>
+</html>

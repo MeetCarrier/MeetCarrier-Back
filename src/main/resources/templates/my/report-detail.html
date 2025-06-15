@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>내 신고내역 상세</title>
+  <style>
+    body { font-family: sans-serif; margin: 40px; max-width: 800px; }
+    .box { border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 5px; }
+    .report-box { background-color: #f9f9f9; }
+    .reply-box { background-color: #eef7ff; }
+    h2 { border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+    dt { font-weight: bold; margin-top: 10px; }
+    dd { margin-left: 0; margin-bottom: 10px; white-space: pre-wrap; }
+    .pending { color: #888; }
+    .back-link { display: inline-block; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+<a href="/my/reports" class="back-link">&laquo; 내 신고 목록으로</a>
+<h1>신고 처리 결과</h1>
+
+<div class="box report-box">
+  <h2>문의 내용</h2>
+  <dl>
+    <dt>신고 상태</dt>
+    <dd th:text="${report.reportStatus == T(com.kslj.mannam.domain.report.enums.ReportStatus).Processed ? '처리 완료' : '접수'}"></dd>
+    <dt>신고 내용</dt>
+    <dd th:text="${report.reportContent}"></dd>
+  </dl>
+</div>
+
+<div class="box reply-box" th:if="${report.replyContent != null}">
+  <h2>관리자 답변</h2>
+  <dl>
+    <dt>답변 일시</dt>
+    <dd th:text="${#temporals.format(report.repliedAt, 'yyyy-MM-dd HH:mm')}"></dd>
+    <dt>답변 내용</dt>
+    <dd th:text="${report.replyContent}"></dd>
+  </dl>
+</div>
+
+<div class="box pending" th:if="${report.replyContent == null}">
+  <h2>처리 중</h2>
+  <p>문의 내용을 확인 중입니다. 빠른 시일 내에 답변드리겠습니다.</p>
+</div>
+
+</body>
+</html>

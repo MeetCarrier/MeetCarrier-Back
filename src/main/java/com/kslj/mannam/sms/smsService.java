@@ -1,6 +1,8 @@
 package com.kslj.mannam.sms;
 
+import com.kslj.mannam.domain.user.dto.UpdateUserRequestDto;
 import com.kslj.mannam.domain.user.service.UserService;
+import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import com.kslj.mannam.redis.RedisUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +49,7 @@ public class smsService {
     }
 
     // Redis에서 인증번호 조회 및 검증
-    public String verifySmsCode(String userPhone, String inputCode) {
+    public String verifySmsCode(String userPhone, String inputCode, UserDetailsImpl userDetails) {
         String savedCode = (String) redisUtils.getData("sms:" + userPhone).get();
 
         if (savedCode == null) {
@@ -56,6 +58,7 @@ public class smsService {
 
         if (inputCode.equals(savedCode)) {
             redisUtils.deleteData("sms:" + userPhone);
+            userService.updateUser(userDetails, UpdateUserRequestDto.builder().phone(userPhone).build());
             return "SUCCESS";
         } else {
             return "FAIL";

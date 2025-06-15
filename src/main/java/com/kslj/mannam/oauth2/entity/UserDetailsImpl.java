@@ -4,10 +4,11 @@ import com.kslj.mannam.domain.user.entity.User;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
 
 @Getter
 @RequiredArgsConstructor
@@ -25,7 +26,9 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        // User 객체의 Role 정보를 기반으로 권한을 생성합니다.
+        // "ROLE_" 접두사를 붙여줘야 hasRole() 메서드가 인식합니다.
+        return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.kslj.mannam.sms;
 
+import com.kslj.mannam.domain.user.service.UserService;
+import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -10,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class smsController {
 
     private final smsService smsService;
+    private final UserService userService;
 
     @GetMapping("/api/test-sms")
     @Operation(
@@ -63,8 +67,10 @@ public class smsController {
     )
     public ResponseEntity<?> verifySms(
             @RequestParam("userPhone") String userPhone,
-            @RequestParam("smsCode") String smsCode) {
-        String result = smsService.verifySmsCode(userPhone, smsCode);
+            @RequestParam("smsCode") String smsCode,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.inspectUserDetails(userDetails);
+        String result = smsService.verifySmsCode(userPhone, smsCode, userDetails);
 
         return switch (result) {
             case "NOT_REQUESTED_OR_EXPIRED" ->

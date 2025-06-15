@@ -15,12 +15,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ReportResponseDto {
     // 신고
-    long id;
+    Long id;
     ReportType reportType;
     ReportStatus reportStatus;
     LocalDateTime reportedAt;
     String reportContent;
     String reportDescription;
-    long reporterId;
-    long targetUserId;
+    Long reporterId;
+    Long targetUserId;
+    String replyContent;
+    LocalDateTime repliedAt;
 }

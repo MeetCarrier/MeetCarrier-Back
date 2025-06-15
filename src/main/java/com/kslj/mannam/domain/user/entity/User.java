@@ -3,6 +3,7 @@ package com.kslj.mannam.domain.user.entity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kslj.mannam.domain.user.dto.UserSignUpRequestDto;
 import com.kslj.mannam.domain.user.enums.Gender;
+import com.kslj.mannam.domain.user.enums.Role;
 import com.kslj.mannam.domain.user.enums.SocialType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -77,6 +78,11 @@ public class User {
     @Builder.Default
     @Column(name = "max_matching_distance", nullable = false)
     private double maxMatchingDistance = 10;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role = Role.USER;
 
     @Override
     public boolean equals(Object o) {

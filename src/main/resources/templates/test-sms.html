@@ -18,7 +18,8 @@
     </script>
 </head>
 <body>
-
+<button onclick="loginAsTestUser()">🧪 테스트 유저로 로그인</button>
+<p id="loginStatus" style="color: green;"></p>
 <h2>📱 휴대폰 번호 입력</h2>
 <form th:action="@{/api/send-sms}" method="post" onsubmit="savePhoneNumber()">
     <label for="userPhone">휴대폰 번호:</label>
@@ -38,6 +39,24 @@
 
     <button type="submit">인증번호 확인</button>
 </form>
-
+<script>
+    function loginAsTestUser() {
+        fetch('/api/auth/test/login', {
+            method: 'POST',
+            credentials: 'include' // JSESSIONID 쿠키 저장
+        })
+            .then(res => {
+                if (res.ok) {
+                    document.getElementById('loginStatus').textContent = '✅ 테스트 유저로 로그인 성공';
+                } else {
+                    document.getElementById('loginStatus').textContent = '❌ 로그인 실패';
+                }
+            })
+            .catch(error => {
+                console.error('로그인 오류:', error);
+                document.getElementById('loginStatus').textContent = '❌ 로그인 오류 발생';
+            });
+    }
+</script>
 </body>
 </html>

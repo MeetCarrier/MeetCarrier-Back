@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>관리자 - 신고 목록</title>
+  <style>
+    body { font-family: sans-serif; margin: 40px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    tr:hover { background-color: #f5f5f5; }
+    a { text-decoration: none; color: #007bff; }
+    .status-processed { color: green; font-weight: bold; }
+    .status-registered { color: orange; font-weight: bold; }
+  </style>
+</head>
+<body>
+<h1>신고 관리</h1>
+<div th:if="${#lists.isEmpty(reports)}">
+  <p>접수된 신고가 없습니다.</p>
+</div>
+<table th:unless="${#lists.isEmpty(reports)}">
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>신고 유형</th>
+    <th>처리 상태</th>
+    <th>신고 내용</th>
+    <th>신고자</th>
+    <th>신고일</th>
+    <th>상세보기</th>
+  </tr>
+  </thead>
+  <tbody>
+  <!-- report.id -> report.reportId 로 수정 -->
+  <tr th:each="report : ${reports}">
+    <td th:text="${report.reportId}">1</td>
+    <td th:text="${report.type}">BUG</td>
+    <td>
+                     <span th:text="${report.status == T(com.kslj.mannam.domain.report.enums.ReportStatus).Processed ? '처리 완료' : '접수'}"
+                           th:class="${report.status == T(com.kslj.mannam.domain.report.enums.ReportStatus).Processed ? 'status-processed' : 'status-registered'}">
+                    </span>
+    </td>
+    <!-- DTO에 추가된 필드들도 보여주도록 수정 -->
+    <td th:text="${report.content}">신고 내용입니다.</td>
+    <td th:text="${report.reporterNickname}">신고자 닉네임</td>
+    <td th:text="${#temporals.format(report.reportedAt, 'yyyy-MM-dd HH:mm')}">2025-06-15 10:30</td>
+
+    <td><a th:href="@{/my/reports/{id}(id=${report.reportId})}">상세보기</a></td>
+  </tr>
+  </tbody>
+</table>
+</body>
+</html>
