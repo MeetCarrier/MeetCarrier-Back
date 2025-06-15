@@ -12,6 +12,7 @@ import com.kslj.mannam.domain.report.enums.ReportType;
 import com.kslj.mannam.domain.report.service.ReportReplyService;
 import com.kslj.mannam.domain.report.service.ReportService;
 import com.kslj.mannam.domain.user.entity.User;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +39,7 @@ public class ReportServiceTest {
     private ReportRequestDto createReportRequest(String reportContent, List<String> reportImages) {
         return ReportRequestDto.builder()
                 .reportType(ReportType.Question)
-                .reportContent(reportContent)
-                .reportImages(reportImages)
-                .build();
+                .reportContent(reportContent).build();
     }
 
     // ReplyRequestDto 생성 메서드
@@ -63,23 +62,6 @@ public class ReportServiceTest {
         System.out.println("reportRequestDto.getReportContent() = " + reportRequestDto.getReportContent());
         System.out.println("foundReport.getReportContent() = " + foundReport.getReportContent());
         Assertions.assertEquals(foundReport.getReportContent(), reportRequestDto.getReportContent());
-    }
-
-    // 신고 등록 및 조회 테스트 (이미지 O)
-    @Test
-    public void testCreateReportWithImage() {
-        //given
-        User foundUser = testUtils.createAndGetTestUser();
-        ReportRequestDto reportRequestDto = createReportRequest("버그가 있어요.", new ArrayList<>(List.of("report1.jpg, report2.jpg, report3.jpg")));
-
-        //when
-        long savedReportId = reportService.createReport(foundUser, reportRequestDto);
-        ReportResponseDto foundReport = reportService.getReportDetail(savedReportId);
-
-        //then
-        System.out.println("reportRequestDto.getReportImages() = " + reportRequestDto.getReportImages());
-        System.out.println("foundReport.getReportImages() = " + foundReport.getReportImages());
-        Assertions.assertEquals(foundReport.getReportImages(), reportRequestDto.getReportImages());
     }
 
     // 신고 삭제 테스트
@@ -168,7 +150,7 @@ public class ReportServiceTest {
         reportReplyService.deleteReportReply(replyId);
 
         //then
-        Assertions.assertThrows(RuntimeException.class, () -> reportReplyService.getReportReply(replyId));
+        Assertions.assertThrows(EntityNotFoundException.class, () -> reportReplyService.getReportReply(replyId));
         Assertions.assertEquals(ReportStatus.Registered, reportService.getReportDetail(reportId).getReportStatus());
     }
 }

@@ -7,6 +7,7 @@ import com.kslj.mannam.domain.assistant.entity.AssistantQuestion;
 import com.kslj.mannam.domain.assistant.repository.AssistantAnswerRepository;
 import com.kslj.mannam.domain.assistant.repository.AssistantQuestionRepository;
 import com.kslj.mannam.domain.user.entity.User;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -61,7 +62,7 @@ public class AssistantService {
             String answer = (String) response.get("answer");
 
             AssistantQuestion question = assistantQuestionRepository.findById(questionId)
-                    .orElseThrow(() -> new RuntimeException("질문을 찾을 수 없습니다. questionId=" + questionId));
+                    .orElseThrow(() -> new EntityNotFoundException("질문을 찾을 수 없습니다. questionId=" + questionId));
 
             AssistantAnswer newAnswer = AssistantAnswer.builder()
                     .content(answer)

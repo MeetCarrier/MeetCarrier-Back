@@ -7,6 +7,7 @@ import com.kslj.mannam.domain.journal.repository.JournalRepository;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.enums.ActionType;
 import com.kslj.mannam.domain.user.service.UserActionLogService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,7 +71,7 @@ public class JournalService {
     @Transactional
     public long updateJournal(Long journalId, JournalRequestDto journalRequestDto) {
         Journal journal = journalRepository.findById(journalId)
-                .orElseThrow(() -> new RuntimeException("일기를 찾을 수 없습니다. journalId = " + journalId));
+                .orElseThrow(() -> new EntityNotFoundException("일기를 찾을 수 없습니다. journalId = " + journalId));
 
         // 일기의 내용과 도장 업데이트
         journal.updateContentAndStamp(journalRequestDto.getContent(), journalRequestDto.getStamp());

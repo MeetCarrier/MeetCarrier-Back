@@ -82,7 +82,7 @@ public class ReportReplyService {
     @Transactional
     public long deleteReportReply(long replyId) {
         ReportReply reportReply = replyRepository.findById(replyId)
-                .orElseThrow(() -> new RuntimeException("답변 내역을 찾을 수 없습니다. replyId=" + replyId));
+                .orElseThrow(() -> new EntityNotFoundException("답변 내역을 찾을 수 없습니다. replyId=" + replyId));
 
         Report report = reportReply.getReport();
 

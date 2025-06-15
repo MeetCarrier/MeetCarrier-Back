@@ -5,6 +5,7 @@ import com.kslj.mannam.domain.user.dto.UserSignUpRequestDto;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.repository.UserRepository;
 import com.kslj.mannam.oauth2.entity.UserDetailsImpl;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -59,7 +60,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public User getUserById(long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("해당 사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new EntityNotFoundException("해당 사용자가 존재하지 않습니다."));
     }
 
     @Transactional(readOnly = true)
@@ -77,7 +78,7 @@ public class UserService {
     @Transactional
     public User updateUser(UserDetailsImpl userDetails, UpdateUserRequestDto dto) {
         User user = userRepository.findById(userDetails.getId())
-                .orElseThrow(() -> new RuntimeException("해당 유저를 찾을 수 없습니다"));
+                .orElseThrow(() -> new EntityNotFoundException("해당 유저를 찾을 수 없습니다"));
 
         if (dto.getNickname() != null) user.updateNickname(dto.getNickname());
         if (dto.getGender() != null) user.updateGender(dto.getGender());

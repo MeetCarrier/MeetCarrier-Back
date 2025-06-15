@@ -102,7 +102,7 @@ public class MatchService {
     @Transactional(readOnly = true)
     public Match getMatch(Long matchId) {
         return matchRepository.findById(matchId).orElseThrow(
-                () -> new RuntimeException("매칭 정보가 없습니다. matchId=" + matchId));
+                () -> new EntityNotFoundException("매칭 정보가 없습니다. matchId=" + matchId));
     }
 
     // 유저로 매칭 정보 검색
@@ -112,7 +112,7 @@ public class MatchService {
         User userB = userService.getUserById(userBId);
 
         return matchRepository.findMatchByUsers(userA, userB).orElseThrow(
-                () -> new RuntimeException("매칭 정보가 없습니다. userA=" + userA + " userB=" + userB)
+                () -> new EntityNotFoundException("매칭 정보가 없습니다. userA=" + userA + " userB=" + userB)
         );
     }
 
