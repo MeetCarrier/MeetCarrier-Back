@@ -60,7 +60,7 @@ public class BlockTest {
 
         // when
         BlockRequestDto updateDto = createBlockRequestDto("010-7484-5883", "업데이트 번호");
-        blockService.updateBlock(blockId, updateDto);
+        blockService.updateBlock(blockId, updateDto, testUser);
 
         BlockResponseDto updatedBlock = blockService.getBlocks(testUser).get(0);
 
@@ -83,7 +83,7 @@ public class BlockTest {
         for (int i=0; i<4; i++)
             blockService.createBlock(testUser, testDto);
 
-        blockService.deleteBlock(blockId);
+        blockService.deleteBlock(blockId, testUser);
         List<BlockResponseDto> blocks = blockService.getBlocks(testUser);
 
         // then

@@ -123,8 +123,10 @@ public class BlockController {
     )
     @PatchMapping("/{blockId}")
     public ResponseEntity<?> updateBlock(@RequestBody BlockRequestDto blockDto,
-                                         @PathVariable("blockId") long blockId) {
-        long updatedBlockId = blockService.updateBlock(blockId, blockDto);
+                                         @PathVariable("blockId") long blockId,
+                                         @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.inspectUserDetails(userDetails);
+        long updatedBlockId = blockService.updateBlock(blockId, blockDto, userDetails.getUser());
 
         return ResponseEntity.ok("번호 정보가 업데이트되었습니다. BlockId = " + updatedBlockId);
     }
@@ -154,9 +156,13 @@ public class BlockController {
             }
     )
     @DeleteMapping("/{blockId}")
-    public ResponseEntity<?> deleteBlock(@PathVariable("blockId") long blockId) {
-        long deletedBlockId = blockService.deleteBlock(blockId);
+    public ResponseEntity<?> deleteBlock(
+            @PathVariable("blockId") long blockId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        userService.inspectUserDetails(userDetails);
+        blockService.deleteBlock(blockId, userDetails.getUser());
 
-        return ResponseEntity.ok("번호가 삭제되었습니다. deletedBlockId = " + deletedBlockId);
+        return ResponseEntity.ok("번호가 삭제되었습니다. deletedBlockId = " + blockId);
     }
 }

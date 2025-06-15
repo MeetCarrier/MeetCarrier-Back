@@ -12,7 +12,6 @@ import com.kslj.mannam.domain.room.entity.Room;
 import com.kslj.mannam.domain.room.enums.RoomStatus;
 import com.kslj.mannam.domain.room.repository.RoomRepository;
 import com.kslj.mannam.domain.user.entity.User;
-import com.kslj.mannam.domain.user.service.UserService;
 import com.kslj.mannam.firebase.FcmTokenService;
 import com.kslj.mannam.redis.RedisUtils;
 import jakarta.persistence.EntityNotFoundException;
@@ -36,7 +35,6 @@ public class ChatService {
     private final FcmTokenService fcmTokenService;
     private final RedisUtils redisUtils;
     private final ChatPresenceService chatPresenceService;
-    private final UserService userService;
     private final SimpMessagingTemplate messagingTemplate;
 
     // 메시지 저장
@@ -303,22 +301,14 @@ public class ChatService {
     // 읽음 처리
     @Transactional
     public void markMessagesAsRead(Long currentUserId, Long roomId) {
-        User currentUser = userService.getUserById(currentUserId);
-
-        // 상대방이 읽지 않은 채팅 내역 가져오기
-        Room room = roomRepository.findById(roomId).orElseThrow();
-        List<Chat> unreadMessages = chatRepository.findByRoomAndUserIsNotAndIsReadFalse(room, currentUser);
-
-        // 읽음 처리
-        unreadMessages.forEach(chat -> chat.updateIsRead(true));
-        chatRepository.saveAll(unreadMessages);
+        chatRepository.markAsReadByRoomIdAndUserId(roomId, currentUserId);
 
         // 안 읽은 알람 개수 초기화
         String unreadCountKey = "chat:unread:" + roomId + ":" + currentUserId;
         redisUtils.deleteData(unreadCountKey);
 
         // 클라이언트에게 접속한 유저가 읽었음을 알림
-        messagingTemplate.convertAndSend("/topic/room/" + roomId + "/read", currentUser.getId());
+        messagingTemplate.convertAndSend("/topic/room/" + roomId + "/read", currentUserId);
     }
 
     // 최신 채팅 정보 조회
