@@ -61,6 +61,11 @@ public class OAuthController {
         String socialId = (String) session.getAttribute("UNREGISTERED_SOCIAL_ID");
         String provider = (String) session.getAttribute("SOCIAL_TYPE");
 
+        // socialId나 provider가 세션에 없는 경우 예외 처리
+        if (socialId == null || provider == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "세션 정보가 만료되었거나 유효하지 않습니다."));
+        }
+
         SocialType socialType = SocialType.from(provider);
 
         UserSignUpRequestDto signUpRequest = UserSignUpRequestDto.builder()
