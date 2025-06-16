@@ -104,9 +104,11 @@ public class UserService {
         return user;
     }
 
-    @CacheEvict(value = "userCache", key = "#user.id")
+    @CacheEvict(value = "userCache", key = "#userId")
     @Transactional
-    public void withdrawUser(User user) {
+    public void withdrawUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 유저를 찾을 수 없습니다. id=" + userId));
         user.withdraw(); // 탈퇴 처리
     }
 

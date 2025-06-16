@@ -114,7 +114,9 @@ public class UserController {
                                           HttpServletRequest request,
                                           HttpServletResponse response) {
         userService.inspectUserDetails(userDetails);
-        userService.withdrawUser(userDetails.getUser());
+        Long userId = userDetails.getId();
+        log.info("{} 탈퇴 요청", userId);
+        userService.withdrawUser(userId);
 
         // 세션 무효화
         request.getSession().invalidate();
