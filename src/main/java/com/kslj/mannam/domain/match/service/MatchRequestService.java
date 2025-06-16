@@ -56,18 +56,19 @@ public class MatchRequestService {
             return false;
         }
 
+        User receiver = userService.getUserById(receiverId);
+        User sender = request.getSender();
+
         // 거절 처리
         if (!isAccepted) {
             request.updateStatus(RequestStatus.REJECTED);
+            notificationService.createNotification(NotificationType.MatchRejected, sender, null);
             return false;
         }
 
         // 수락 처리
         request.updateStatus(RequestStatus.ACCEPTED);
         matchQueueManager.cancelMatching(receiverId);
-
-        User receiver = userService.getUserById(receiverId);
-        User sender = request.getSender();
 
         // 매칭 데이터 생성
         long matchId = matchService.createMatch(MatchCreateDto.builder()

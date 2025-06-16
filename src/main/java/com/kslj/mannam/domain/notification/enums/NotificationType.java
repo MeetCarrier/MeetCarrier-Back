@@ -7,6 +7,7 @@ public enum NotificationType {
     Meeting,
     Request,
     Match,
+    MatchRejected,
     InvitationRequest,
     InvitationAccepted,
     InvitationRejected,

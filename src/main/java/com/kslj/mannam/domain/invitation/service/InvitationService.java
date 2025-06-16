@@ -12,6 +12,8 @@ import com.kslj.mannam.domain.match.enums.MatchStatus;
 import com.kslj.mannam.domain.match.service.MatchService;
 import com.kslj.mannam.domain.notification.enums.NotificationType;
 import com.kslj.mannam.domain.notification.service.NotificationService;
+import com.kslj.mannam.domain.room.entity.Room;
+import com.kslj.mannam.domain.room.repository.RoomRepository;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
@@ -28,6 +30,7 @@ public class InvitationService {
     private final NotificationService notificationService;
     private final UserService userService;
     private final ChatService chatService;
+    private final RoomRepository roomRepository;
 
     // 만남 초대장 생성
     @Transactional
@@ -58,7 +61,8 @@ public class InvitationService {
 
         Invitation saved = invitationRepository.save(invitation);
 
-        notificationService.createNotification(NotificationType.InvitationRequest, receiver, null);
+        Room room = roomRepository.getRoomByMatchId(match.getId());
+        notificationService.createNotification(NotificationType.InvitationRequest, receiver, room.getId());
 
         chatService.saveChatMessageWithoutNotification(match.getId(), sender, "만남초대장이 전송되었습니다. + 버튼을 눌러 확인해보세요!");
 
@@ -98,15 +102,16 @@ public class InvitationService {
             throw new IllegalStateException("이미 처리된 초대장입니다.");
         }
 
+        Room room = roomRepository.getRoomByMatchId(match.getId());
         User sender = invitation.getSender();
         if (dto.isAccepted()) {
             invitation.accept();
             matchService.updateMatchStatus(dto.getMatchId(), MatchStatus.Meeting);
-            notificationService.createNotification(NotificationType.InvitationAccepted, sender, null);
+            notificationService.createNotification(NotificationType.InvitationAccepted, sender, room.getId());
             chatService.saveChatMessageWithoutNotification(match.getId(), sender, "만남 초대장이 수락되었어요! 만남 일정을 정해보세요!");
         } else {
             invitation.reject();
-            notificationService.createNotification(NotificationType.InvitationRejected, sender, null);
+            notificationService.createNotification(NotificationType.InvitationRejected, sender, room.getId());
             chatService.saveChatMessageWithoutNotification(match.getId(), sender, "아직 만날 준비가 안 됐나 봐요! 조금 더 천천히 다가가 봐요!");
         }
     }

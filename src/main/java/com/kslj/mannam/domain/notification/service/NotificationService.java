@@ -64,6 +64,7 @@ public class NotificationService {
             case Meeting -> "만남 일정 알림";
             case Request -> "매칭 요청";
             case Match -> "매칭 성사";
+            case MatchRejected -> "매칭 요청 거절";
             case InvitationRequest -> "만남 초대장";
             case InvitationAccepted -> "초대장 수락";
             case InvitationRejected -> "초대장 거절";
@@ -78,6 +79,7 @@ public class NotificationService {
             case Meeting -> "내일 약속 있는거 기억하시죠? 준비 잘 하셔서 좋은 시간 보내시길 바래요!";
             case Request -> "어떤 분이 매칭 요청을 보냈어요!";
             case Match -> "매칭이 성사되었어요! 매칭 목록으로 가셔서 확인해보세요!";
+            case MatchRejected -> "상대방이 매칭 요절을 거절했어요...";
             case InvitationRequest -> "만남 초대장을 전송했어요!";
             case InvitationAccepted -> "상대방이 만남 초대장을 수락했어요! 만남 일정을 정해보세요!";
             case InvitationRejected -> "상대방이 만남 초대장을 거절했어요...";
@@ -91,7 +93,7 @@ public class NotificationService {
             case Journal, Meeting -> "https://www.mannamdeliveries.link/Calendar";
             case Request, MeetingAccepted, MeetingRejected -> "https://www.mannamdeliveries.link/notifications";
             case Match -> "https://www.mannamdeliveries.link/ChatList";
-            case InvitationRequest, InvitationAccepted, InvitationRejected -> "https://www.mannamdeliveries.link/";
+            default -> "https://www.mannamdeliveries.link/";
         };
 
         Notification newNotification = Notification.builder()

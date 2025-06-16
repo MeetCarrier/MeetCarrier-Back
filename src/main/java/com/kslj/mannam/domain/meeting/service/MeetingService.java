@@ -139,13 +139,13 @@ public class MeetingService {
 
         meeting.confirm();
 
-        // 알림 전송
-        notificationService.createNotification(NotificationType.MeetingAccepted, match.getUser1(), null);
-        notificationService.createNotification(NotificationType.MeetingAccepted, match.getUser2(), null);
-
         // 채팅방 종료 시간 갱신
         Room room = roomRepository.getRoomByMatchId(match.getId());
         room.updateDeactivationTime(meeting.getDate().plusHours(24));
+
+        // 알림 전송
+        notificationService.createNotification(NotificationType.MeetingAccepted, match.getUser1(), room.getId());
+        notificationService.createNotification(NotificationType.MeetingAccepted, match.getUser2(), room.getId());
 
         // 채팅방에 알림
         chatService.saveChatMessageWithoutNotification(match.getId(), currentUser, "만남 일정이 확정되었어요!");
@@ -170,8 +170,9 @@ public class MeetingService {
         meeting.reject();
 
         // 알림 전송
+        Room room = roomRepository.getRoomByMatchId(match.getId());
         User receiver = getOtherUser(currentUser, meeting);
-        notificationService.createNotification(NotificationType.MeetingRejected, receiver, null);
+        notificationService.createNotification(NotificationType.MeetingRejected, receiver, room.getId());
 
         // 채팅방에 알림
         chatService.saveChatMessageWithoutNotification(match.getId(), currentUser, "만남 일정이 거절되었어요... 다시 한 번 일정을 조율해보세요!");
