@@ -1,6 +1,5 @@
 package com.kslj.mannam.domain.assistant.controller;
 
-import com.kslj.mannam.domain.assistant.dto.AssistantDataDto;
 import com.kslj.mannam.domain.assistant.dto.AssistantQuestionDto;
 import com.kslj.mannam.domain.assistant.dto.AssistantResponseDto;
 import com.kslj.mannam.domain.assistant.service.AssistantService;
@@ -18,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -26,7 +24,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.nio.file.AccessDeniedException;
-import java.time.LocalDateTime;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -37,7 +34,6 @@ public class AssistantController {
 
     private final AssistantService assistantService;
     private final UserService userService;
-    private final SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/api/assistant/send")
     public void sendQuestion(SimpMessageHeaderAccessor headerAccessor, @Payload AssistantQuestionDto dto) throws AccessDeniedException {
@@ -54,14 +50,6 @@ public class AssistantController {
 
         // 질문 저장
         assistantService.createQuestionAndSendToAI(sender, dto.getContent());
-
-        AssistantDataDto questionDto = AssistantDataDto.builder()
-                .content(dto.getContent())
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        // AI 비서 채팅방에 표시
-        messagingTemplate.convertAndSend("/topic/assistant/" + sender.getId(), questionDto);
     }
 
     @GetMapping
