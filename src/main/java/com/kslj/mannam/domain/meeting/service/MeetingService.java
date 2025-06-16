@@ -96,8 +96,8 @@ public class MeetingService {
             throw new IllegalStateException("확정된 약속만 수정할 수 있습니다.");
         }
 
-        if(dto.getDate() != null && dto.getLocation() != null) {
-            meeting.updateSchedule(dto.getDate(), dto.getLocation());
+        if(dto.getDate() != null) {
+            meeting.updateDate(dto.getDate());
 
             Match match = meeting.getMatch();
 
@@ -106,6 +106,9 @@ public class MeetingService {
             room.updateDeactivationTime(meeting.getDate().plusHours(24));
 
             chatService.saveChatMessageWithoutNotification(match.getId(), user, "만남 일정이 변경되었어요! 확인해보세요!");
+        }
+        if(dto.getLocation() != null) {
+            meeting.updateLocation(dto.getLocation());
         }
         if(dto.getNote() != null) meeting.updateNote(dto.getNote());
     }

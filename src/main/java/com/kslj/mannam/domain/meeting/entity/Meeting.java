@@ -43,6 +43,7 @@ public class Meeting {
     @Column(nullable = false)
     private Long senderId;
 
+    public void updateLocation(String location) {this.location = location;}
     public void updateNote(String note) {
         this.note = note;
     }
@@ -64,7 +65,7 @@ public class Meeting {
     }
 
     // 확정된 일정 수정 (최대 3회)
-    public void updateSchedule(LocalDateTime date, String location) {
+    public void updateDate(LocalDateTime date) {
         if (this.status != MeetingStatus.ACCEPTED)
             throw new IllegalStateException("확정된 일정만 수정할 수 있습니다.");
 
@@ -73,7 +74,6 @@ public class Meeting {
         }
 
         this.date = date;
-        this.location = location;
         this.updateCount++;
     }
 }
