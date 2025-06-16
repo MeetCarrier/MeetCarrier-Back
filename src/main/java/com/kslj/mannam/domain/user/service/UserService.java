@@ -69,7 +69,7 @@ public class UserService {
     }
 
     public Boolean checkNickDuplication(String nickname) {
-        Optional<User> optionalUser = userRepository.findByNicknameAndDeleted(nickname, false);
+        Optional<User> optionalUser = userRepository.findByNicknameAndIsDeletedFalse(nickname);
 
         return optionalUser.isPresent();
     }
