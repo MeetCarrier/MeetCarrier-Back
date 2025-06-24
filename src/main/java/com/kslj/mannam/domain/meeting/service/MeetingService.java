@@ -55,7 +55,7 @@ public class MeetingService {
                 .note(requestDto.getNote())
                 .match(match)
                 .senderId(sender.getId())
-                .status(MeetingStatus.ACCEPTED)
+                .status(MeetingStatus.PENDING)
                 .build();
 
         Meeting savedMeeting = meetingRepository.save(newMeeting);
