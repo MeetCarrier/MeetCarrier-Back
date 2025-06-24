@@ -22,6 +22,7 @@ public class MeetingResponseDto {
     String note;
     MeetingStatus status;
     int updateCount;
+    Long senderId;
 
     public static MeetingResponseDto fromEntity(Meeting meeting, User user) {
         return MeetingResponseDto.builder()
@@ -32,6 +33,7 @@ public class MeetingResponseDto {
                 .note(meeting.getNote())
                 .status(meeting.getStatus())
                 .updateCount(3 - meeting.getUpdateCount())
+                .senderId(meeting.getSenderId())
                 .build();
     }
 }
