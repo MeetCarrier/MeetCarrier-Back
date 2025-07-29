@@ -69,6 +69,7 @@ public class MatchRequestService {
         // 수락 처리
         request.updateStatus(RequestStatus.ACCEPTED);
         matchQueueManager.cancelMatching(receiverId);
+        matchQueueManager.cancelMatching(sender.getId());
 
         // 매칭 데이터 생성
         long matchId = matchService.createMatch(MatchCreateDto.builder()
