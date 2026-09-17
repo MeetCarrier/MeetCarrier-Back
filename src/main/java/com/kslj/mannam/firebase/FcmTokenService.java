@@ -55,43 +55,44 @@ public class FcmTokenService {
     }
 
     @Async
-    @Transactional
     public void sendPushToUserAsync(User user, String title, String body, String url, String chatRoomId) {
         try {
-            List<FcmToken> tokens = fcmTokenRepository.findAllByUser(user);
-
-            if (tokens.isEmpty()) {
-                // 토큰이 없으면 로그만 남기고 종료
-                log.info("No FCM token found for user: {}. Skipping async push.", user.getId());
-                return; // ❗️ 예외를 던지지 않고 메소드 종료
-            }
-
-            for (FcmToken tokenEntity : tokens) {
-                String token = tokenEntity.getToken();
-                try {
-                    Message.Builder messageBuilder = Message.builder()
-                            .setToken(token)
-                            .putData("title", title)
-                            .putData("body", body)
-                            .putData("url", url);
-
-                    if (chatRoomId != null && !chatRoomId.isEmpty()) {
-                        messageBuilder.putData("chatRoomId", chatRoomId);
-                    }
-
-                    Message message = messageBuilder.build();
-                    FirebaseMessaging.getInstance().send(message);
-                    log.info("Async push sent successfully To: {} for user: {}", token, user.getId());
-
-                } catch (Exception e) {
-                    // 개별 토큰 전송 실패가 전체 로직에 영향을 주지 않도록 내부에서 처리
-                    log.warn("Failed to send message to a single token: {}. Error: {}", token, e.getMessage());
-                    fcmTokenRepository.delete(tokenEntity);
-                }
-            }
+            sendPushToUser(user, title, body, url, chatRoomId);
         } catch (Exception e) {
             // 전체 로직 수행 중 예측하지 못한 에러 발생 시 로그
             log.error("An unexpected error occurred while sending push notifications asynchronously for user: {}", user.getId(), e);
+        }
+    }
+
+    public void sendPushToUser(User user, String title, String body, String url, String chatRoomId) {
+        List<FcmToken> tokens = fcmTokenRepository.findAllByUser(user);
+        if (tokens.isEmpty()) {
+            log.info("No FCM token found for user: {}. Skipping push.", user.getId());
+            return;
+        }
+
+        int successCount = 0;
+        Exception lastFailure = null;
+        for (FcmToken tokenEntity : tokens) {
+            try {
+                Message.Builder messageBuilder = Message.builder()
+                        .setToken(tokenEntity.getToken())
+                        .putData("title", title)
+                        .putData("body", body)
+                        .putData("url", url);
+                if (chatRoomId != null && !chatRoomId.isEmpty()) {
+                    messageBuilder.putData("chatRoomId", chatRoomId);
+                }
+                FirebaseMessaging.getInstance().send(messageBuilder.build());
+                successCount++;
+            } catch (Exception e) {
+                lastFailure = e;
+                log.warn("Failed to send message to token: {}. Error: {}", tokenEntity.getToken(), e.getMessage());
+                fcmTokenRepository.delete(tokenEntity);
+            }
+        }
+        if (successCount == 0 && lastFailure != null) {
+            throw new IllegalStateException("모든 FCM 토큰 전송에 실패했습니다.", lastFailure);
         }
     }
 }

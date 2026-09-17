@@ -2,7 +2,7 @@ package com.kslj.mannam.websocket;
 
 import com.kslj.mannam.domain.chat.service.ChatPresenceService;
 import com.kslj.mannam.domain.chat.service.ChatService;
-import com.kslj.mannam.domain.match.service.MatchQueueManager;
+import com.kslj.mannam.domain.match.service.MatchOrchestrationService;
 import com.kslj.mannam.domain.match.service.MatchService;
 import com.kslj.mannam.redis.RedisUtils;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class WebSocketEventListener {
 
-    private final MatchQueueManager queueManager;
+    private final MatchOrchestrationService matchOrchestrationService;
     private final ChatPresenceService chatPresenceService;
     private final ChatService chatService;
     private final MatchService matchService;
@@ -113,8 +113,8 @@ public class WebSocketEventListener {
                 long userId = Long.parseLong(userIdStr);
 
                 // 1. 매칭 큐에 있다면 매칭 취소 처리
-                if (queueManager.isUserInQueue(userId)) {
-                    queueManager.cancelMatching(userId);
+                if (matchOrchestrationService.isUserInQueue(userId)) {
+                    matchOrchestrationService.cancelMatching(userId);
                     log.info("❌ 매칭 중인 유저 {} 연결 종료 -> 매칭 취소", userId);
                 }
 

@@ -77,7 +77,8 @@ public class MatchService {
         }
 
         for (Match match : matches) {
-            Long sessionId = surveySessionRepository.findSurveySessionByMatchId(match.getId()).getId();
+            var surveySession = surveySessionRepository.findSurveySessionByMatchId(match.getId());
+            Long sessionId = surveySession == null ? null : surveySession.getId();
             Long roomId = null;
             MatchStatus status = match.getStatus();
             LastChatDto lastChatDto = null;
@@ -181,6 +182,7 @@ public class MatchService {
     public boolean canRequestNewMatch(User user) {
         // 진행 중으로 간주할 매칭 상태
         Set<MatchStatus> activeStatus = Set.of(
+                MatchStatus.Matched,
                 MatchStatus.Surveying,
                 MatchStatus.Chatting,
                 MatchStatus.Meeting

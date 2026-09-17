@@ -21,7 +21,7 @@ public class MatchResponseDto {
     LocalDateTime matchedAt;
     MatchStatus status;
     boolean agreed;
-    long sessionId;
+    Long sessionId;
     Long roomId;
     Long user1Id;
     String user1Nickname;

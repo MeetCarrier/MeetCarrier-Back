@@ -1,9 +1,16 @@
 package com.kslj.mannam.rabbimq;
 
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.QueueBuilder;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.retry.RejectAndDontRequeueRecoverer;
+import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 
 @Configuration
 public class RabbitMQConfig {
@@ -24,15 +31,44 @@ public class RabbitMQConfig {
         return new Queue("ai_request_queue", true);
     }
 
-    // 매칭 큐
+    // 순차 매칭 요청 큐
     @Bean
-    public Queue matchRequestQueue() {
-        return new Queue("match_request_queue", true);
+    public Queue matchAdmissionQueue() {
+        return QueueBuilder.durable("match_admission_queue")
+                .deadLetterExchange("")
+                .deadLetterRoutingKey("match_admission_dlq")
+                .build();
     }
 
     @Bean
-    public Queue matchResponseQueue() {
-        return new Queue("match_response_queue", true);
+    public Queue matchAdmissionDeadLetterQueue() {
+        return QueueBuilder.durable("match_admission_dlq").build();
+    }
+
+    @Bean
+    public SimpleRabbitListenerContainerFactory matchAdmissionListenerFactory(
+            ConnectionFactory connectionFactory,
+            Jackson2JsonMessageConverter messageConverter,
+            RetryOperationsInterceptor matchAdmissionRetryInterceptor,
+            @Value("${spring.rabbitmq.listener.simple.auto-startup:true}") boolean autoStartup) {
+        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+        factory.setConnectionFactory(connectionFactory);
+        factory.setMessageConverter(messageConverter);
+        factory.setConcurrentConsumers(1);
+        factory.setMaxConcurrentConsumers(1);
+        factory.setPrefetchCount(1);
+        factory.setDefaultRequeueRejected(false);
+        factory.setAdviceChain(matchAdmissionRetryInterceptor);
+        factory.setAutoStartup(autoStartup);
+        return factory;
+    }
+
+    @Bean
+    public RetryOperationsInterceptor matchAdmissionRetryInterceptor() {
+        return RetryInterceptorBuilder.stateless()
+                .maxAttempts(3)
+                .recoverer(new RejectAndDontRequeueRecoverer())
+                .build();
     }
 
     // 개인 챗봇 통신용 큐

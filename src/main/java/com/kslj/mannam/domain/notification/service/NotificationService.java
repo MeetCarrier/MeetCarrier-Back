@@ -108,6 +108,14 @@ public class NotificationService {
          fcmTokenService.sendPushToUserAsync(user, title, message, "https://www.mannamdeliveries.link", null);
     }
 
+    @Transactional
+    public void saveMatchNotificationIfAbsent(User user, Long matchId) {
+        if (!notificationRepository.existsByUserAndReferenceId(user, matchId)) {
+            saveNotification(NotificationType.Match, user, matchId,
+                    "매칭이 성사되었어요! 매칭 목록으로 가셔서 확인해보세요!");
+        }
+    }
+
     // 알림 조회 (조회한 알림은 자동으로 읽음 처리)
     @Transactional
     public List<NotificationResponseDto> getNotifications(User user) {

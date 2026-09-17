@@ -2,6 +2,7 @@ package com.kslj.mannam.domain.match.repository;
 
 import com.kslj.mannam.domain.match.entity.Match;
 import com.kslj.mannam.domain.user.entity.User;
+import com.kslj.mannam.domain.match.enums.MatchStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,4 +19,9 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     Optional<Match> findMatchByUsers(@Param("userA") User userA, @Param("userB") User userB);
 
     Match getMatchById(Long id);
+
+    @Query("select count(m) > 0 from Match m where " +
+            "(m.user1.id in :userIds or m.user2.id in :userIds) and m.status in :statuses")
+    boolean existsActiveMatchForUsers(@Param("userIds") List<Long> userIds,
+                                      @Param("statuses") List<MatchStatus> statuses);
 }

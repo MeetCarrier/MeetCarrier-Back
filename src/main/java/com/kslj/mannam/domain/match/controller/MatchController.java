@@ -2,7 +2,7 @@ package com.kslj.mannam.domain.match.controller;
 
 import com.kslj.mannam.domain.match.dto.*;
 import com.kslj.mannam.domain.match.enums.MatchStatus;
-import com.kslj.mannam.domain.match.service.MatchQueueManager;
+import com.kslj.mannam.domain.match.service.MatchOrchestrationService;
 import com.kslj.mannam.domain.match.service.MatchService;
 import com.kslj.mannam.domain.review.dto.ReviewQueueDto;
 import com.kslj.mannam.domain.user.entity.User;
@@ -40,7 +40,7 @@ import java.util.List;
 public class MatchController {
 
     private final MatchService matchService;
-    private final MatchQueueManager matchQueueManager;
+    private final MatchOrchestrationService matchOrchestrationService;
     private final UserService userService;
 
     // 현재 유저 매칭 목록 조회
@@ -162,7 +162,7 @@ public class MatchController {
     public ResponseEntity<String> cancelMatching(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         userService.inspectUserDetails(userDetails);
         User user = userDetails.getUser();
-        boolean cancelled = matchQueueManager.cancelMatching(user.getId());
+        boolean cancelled = matchOrchestrationService.cancelMatching(user.getId());
 
         if (cancelled) {
             return ResponseEntity.ok("매칭 요청이 취소되었습니다.");
@@ -174,7 +174,7 @@ public class MatchController {
     @Operation(
             summary = "새 매칭 요청 가능 여부 조회",
             description = "현재 로그인한 사용자가 새로운 매칭을 요청할 수 있는 상태인지 확인합니다.<br>" +
-                    "진행 중인 매칭(Surveying, Chatting, Meeting 상태)이 있으면 false를, 없으면 true를 반환합니다.",
+                    "진행 중인 매칭(Matched, Surveying, Chatting, Meeting 상태)이 있으면 false를, 없으면 true를 반환합니다.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -214,8 +214,7 @@ public class MatchController {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         User user = userDetails.getUser();
 
-        matchQueueManager.registerUserSession(user.getId());  // 세션 등록
-        matchQueueManager.addNewUser(user);    // RabbitMQ로 요청 전송
+        matchOrchestrationService.addNewUser(user);    // RabbitMQ로 요청 전송
     }
 
     // 대기 유저 추가 (테스트용)
@@ -235,7 +234,7 @@ public class MatchController {
                 .reviews(new ArrayList<>())
                 .build();
 
-        matchQueueManager.addWaitingUserDirectly(waitingUser1);
+        matchOrchestrationService.addWaitingUserDirectly(waitingUser1);
 
         MatchQueueRequestDto waitingUser2 = MatchQueueRequestDto.builder()
                 .userId(2L)
@@ -255,7 +254,7 @@ public class MatchController {
                 ))
                 .build();
 
-        matchQueueManager.addWaitingUserDirectly(waitingUser2);
+        matchOrchestrationService.addWaitingUserDirectly(waitingUser2);
 
         MatchQueueRequestDto waitingUser3 = MatchQueueRequestDto.builder()
                 .userId(3L)
@@ -273,7 +272,7 @@ public class MatchController {
                 ))
                 .build();
 
-        matchQueueManager.addWaitingUserDirectly(waitingUser3);
+        matchOrchestrationService.addWaitingUserDirectly(waitingUser3);
 
         return ResponseEntity.ok("대기 유저 추가 완료");
     }
@@ -301,7 +300,7 @@ public class MatchController {
     // 추가: 현재 대기 큐 상태 조회
     @GetMapping("/queue-status")
     public ResponseEntity<List<WaitingUserInfoDto>> getQueueStatus() {
-        List<WaitingUserInfoDto> queueStatus = matchQueueManager.getWaitingUsers();
+        List<WaitingUserInfoDto> queueStatus = matchOrchestrationService.getWaitingUsers();
         return ResponseEntity.ok(queueStatus);
     }
 }

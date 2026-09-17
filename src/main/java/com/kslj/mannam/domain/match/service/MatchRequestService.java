@@ -1,18 +1,19 @@
 package com.kslj.mannam.domain.match.service;
 
-import com.kslj.mannam.domain.match.dto.MatchCreateDto;
+import com.kslj.mannam.domain.match.dto.MatchFinalizationResult;
 import com.kslj.mannam.domain.match.entity.MatchRequest;
 import com.kslj.mannam.domain.match.enums.RequestStatus;
 import com.kslj.mannam.domain.match.repository.MatchRequestRepository;
 import com.kslj.mannam.domain.notification.enums.NotificationType;
 import com.kslj.mannam.domain.notification.service.NotificationService;
-import com.kslj.mannam.domain.survey.service.SurveyService;
 import com.kslj.mannam.domain.user.entity.User;
 import com.kslj.mannam.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Slf4j
 @Service
@@ -22,9 +23,8 @@ public class MatchRequestService {
     private final MatchRequestRepository matchRequestRepository;
     private final NotificationService notificationService;
     private final UserService userService;
-    private final MatchService matchService;
-    private final SurveyService surveyService;
-    private final MatchQueueManager matchQueueManager;
+    private final MatchFinalizationService finalizationService;
+    private final MatchOrchestrationService matchOrchestrationService;
 
     @Transactional
     public void createMatchRequest(long senderId, long receiverId) {
@@ -45,16 +45,14 @@ public class MatchRequestService {
 
     @Transactional
     public boolean processRespond(long receiverId, long requestId, boolean isAccepted) {
-        MatchRequest request = matchRequestRepository.findById(requestId).orElseThrow();
+        MatchRequest request = matchRequestRepository.findByIdForUpdate(requestId).orElseThrow();
 
         if (request.getReceiver().getId() != receiverId) {
             throw new IllegalStateException("해당 유저에게 전달된 매칭 요청이 아닙니다.");
         }
         log.info("receiverId={}, requestId={}, isAccepted={}", receiverId, requestId, isAccepted);
 
-        if (request.getStatus() != RequestStatus.PENDING) {
-            return false;
-        }
+        if (request.getStatus() != RequestStatus.PENDING) return request.getStatus() == RequestStatus.ACCEPTED;
 
         User receiver = userService.getUserById(receiverId);
         User sender = request.getSender();
@@ -67,25 +65,18 @@ public class MatchRequestService {
         }
 
         // 수락 처리
+        MatchFinalizationResult result = finalizationService.finalizeMatch(receiver.getId(), sender.getId(), 0.0);
+        if (!result.isSuccess()) {
+            request.updateStatus(RequestStatus.EXPIRED);
+            return false;
+        }
         request.updateStatus(RequestStatus.ACCEPTED);
-        matchQueueManager.cancelMatching(receiverId);
-        matchQueueManager.cancelMatching(sender.getId());
-
-        // 매칭 데이터 생성
-        long matchId = matchService.createMatch(MatchCreateDto.builder()
-                .user1Id(receiver.getId())
-                .user2Id(sender.getId())
-                .build()
-        );
-
-        // 설문지 생성
-        long sessionId = surveyService.createSurveySession(matchId);
-        surveyService.createSurveyQuestions(matchId, sessionId);
-
-        // 알림 등록
-        notificationService.createNotification(NotificationType.Match, receiver, matchId);
-        notificationService.createNotification(NotificationType.Match, sender, matchId);
-
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                matchOrchestrationService.completeExternalMatch(receiver.getId(), sender.getId());
+            }
+        });
         return true;
     }
 }
