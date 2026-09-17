@@ -2,37 +2,127 @@ package com.kslj.mannam.domain.chat.service;
 
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class ChatPresenceService {
 
-    // 각 채팅방에 접속 중인 유저 저장
-    private final Map<Long, Set<Long>> activeUserMap = new ConcurrentHashMap<>();
+    private final Map<Long, Map<Long, Set<SubscriptionKey>>> subscriptionsByRoom = new HashMap<>();
+    private final Map<String, Set<SubscriptionRef>> subscriptionsBySession = new HashMap<>();
 
-    // 채팅방에 유저 입장
-    public void userJoined(Long roomId, Long userId) {
-        activeUserMap.computeIfAbsent(roomId, k -> ConcurrentHashMap.newKeySet()).add(userId);
+    public synchronized void addSubscription(
+            Long roomId,
+            Long userId,
+            String sessionId,
+            String subscriptionId
+    ) {
+        if (roomId == null || userId == null || sessionId == null || subscriptionId == null) {
+            return;
+        }
+
+        removeSubscriptionInternal(sessionId, subscriptionId);
+
+        SubscriptionKey subscriptionKey = new SubscriptionKey(sessionId, subscriptionId);
+        subscriptionsByRoom
+                .computeIfAbsent(roomId, ignored -> new HashMap<>())
+                .computeIfAbsent(userId, ignored -> new HashSet<>())
+                .add(subscriptionKey);
+
+        subscriptionsBySession
+                .computeIfAbsent(sessionId, ignored -> new HashSet<>())
+                .add(new SubscriptionRef(roomId, userId, subscriptionId));
     }
 
-    // 채팅방에서 유저 퇴장
-    public void userLeft(Long roomId, Long userId) {
-        if (activeUserMap.containsKey(roomId)) {
-            activeUserMap.get(roomId).remove(userId);
-            if (activeUserMap.get(roomId).isEmpty()) {
-                activeUserMap.remove(roomId);
-            }
+    public synchronized void removeSubscription(String sessionId, String subscriptionId) {
+        if (sessionId == null || subscriptionId == null) {
+            return;
+        }
+
+        removeSubscriptionInternal(sessionId, subscriptionId);
+    }
+
+    public synchronized void removeSession(String sessionId) {
+        if (sessionId == null) {
+            return;
+        }
+
+        Set<SubscriptionRef> subscriptions = subscriptionsBySession.remove(sessionId);
+        if (subscriptions == null) {
+            return;
+        }
+
+        for (SubscriptionRef subscription : subscriptions) {
+            removeFromRoomIndex(
+                    subscription.roomId(),
+                    subscription.userId(),
+                    new SubscriptionKey(sessionId, subscription.subscriptionId())
+            );
         }
     }
 
-    // 채팅방에 유저 입장해있는지 확인
-    public boolean isUserActive(long roomId, Long userId) {
-        if (activeUserMap.get(roomId) == null) {
+    public synchronized boolean isUserActive(long roomId, Long userId) {
+        Map<Long, Set<SubscriptionKey>> users = subscriptionsByRoom.get(roomId);
+        if (users == null) {
             return false;
         }
 
-        return activeUserMap.get(roomId).contains(userId);
+        Set<SubscriptionKey> subscriptions = users.get(userId);
+        return subscriptions != null && !subscriptions.isEmpty();
+    }
+
+    private void removeSubscriptionInternal(String sessionId, String subscriptionId) {
+        Set<SubscriptionRef> sessionSubscriptions = subscriptionsBySession.get(sessionId);
+        if (sessionSubscriptions == null) {
+            return;
+        }
+
+        Set<SubscriptionRef> subscriptionsToRemove = new HashSet<>();
+        for (SubscriptionRef subscription : sessionSubscriptions) {
+            if (subscription.subscriptionId().equals(subscriptionId)) {
+                subscriptionsToRemove.add(subscription);
+            }
+        }
+
+        for (SubscriptionRef subscription : subscriptionsToRemove) {
+            sessionSubscriptions.remove(subscription);
+            removeFromRoomIndex(
+                    subscription.roomId(),
+                    subscription.userId(),
+                    new SubscriptionKey(sessionId, subscription.subscriptionId())
+            );
+        }
+
+        if (sessionSubscriptions.isEmpty()) {
+            subscriptionsBySession.remove(sessionId);
+        }
+    }
+
+    private void removeFromRoomIndex(Long roomId, Long userId, SubscriptionKey subscriptionKey) {
+        Map<Long, Set<SubscriptionKey>> users = subscriptionsByRoom.get(roomId);
+        if (users == null) {
+            return;
+        }
+
+        Set<SubscriptionKey> subscriptions = users.get(userId);
+        if (subscriptions == null) {
+            return;
+        }
+
+        subscriptions.remove(subscriptionKey);
+        if (subscriptions.isEmpty()) {
+            users.remove(userId);
+        }
+        if (users.isEmpty()) {
+            subscriptionsByRoom.remove(roomId);
+        }
+    }
+
+    private record SubscriptionKey(String sessionId, String subscriptionId) {
+    }
+
+    private record SubscriptionRef(Long roomId, Long userId, String subscriptionId) {
     }
 }

@@ -34,7 +34,7 @@ public class NotificationOutboxWorker {
             try {
                 notificationService.saveMatchNotificationIfAbsent(event.getUser(), event.getReferenceId());
                 messagingTemplate.convertAndSendToUser(String.valueOf(event.getUser().getId()),
-                        "/topic/match-notification", Map.of("matchId", event.getReferenceId()));
+                        "/queue/match-notification", Map.of("matchId", event.getReferenceId()));
                 fcmTokenService.sendPushToUser(event.getUser(), "매칭 성사",
                         "매칭이 성사되었어요! 매칭 목록에서 확인해보세요!",
                         "https://www.mannamdeliveries.link/ChatList", null);

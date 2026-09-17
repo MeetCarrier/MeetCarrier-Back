@@ -18,6 +18,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +42,7 @@ public class ChatService {
     @Transactional
     public ChatResponseDto saveChatMessage(ChatMessageDto dto, long roomId, User sender, boolean isChatbot) {
         Room room = roomRepository.findById(roomId).orElseThrow();
+        requireRoomParticipant(room, sender);
         Match match = room.getMatch();
 
         User receiver;
@@ -103,7 +105,8 @@ public class ChatService {
                     .lastMessageAt(savedChat.getSentAt())
                     .unreadCount(0) // 보낸 사람은 항상 읽음 상태
                     .build();
-            messagingTemplate.convertAndSend("/topic/user/" + sender.getId() + "/chats", lastChatForSender);
+            messagingTemplate.convertAndSendToUser(
+                    String.valueOf(sender.getId()), "/queue/chats", lastChatForSender);
 
             if (!isReceiverOnline) {
                 // Redis에 안 읽은 메시지 개수 증가
@@ -125,7 +128,8 @@ public class ChatService {
                         .lastMessageAt(savedChat.getSentAt())
                         .unreadCount(unreadCount.intValue())
                         .build();
-                messagingTemplate.convertAndSend("/topic/user/" + receiver.getId() + "/chats", lastChatInfo);
+                messagingTemplate.convertAndSendToUser(
+                        String.valueOf(receiver.getId()), "/queue/chats", lastChatInfo);
             } else {
                 // 최신 메시지 정보 전송
                 LastChatDto lastChatForReceiverOnline = LastChatDto.builder()
@@ -134,7 +138,8 @@ public class ChatService {
                         .lastMessageAt(savedChat.getSentAt())
                         .unreadCount(0) // 온라인 상태이므로 안 읽은 개수는 0
                         .build();
-                messagingTemplate.convertAndSend("/topic/user/" + receiver.getId() + "/chats", lastChatForReceiverOnline);
+                messagingTemplate.convertAndSendToUser(
+                        String.valueOf(receiver.getId()), "/queue/chats", lastChatForReceiverOnline);
             }
         }
 
@@ -147,6 +152,7 @@ public class ChatService {
 
         Room room = roomRepository.findRoomByMatchId(matchId)
                 .orElseThrow(() -> new EntityNotFoundException("채팅방을 찾을 수 없습니다. matchId = " + matchId));
+        requireRoomParticipant(room, sender);
         long roomId = room.getId();
         Match match = room.getMatch();
 
@@ -205,7 +211,8 @@ public class ChatService {
                 .lastMessageAt(savedChat.getSentAt())
                 .unreadCount(0) // 보낸 사람은 항상 읽음 상태
                 .build();
-        messagingTemplate.convertAndSend("/topic/user/" + sender.getId() + "/chats", lastChatForSender);
+        messagingTemplate.convertAndSendToUser(
+                String.valueOf(sender.getId()), "/queue/chats", lastChatForSender);
 
         if (!isReceiverOnline) {
             // Redis에 안 읽은 메시지 개수 증가
@@ -221,7 +228,8 @@ public class ChatService {
                     .lastMessageAt(savedChat.getSentAt())
                     .unreadCount(unreadCount.intValue())
                     .build();
-            messagingTemplate.convertAndSend("/topic/user/" + receiver.getId() + "/chats", lastChatInfo);
+            messagingTemplate.convertAndSendToUser(
+                    String.valueOf(receiver.getId()), "/queue/chats", lastChatInfo);
         } else {
             // 상대방이 온라인일 경우, 최신 메시지 정보만 전송 (안 읽은 개수는 0)
             LastChatDto lastChatForReceiverOnline = LastChatDto.builder()
@@ -230,7 +238,8 @@ public class ChatService {
                     .lastMessageAt(savedChat.getSentAt())
                     .unreadCount(0)
                     .build();
-            messagingTemplate.convertAndSend("/topic/user/" + receiver.getId() + "/chats", lastChatForReceiverOnline);
+            messagingTemplate.convertAndSendToUser(
+                    String.valueOf(receiver.getId()), "/queue/chats", lastChatForReceiverOnline);
         }
     }
 
@@ -287,6 +296,7 @@ public class ChatService {
     public void leaveRoom(long roomId, User user, String reasonCodes, String customReason) {
         // 매치 정보 가져오기
         Room room = roomRepository.findById(roomId).orElseThrow();
+        requireRoomParticipant(room, user);
         Match match = room.getMatch();
 
         // 채팅 중 중단으로 상태 변경
@@ -302,6 +312,11 @@ public class ChatService {
     // 읽음 처리
     @Transactional
     public void markMessagesAsRead(Long currentUserId, Long roomId) {
+        if (currentUserId == null || roomId == null
+                || !roomRepository.existsParticipant(roomId, currentUserId)) {
+            throw new AccessDeniedException("해당 채팅방의 참여자가 아닙니다.");
+        }
+
         chatRepository.markAsReadByRoomIdAndUserId(roomId, currentUserId);
 
         // 안 읽은 알람 개수 초기화
@@ -310,6 +325,13 @@ public class ChatService {
 
         // 클라이언트에게 접속한 유저가 읽었음을 알림
         messagingTemplate.convertAndSend("/topic/room/" + roomId + "/read", currentUserId);
+    }
+
+    private void requireRoomParticipant(Room room, User user) {
+        Match match = room.getMatch();
+        if (user == null || match == null || !match.hasUser(user)) {
+            throw new AccessDeniedException("해당 채팅방의 참여자가 아닙니다.");
+        }
     }
 
     // 최신 채팅 정보 조회

@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -134,6 +135,7 @@ public class SurveyService {
     public void submitSurveyAnswer(long sessionId, List<SurveyAnswerRequestDto> answers, User user) {
         SurveySession session = surveySessionRepository.findByIdForUpdate(sessionId)
                 .orElseThrow(() -> new EntityNotFoundException("SurveySession not found: " + sessionId));
+        requireSessionParticipant(session, user);
 
         // 필요한 Question들 한 번에 조회
         List<Long> questionIds = answers.stream().map(SurveyAnswerRequestDto::getQuestionId).toList();
@@ -199,6 +201,7 @@ public class SurveyService {
     public void leaveSession(long sessionId, User user, String reasonCodes, String customReason) {
         SurveySession session = surveySessionRepository.findById(sessionId)
                 .orElseThrow(() -> new EntityNotFoundException("SurveySession not found: " + sessionId));
+        requireSessionParticipant(session, user);
 
         Match match = session.getMatch();
 
@@ -227,6 +230,13 @@ public class SurveyService {
         // 클라이언트에게 메시지 전송
         System.out.println("dto = " + dto);
         messagingTemplate.convertAndSend("/topic/survey/" + sessionId + "/complete", dto);
+    }
+
+    private void requireSessionParticipant(SurveySession session, User user) {
+        Match match = session.getMatch();
+        if (user == null || match == null || !match.hasUser(user)) {
+            throw new AccessDeniedException("해당 설문 세션의 참여자가 아닙니다.");
+        }
     }
 
     // 질문 리스트 가져오기

@@ -2,6 +2,7 @@ package com.kslj.mannam.domain.chat.controller;
 
 import com.kslj.mannam.domain.chat.dto.ChatLeaveMessageDto;
 import com.kslj.mannam.domain.chat.dto.ChatMessageDto;
+import com.kslj.mannam.domain.chat.dto.ChatReadMessageDto;
 import com.kslj.mannam.domain.chat.dto.ChatResponseDto;
 import com.kslj.mannam.domain.chat.enums.MessageType;
 import com.kslj.mannam.domain.chat.service.ChatService;
@@ -70,6 +71,22 @@ public class ChatController {
         // 채팅방 유저들에게 브로드캐스트
         messagingTemplate.convertAndSend(
                 "/topic/room/" + roomId, response);
+    }
+
+    @MessageMapping("/api/chat/read")
+    public void markMessagesAsRead(
+            SimpMessageHeaderAccessor headerAccessor,
+            @Payload ChatReadMessageDto dto
+    ) throws AccessDeniedException {
+        Authentication authentication = (Authentication) headerAccessor.getUser();
+        if (authentication == null) {
+            throw new AccessDeniedException("로그인된 유저 정보가 없습니다.");
+        }
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        User user = userDetails.getUser();
+
+        chatService.markMessagesAsRead(user.getId(), dto.getRoomId());
     }
 
     @MessageMapping("/api/chat/leave")

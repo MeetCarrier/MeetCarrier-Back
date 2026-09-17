@@ -1,8 +1,11 @@
 package com.kslj.mannam.websocket;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.security.messaging.access.intercept.AuthorizationChannelInterceptor;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -14,13 +17,25 @@ import java.util.Map;
 
 @Configuration
 @EnableWebSocketMessageBroker
+@RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+    private final BrokerDestinationGuardInterceptor brokerDestinationGuardInterceptor;
+    private final WebSocketSubscriptionAuthorizationManager subscriptionAuthorizationManager;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/topic", "/queue");    // 서버가 메시지를 전달할 수 있는 prefix
         config.setUserDestinationPrefix("/user");
         config.setApplicationDestinationPrefixes("/app");       // 서버에서 수신할 prefix
+    }
+
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(
+                brokerDestinationGuardInterceptor,
+                new AuthorizationChannelInterceptor(subscriptionAuthorizationManager)
+        );
     }
 
     @Override

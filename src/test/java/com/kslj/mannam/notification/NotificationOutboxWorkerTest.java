@@ -30,7 +30,8 @@ class NotificationOutboxWorkerTest {
         when(repository.findTop50ByStatusInAndNextAttemptAtBeforeOrderByIdAsc(any(), any(LocalDateTime.class)))
                 .thenReturn(List.of(event));
         doThrow(new IllegalStateException("websocket unavailable"))
-                .when(messagingTemplate).convertAndSendToUser(eq("1"), anyString(), any(Object.class));
+                .when(messagingTemplate).convertAndSendToUser(
+                        eq("1"), eq("/queue/match-notification"), any(Object.class));
         NotificationOutboxWorker worker = new NotificationOutboxWorker(
                 repository, notificationService, fcmTokenService, messagingTemplate);
 

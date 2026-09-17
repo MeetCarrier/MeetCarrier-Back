@@ -159,7 +159,7 @@ public class MatchOrchestrationService {
             if (state == null || state.getStatus() != MatchRequestState.WAITING) continue;
             List<Long> recommendations = queueStore.getTopMatches(userId);
             queueStore.timeout(userId);
-            messagingTemplate.convertAndSendToUser(String.valueOf(userId), "/topic/match-result",
+            messagingTemplate.convertAndSendToUser(String.valueOf(userId), "/queue/match-result",
                     MatchTimeoutDto.builder().requestId(state.getRequestId()).recommendedUserIds(recommendations)
                             .message("매칭 실패. 추천 상대를 안내합니다.").build());
         }
@@ -222,12 +222,12 @@ public class MatchOrchestrationService {
     }
 
     private void sendStatus(MatchRequestStateDto state) {
-        messagingTemplate.convertAndSendToUser(String.valueOf(state.getUserId()), "/topic/match-status", state);
+        messagingTemplate.convertAndSendToUser(String.valueOf(state.getUserId()), "/queue/match-status", state);
     }
 
     private void sendMatchSuccess(UUID requestId, long receiverId, long matchedUserId, double score, long sessionId) {
         try {
-            messagingTemplate.convertAndSendToUser(String.valueOf(receiverId), "/topic/match-result",
+            messagingTemplate.convertAndSendToUser(String.valueOf(receiverId), "/queue/match-result",
                     MatchResultDto.builder().requestId(requestId).matchedUserId(matchedUserId)
                             .finalScore(score).surveySessionId(sessionId).build());
         } catch (RuntimeException e) {

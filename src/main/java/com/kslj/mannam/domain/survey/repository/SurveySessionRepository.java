@@ -18,4 +18,12 @@ public interface SurveySessionRepository extends JpaRepository<SurveySession, Lo
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select s from SurveySession s where s.id = :id")
     Optional<SurveySession> findByIdForUpdate(@Param("id") Long id);
+
+    @Query("""
+            select count(s) > 0
+            from SurveySession s
+            where s.id = :sessionId
+              and (s.match.user1.id = :userId or s.match.user2.id = :userId)
+            """)
+    boolean existsParticipant(@Param("sessionId") long sessionId, @Param("userId") long userId);
 }

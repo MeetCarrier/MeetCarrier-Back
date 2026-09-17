@@ -76,7 +76,8 @@ public class AssistantService {
                     .createdAt(LocalDateTime.now())
                     .build();
 
-            messagingTemplate.convertAndSend("/topic/assistant/" + userId, answerDto);
+            messagingTemplate.convertAndSendToUser(
+                    String.valueOf(userId), "/queue/assistant", answerDto);
 
         } catch (Exception e) {
             log.error("Failed to process AI response", e);

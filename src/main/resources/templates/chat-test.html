@@ -47,13 +47,13 @@
         <hr>
         <div>
             <h3>액션</h3>
-            <button onclick="markAsRead(1)">'읽음' 처리 API 직접 호출</button>
+            <button onclick="markAsRead(1)">'읽음' 처리 명령 전송</button>
             <textarea id="message-1" rows="4">{"type": "TEXT", "message": "안녕하세요! User 1 입니다."}</textarea>
             <button class="primary" onclick="sendMessage(1)">메시지 전송</button>
         </div>
         <hr>
         <div>
-            <label class="output-label">채팅 목록 업데이트 (/topic/user/1000/chats):</label>
+            <label class="output-label">채팅 목록 업데이트 (/user/queue/chats):</label>
             <pre id="list-output-1"></pre>
             <label class="output-label">채팅방 메시지 (/topic/room/1008):</label>
             <pre id="room-output-1"></pre>
@@ -81,13 +81,13 @@
         <hr>
         <div>
             <h3>액션</h3>
-            <button onclick="markAsRead(2)">'읽음' 처리 API 직접 호출</button>
+            <button onclick="markAsRead(2)">'읽음' 처리 명령 전송</button>
             <textarea id="message-2" rows="4">{"type": "TEXT", "message": "반갑습니다! User 2 입니다."}</textarea>
             <button class="primary" onclick="sendMessage(2)">메시지 전송</button>
         </div>
         <hr>
         <div>
-            <label class="output-label">채팅 목록 업데이트 (/topic/user/1001/chats):</label>
+            <label class="output-label">채팅 목록 업데이트 (/user/queue/chats):</label>
             <pre id="list-output-2"></pre>
             <label class="output-label">채팅방 메시지 (/topic/room/1008):</label>
             <pre id="room-output-2"></pre>
@@ -154,7 +154,7 @@
 
     function subscribeUserTopic(userNum) {
         const userId = USER_IDS[userNum];
-        const path = `/topic/user/${userId}/chats`;
+        const path = '/user/queue/chats';
         const client = stompClients[userNum];
         if (client && client.connected) {
             const sub = client.subscribe(path, (message) => appendOutput(userNum, 'list', `[채팅목록] ${message.body}`));
@@ -206,12 +206,14 @@
     }
 
     function markAsRead(userNum) {
-        fetch(`/api/chat/${ROOM_ID}/read`, {
-            method: 'POST',
-            credentials: 'include'
-        }).then(res => {
-            appendOutput(userNum, 'read', `읽음 처리 API 호출: ${res.ok ? '성공' : '실패'}`);
-        }).catch(err => console.error(`Mark as read error for user ${userNum}:`, err));
+        const sendPath = '/app/api/chat/read';
+        const client = stompClients[userNum];
+        if (client && client.connected) {
+            client.send(sendPath, {}, JSON.stringify({ roomId: ROOM_ID }));
+            appendOutput(userNum, 'read', `읽음 처리 명령 전송: roomId=${ROOM_ID}`);
+        } else {
+            alert('먼저 연결하세요.');
+        }
     }
 
     function sendMessage(userNum) {
