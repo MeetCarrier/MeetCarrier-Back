@@ -145,7 +145,8 @@ public class ChatService {
     @Transactional
     public void saveChatMessageWithoutNotification(long matchId, User sender, String message) {
 
-        Room room = roomRepository.getRoomByMatchId(matchId);
+        Room room = roomRepository.findRoomByMatchId(matchId)
+                .orElseThrow(() -> new EntityNotFoundException("채팅방을 찾을 수 없습니다. matchId = " + matchId));
         long roomId = room.getId();
         Match match = room.getMatch();
 

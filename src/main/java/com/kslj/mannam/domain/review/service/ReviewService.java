@@ -29,6 +29,7 @@ public class ReviewService {
     // 리뷰 등록
     @Transactional
     public long createReview(long userId, ReviewRequestDto requestDto, User reviewer) {
+        validateCreateRequest(requestDto);
         User targetUser = userService.getUserById(userId);
 
         Review newReview = Review.builder()
@@ -44,6 +45,18 @@ public class ReviewService {
         notificationService.createNotification(NotificationType.Review, targetUser, savedReview.getId());
 
         return savedReview.getId();
+    }
+
+    private void validateCreateRequest(ReviewRequestDto requestDto) {
+        if (requestDto == null) {
+            throw new IllegalArgumentException("리뷰 요청 정보가 없습니다.");
+        }
+        if (requestDto.getRating() == null) {
+            throw new IllegalArgumentException("리뷰 평점은 필수입니다.");
+        }
+        if (requestDto.getStep() == null) {
+            throw new IllegalArgumentException("리뷰 작성 단계는 필수입니다.");
+        }
     }
 
     // 리뷰 조회

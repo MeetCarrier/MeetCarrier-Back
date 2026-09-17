@@ -26,6 +26,7 @@ public class TestService {
     // 테스트 결과 등록
     @Transactional
     public long createTest(TestRequestDto requestDto, User user) {
+        validateRequest(requestDto);
         Test newTest = Test.builder()
                 .depressionScore(requestDto.getDepressionScore())
                 .relationshipScore(requestDto.getRelationshipScore())
@@ -36,6 +37,21 @@ public class TestService {
         Test savedTest = testRepository.save(newTest);
         userActionLogService.logUserAction(user, ActionType.TEST_DONE);
         return savedTest.getId();
+    }
+
+    private void validateRequest(TestRequestDto requestDto) {
+        if (requestDto == null) {
+            throw new IllegalArgumentException("검사 결과 정보가 없습니다.");
+        }
+        if (requestDto.getDepressionScore() == null) {
+            throw new IllegalArgumentException("우울 점수는 필수입니다.");
+        }
+        if (requestDto.getEfficacyScore() == null) {
+            throw new IllegalArgumentException("효능감 점수는 필수입니다.");
+        }
+        if (requestDto.getRelationshipScore() == null) {
+            throw new IllegalArgumentException("대인관계 점수는 필수입니다.");
+        }
     }
 
     // 테스트 결과 목록

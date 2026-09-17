@@ -43,6 +43,7 @@ public class MeetingService {
     @Transactional
     public long createMeeting(long matchId, User sender, MeetingRequestDto requestDto) {
         Match match = matchService.getMatch(matchId);
+        requireRoom(matchId);
 
         boolean exists = meetingRepository.existsByMatchIdAndStatus(matchId, MeetingStatus.PENDING);
         if (exists) {
@@ -102,7 +103,7 @@ public class MeetingService {
             Match match = meeting.getMatch();
 
             // 채팅방 종료 시간 갱신
-            Room room = roomRepository.getRoomByMatchId(meeting.getMatch().getId());
+            Room room = requireRoom(meeting.getMatch().getId());
             room.updateDeactivationTime(meeting.getDate().plusHours(24));
 
             chatService.saveChatMessageWithoutNotification(match.getId(), user, "만남 일정이 변경되었어요! 확인해보세요!");
@@ -143,7 +144,7 @@ public class MeetingService {
         meeting.confirm();
 
         // 채팅방 종료 시간 갱신
-        Room room = roomRepository.getRoomByMatchId(match.getId());
+        Room room = requireRoom(match.getId());
         room.updateDeactivationTime(meeting.getDate().plusHours(24));
 
         // 알림 전송
@@ -173,7 +174,7 @@ public class MeetingService {
         meeting.reject();
 
         // 알림 전송
-        Room room = roomRepository.getRoomByMatchId(match.getId());
+        Room room = requireRoom(match.getId());
         User receiver = getOtherUser(currentUser, meeting);
         notificationService.createNotification(NotificationType.MeetingRejected, receiver, room.getId());
 
@@ -223,6 +224,11 @@ public class MeetingService {
         } else {
             throw new IllegalStateException("이 약속과 관련없는 사용자입니다.");
         }
+    }
+
+    private Room requireRoom(long matchId) {
+        return roomRepository.findRoomByMatchId(matchId)
+                .orElseThrow(() -> new EntityNotFoundException("채팅방을 찾을 수 없습니다. matchId = " + matchId));
     }
 
     // 권한 검사를 위한 private 메서드
