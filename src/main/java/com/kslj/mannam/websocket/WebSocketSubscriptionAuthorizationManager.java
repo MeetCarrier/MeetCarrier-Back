@@ -11,6 +11,7 @@ import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,6 +24,15 @@ public class WebSocketSubscriptionAuthorizationManager implements AuthorizationM
             Pattern.compile("^/topic/room/(\\d+)(?:/read)?$");
     private static final Pattern SURVEY_DESTINATION =
             Pattern.compile("^/topic/survey/(\\d+)/(?:leave|complete)$");
+    private static final Set<String> APPLICATION_DESTINATIONS = Set.of(
+            "/app/api/chat/send",
+            "/app/api/chat/read",
+            "/app/api/chat/leave",
+            "/app/api/chatbot/send",
+            "/app/api/assistant/send",
+            "/app/api/survey/leave",
+            "/app/api/start-matching"
+    );
     private final RoomRepository roomRepository;
     private final SurveySessionRepository surveySessionRepository;
 
@@ -31,19 +41,26 @@ public class WebSocketSubscriptionAuthorizationManager implements AuthorizationM
     public AuthorizationDecision check(Supplier<Authentication> authenticationSupplier, Message<?> message) {
         SimpMessageType messageType = message.getHeaders()
                 .get(SimpMessageHeaderAccessor.MESSAGE_TYPE_HEADER, SimpMessageType.class);
-        if (messageType != SimpMessageType.SUBSCRIBE) {
-            return new AuthorizationDecision(true);
+        if (messageType == null) {
+            return new AuthorizationDecision(false);
         }
 
         Authentication authentication = authenticationSupplier.get();
         Long currentUserId = getAuthenticatedUserId(authentication);
-        if (currentUserId == null) {
-            return new AuthorizationDecision(false);
-        }
-
         String destination = message.getHeaders()
                 .get(SimpMessageHeaderAccessor.DESTINATION_HEADER, String.class);
-        return new AuthorizationDecision(isSubscriptionAllowed(destination, currentUserId));
+
+        return switch (messageType) {
+            case CONNECT -> new AuthorizationDecision(currentUserId != null);
+            case MESSAGE -> new AuthorizationDecision(
+                    currentUserId != null && APPLICATION_DESTINATIONS.contains(destination)
+            );
+            case SUBSCRIBE -> new AuthorizationDecision(
+                    currentUserId != null && isSubscriptionAllowed(destination, currentUserId)
+            );
+            case UNSUBSCRIBE, DISCONNECT, HEARTBEAT -> new AuthorizationDecision(true);
+            default -> new AuthorizationDecision(false);
+        };
     }
 
     private boolean isSubscriptionAllowed(String destination, long currentUserId) {

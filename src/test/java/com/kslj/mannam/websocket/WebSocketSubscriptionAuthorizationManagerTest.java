@@ -81,13 +81,41 @@ class WebSocketSubscriptionAuthorizationManagerTest {
         assertThat(check("1", "/topic/unknown").isGranted()).isFalse();
     }
 
+    @Test
+    void 인증된사용자만연결할수있다() {
+        assertThat(check("1", SimpMessageType.CONNECT, null).isGranted()).isTrue();
+
+        Authentication unauthenticated = new TestingAuthenticationToken("1", null);
+        unauthenticated.setAuthenticated(false);
+        assertThat(check(() -> unauthenticated, SimpMessageType.CONNECT, null).isGranted()).isFalse();
+    }
+
+    @Test
+    void 인증된사용자는허용된Application목적지로만전송할수있다() {
+        assertThat(check("1", SimpMessageType.MESSAGE, "/app/api/chat/send").isGranted()).isTrue();
+        assertThat(check("1", SimpMessageType.MESSAGE, "/app/not-mapped").isGranted()).isFalse();
+        assertThat(check("1", SimpMessageType.MESSAGE, "/topic/room/10").isGranted()).isFalse();
+    }
+
     private AuthorizationDecision check(String userId, String destination) {
         return check(() -> new TestingAuthenticationToken(userId, null, "ROLE_USER"), destination);
     }
 
     private AuthorizationDecision check(Supplier<Authentication> authentication, String destination) {
+        return check(authentication, SimpMessageType.SUBSCRIBE, destination);
+    }
+
+    private AuthorizationDecision check(String userId, SimpMessageType messageType, String destination) {
+        return check(() -> new TestingAuthenticationToken(userId, null, "ROLE_USER"), messageType, destination);
+    }
+
+    private AuthorizationDecision check(
+            Supplier<Authentication> authentication,
+            SimpMessageType messageType,
+            String destination
+    ) {
         Message<byte[]> message = MessageBuilder.withPayload(new byte[0])
-                .setHeader(MESSAGE_TYPE_HEADER, SimpMessageType.SUBSCRIBE)
+                .setHeader(MESSAGE_TYPE_HEADER, messageType)
                 .setHeader(DESTINATION_HEADER, destination)
                 .build();
         return authorizationManager.check(authentication, message);

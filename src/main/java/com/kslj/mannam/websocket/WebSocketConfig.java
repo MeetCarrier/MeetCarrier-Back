@@ -50,7 +50,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         return request.getPrincipal(); // 세션에서 가져옴
                     }
                 })
-                .setAllowedOriginPatterns("*")
+                .setAllowedOrigins(
+                        "http://localhost:5173",
+                        "https://localhost:5173",
+                        "https://jiangxy.github.io",
+                        "http://localhost:8080",
+                        "https://www.mannamdeliveries.link"
+                )
                 .withSockJS();
     }
 }
